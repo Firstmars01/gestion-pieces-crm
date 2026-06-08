@@ -164,8 +164,8 @@ L'application permet de :
 ### Cloner le projet
 
 ```bash
-git clone https://github.com/votre-compte/crm-gestion-pieces.git
-cd crm-gestion-pieces
+git clone https://github.com/votre-compte/gestion-pieces-crm.git
+cd gestion-pieces-crm
 ```
 
 ### Installer les dépendances
