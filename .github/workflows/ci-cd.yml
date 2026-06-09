@@ -1,0 +1,98 @@
+name: Symfony CI/CD
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+
+    pull_request:
+        branches:
+            - main
+            - develop
+
+env:
+    APP_ENV: test
+
+jobs:
+
+    quality:
+
+        name: Tests & Quality
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:16
+
+                env:
+                    POSTGRES_DB: crm_test
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+
+                ports:
+                    - 5432:5432
+
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        env:
+            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/crm_test?serverVersion=16&charset=utf8
+
+        steps:
+
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.3
+                  extensions: pdo_pgsql
+                  coverage: none
+
+            - name: Validate composer.json
+              run: composer validate --strict
+
+            - name: Cache Composer
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress --no-interaction
+
+            - name: Check PHP syntax
+              run: find src -type f -name "*.php" -exec php -l {} \;
+
+            - name: Create database
+              run: |
+                  php bin/console doctrine:database:create --if-not-exists --env=test
+                  php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+            - name: Run PHPStan
+              run: vendor/bin/phpstan analyse
+
+            - name: Run PHPUnit
+              run: php bin/phpunit
+
+    deploy:
+
+        name: Deploy to Render
+
+        runs-on: ubuntu-latest
+
+        needs: quality
+
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+        steps:
+
+            - name: Trigger Render Deploy
+              run: |
+                  curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
