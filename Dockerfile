@@ -42,4 +42,6 @@ RUN mkdir -p var && chown -R www-data:www-data var
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+# 🚀 SCRIPT AUTOMATIQUE POUR LE PLAN FREE :
+# Exécute les migrations Doctrine, puis démarre Apache si elles réussissent.
+CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod && apache2-foreground
