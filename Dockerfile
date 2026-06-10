@@ -42,6 +42,6 @@ RUN mkdir -p var && chown -R www-data:www-data var
 
 EXPOSE 80
 
-# 🚀 SCRIPT AUTOMATIQUE POUR LE PLAN FREE :
-# Exécute les migrations Doctrine, puis démarre Apache si elles réussissent.
-CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod && apache2-foreground
+# 🚀 LA LIGNE FINALE CORRIGÉE :
+# On lance les migrations, on redonne les droits du dossier var à Apache (www-data), puis on démarre Apache.
+CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod && chown -R www-data:www-data var && apache2-foreground
