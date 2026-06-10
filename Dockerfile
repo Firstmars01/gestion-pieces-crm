@@ -11,10 +11,17 @@ RUN apt-get update && apt-get install -y \
 # 2. Activation du module de réécriture Apache (indispensable pour Symfony)
 RUN a2enmod rewrite
 
-# 3. Modification du DocumentRoot d'Apache pour pointer vers /public
+# 3. Modification du DocumentRoot d'Apache pour pointer vers /public et activation du .htaccess
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Autoriser Apache à lire le fichier .htaccess de Symfony
+RUN printf '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>\n' >> /etc/apache2/apache2.conf
 
 # 4. Récupération de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
