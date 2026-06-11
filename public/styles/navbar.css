@@ -1,0 +1,167 @@
+/* ==========================================================================
+   1. NAVBAR SUPÉRIEURE
+   ========================================================================== */
+
+.top-navbar {
+    height: 50px;
+    background: var(--navbar-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px 0 0; /* 🚀 Ajusté : 0 padding à gauche pour que le bloc du logo colle au bord de l'écran */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+/* 🚀 AJOUT : Ce bloc fait exactement la largeur du bleu (120px).
+   Il force le logo à se centrer horizontalement par rapport à la sidebar,
+   et l'aligne par le haut pour gérer proprement le débordement de 70px. */
+.navbar-left {
+    width: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligné en haut pour contrôler le débordement */
+    padding-top: 5px;        /* Un petit espace pour décoller légèrement du haut de l'écran */
+    flex-shrink: 0;
+}
+
+.navbar-logo {
+    height: 70px; /* 🚀 Fixé à 70px comme tu le souhaites */
+    width: auto;
+    display: block;
+    position: relative;
+    z-index: 20; /* Passe au-dessus de la ligne de la navbar */
+}
+
+/* Conteneur de l'avatar et du menu déroulant */
+.profile-dropdown {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* L'icône de profil (déclencheur) */
+.profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+}
+
+.profile-icon:hover {
+    opacity: 0.7;
+}
+
+/* ==========================================================================
+   2. DROPDOWN COMPTE (AU SURVOL)
+   ========================================================================== */
+
+/* Menu masqué par défaut avec effet d'animation */
+.dropdown-menu-custom {
+    display: block;
+    position: absolute;
+    top: 48px; /* 🚀 Ajusté au plus près du bas de la navbar (50px) pour réduire le vide */
+    right: 0;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: all 0.2s ease-in-out; /* 🚀 Changé de 0.5s à 0.2s pour être beaucoup plus réactif */
+}
+
+/* 🚀 L'ASTUCE MAGIQUE : Un pont invisible au-dessus de la carte blanche.
+   Il comble le vide physique de 10px ou 20px entre l'icône et la boîte.
+   Quand ta souris descend, elle reste techniquement sur le menu. */
+.dropdown-menu-custom::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: transparent; /* Totalement invisible */
+}
+
+/* Déclenchement de l'affichage au survol */
+.profile-dropdown:hover .dropdown-menu-custom {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Le conteneur blanc du menu (Rendu de ta capture) */
+.dropdown-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+}
+
+.user-name {
+    color: #666666;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.logout-btn {
+    color: #212529;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.logout-btn:hover {
+    color: #dc3545; /* Devient rouge de sécurité au survol */
+}
+
+/* ==========================================================================
+   3. SIDEBAR (BARRE LATÉRALE)
+   ========================================================================== */
+
+.sidebar {
+    width: 120px;
+    background: var(--sidebar);
+    padding-top: 20px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 8px;
+}
+
+.sidebar-link {
+    display: block;
+    text-align: center;
+    padding: 10px 5px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Style du bouton actif */
+.sidebar-link.active {
+    background: #262626;
+    font-weight: 600;
+}

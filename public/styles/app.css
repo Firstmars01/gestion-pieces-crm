@@ -1,0 +1,73 @@
+/* ==========================================================================
+   0. STRUCTURE GLOBALE ET SQUELETTE
+   ========================================================================== */
+
+:root {
+    --primary: #243c84;
+    --sidebar: #464ba4;    /* Ton violet */
+    --background: #cccccc; /* Ton fond gris */
+    --navbar-bg: #ffffff;  /* Ta navbar blanche */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--background);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* Organise la navbar, la sidebar et le contenu */
+.app-container {
+    display: grid;
+    grid-template-rows: 50px 1fr;        /* Fixe la navbar à 50px, le reste prend tout l'espace */
+    grid-template-columns: 120px 1fr;    /* Fixe la sidebar à 120px, le contenu prend le reste */
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Force la Navbar à prendre toute la largeur du haut (les 2 colonnes) */
+.top-navbar {
+    grid-row: 1;
+    grid-column: 1 / span 2;
+    height: 50px;
+    background: var(--navbar-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+/* Aligne la sidebar sur la première colonne de la deuxième ligne */
+.sidebar {
+    grid-row: 2;
+    grid-column: 1;
+    width: 120px;
+    background: var(--sidebar);
+    padding-top: 20px;
+    height: 100%;
+}
+
+/* Calage immédiat du contenu en haut à droite (2ème colonne, 2ème ligne) */
+.main-content {
+    grid-row: 2;
+    grid-column: 2;
+    background: var(--background);
+    padding: 30px;
+    height: 100%;
+    overflow-y: auto; /* Scroll interne si le contenu dépasse */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
