@@ -1,0 +1,125 @@
+/* ==========================================================================
+   STRUCTURE DOUBLE COLONNE (SPLIT SCREEN)
+   ========================================================================== */
+
+.login-split-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Coté gauche : Image corporate */
+.login-image-side {
+    flex: 1.3; /* Prend un peu plus de place que la partie formulaire */
+    background-image: url('../images/login.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Coté droit : Zone grise du formulaire */
+.login-form-side {
+    flex: 1;
+    background-color: #cccccc; /* Le gris neutre en fond comme sur ta maquette */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+/* ==========================================================================
+   LOGO ET BOÎTE BLANCHE (CARD)
+   ========================================================================== */
+
+.login-logo-container {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.login-main-logo {
+    height: 90px; /* Ajuste la taille de ton logo principal */
+    width: auto;
+}
+
+/* La boîte blanche avec les bords arrondis */
+.login-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 440px; /* Taille parfaite pour caler le formulaire */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   CHAMPS ET ÉLÉMENTS DE FORMULAIRE
+   ========================================================================== */
+
+.form-label-custom {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4a4a4a;
+    margin-bottom: 6px;
+}
+
+/* Inputs épurés et très fins */
+.form-control-custom {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-control-custom:focus {
+    border-color: #464ba4; /* Accentuation sur ton violet au clic */
+}
+
+/* Placeholder gris très clair */
+.form-control-custom::placeholder {
+    color: #cbd5e1;
+}
+
+/* ==========================================================================
+   BOUTONS ET LIENS
+   ========================================================================== */
+
+/* Bouton violet plat de ta maquette */
+.btn-login-submit {
+    width: 100%;
+    background-color: #464ba4; /* Ton beau violet de marque */
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-login-submit:hover {
+    background-color: #373b82; /* Assombrissement au survol */
+}
+
+.forgot-password-container {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.forgot-password-link {
+    font-size: 0.85rem;
+    color: #4a4a4a;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.forgot-password-link:hover {
+    color: #000000;
+}
