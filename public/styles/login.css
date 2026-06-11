@@ -24,9 +24,19 @@
     background-color: #cccccc; /* Le gris neutre en fond comme sur ta maquette */
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
+    justify-content: flex-start; /* 🚀 Modifié : Aligne le contenu vers le haut pour enlever le vide */
+    align-items: center;         /* Centre horizontalement la carte et le logo */
+    padding: 40px 40px 20px 40px; /* 🚀 Ajusté : Espace global autour */
+}
+
+/* 🚀 AJOUT : Ce bloc regroupe le logo et la carte pour qu'ils restent bien alignés horizontalement,
+   et on lui donne un léger espace par rapport au haut de l'écran pour que le logo respire sans excès. */
+.login-center-block {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 5vh; /* 🚀 Ajuste cette valeur (ex: 2vh, 8vh) pour monter ou descendre le logo à l'œil */
 }
 
 /* ==========================================================================
@@ -34,13 +44,15 @@
    ========================================================================== */
 
 .login-logo-container {
-    margin-bottom: 40px;
+    margin-bottom: 20px; /* 🚀 Réduit de 40px à 20px pour resserrer l'espace entre le logo et la carte */
     text-align: center;
 }
 
 .login-main-logo {
-    height: 90px; /* Ajuste la taille de ton logo principal */
+    height: 230px;
     width: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* La boîte blanche avec les bords arrondis */
@@ -49,7 +61,6 @@
     border-radius: 12px;
     padding: 40px;
     width: 100%;
-    max-width: 440px; /* Taille parfaite pour caler le formulaire */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
