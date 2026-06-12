@@ -25,3 +25,5 @@ phpstan.neon
 var/cache/*
 var/log/*
 vendor/
+/1-CDC-GestionPieces2026.pdf
+/.env.test
