@@ -30,14 +30,32 @@
         </a>
 
         {% if is_granted('ROLE_ADMIN') %}
-            {#
-            Ici on utilise "starts with" au lieu de "==".
-            Comme ça, le bouton reste actif même si tu es sur les pages
-            admin_user_new, admin_user_edit, etc. (ton CRUD complet)
-            #}
             <a href="{{ path('admin_user_index') }}" class="sidebar-link {% if current_route starts with 'admin_user_' %}active{% endif %}">
                 Administration utilisateur
             </a>
         {% endif %}
+
+        {# Section Atelier : groupe avec sous-menu. Visible pour ROLE_ATELIER et ROLE_ADMIN #}
+        {% if is_granted('ROLE_ATELIER') or is_granted('ROLE_ADMIN') %}
+            {# Le lien parent ultra propre #}
+            <a href="#atelierMenu" class="sidebar-link {% if current_route starts with 'atelier_' %}active{% endif %}"
+               data-bs-toggle="collapse" role="button" aria-expanded="{{ (current_route starts with 'atelier_') ? 'true' : 'false' }}" aria-controls="atelierMenu">
+                Atelier
+                <i class="bi bi-chevron-down"></i>
+            </a>
+
+            <div class="collapse {% if current_route starts with 'atelier_' %}show{% endif %} mt-1" id="atelierMenu">
+                <nav class="submenu">
+                    {# Liste des pages de l'atelier. Ajoute d'autres liens ici si besoin #}
+                    <a href="{{ path('atelier_stock') }}" class="sidebar-sublink {% if current_route starts with 'atelier_stock' %}active{% endif %}">
+                        Stock des pièces
+                    </a>
+                    {# Exemple pour ajouter d'autres pages atelier à l'avenir :
+                        <a href="{{ path('atelier_composition') }}" class="sidebar-sublink {% if current_route starts with 'atelier_composition' %}active{% endif %}">Composition</a>
+                    #}
+                </nav>
+            </div>
+        {% endif %}
+
     </nav>
 </aside>

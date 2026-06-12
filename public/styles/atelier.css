@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Atelier / Stock des pièces
+   ========================================================================== */
+
+.atelier-stock-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.atelier-stock-page__header {
+    margin-bottom: 0;
+}
+
+.atelier-stock-page__title {
+    margin-bottom: 0.25rem;
+}
+
+.atelier-stock-page__subtitle {
+    margin-bottom: 0;
+    color: #6c757d;
+}
+
+.atelier-stock-card {
+    overflow: hidden;
+}
+
+.atelier-stock-table {
+    margin-bottom: 0;
+}
+
+.atelier-stock-table tbody tr {
+    vertical-align: middle;
+}
+
+.atelier-stock-components-cell {
+    vertical-align: top;
+}
+
+.atelier-stock-components {
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.atelier-stock-empty-state {
+    padding: 2rem 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .atelier-stock-page {
+        gap: 1rem;
+    }
+
+    .atelier-stock-components {
+        padding-left: 1rem;
+    }
+}
+

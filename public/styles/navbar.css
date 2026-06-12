@@ -1,39 +1,38 @@
 /* ==========================================================================
    1. NAVBAR SUPÉRIEURE
    ========================================================================== */
-
 .top-navbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+
     height: 50px;
     background: var(--navbar-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 25px 0 0; /* 🚀 Ajusté : 0 padding à gauche pour que le bloc du logo colle au bord de l'écran */
+    padding: 0 25px 0 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     z-index: 10;
 }
 
-/* 🚀 AJOUT : Ce bloc fait exactement la largeur du bleu (120px).
-   Il force le logo à se centrer horizontalement par rapport à la sidebar,
-   et l'aligne par le haut pour gérer proprement le débordement de 70px. */
 .navbar-left {
-    width: 120px;
+    width: 220px;
+    min-width: 220px;
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Aligné en haut pour contrôler le débordement */
-    padding-top: 5px;        /* Un petit espace pour décoller légèrement du haut de l'écran */
-    flex-shrink: 0;
+    align-items: flex-start;
+    padding-top: 5px;
 }
 
 .navbar-logo {
-    height: 70px; /* 🚀 Fixé à 70px comme tu le souhaites */
+    height: 70px;
     width: auto;
     display: block;
     position: relative;
-    z-index: 20; /* Passe au-dessus de la ligne de la navbar */
+    z-index: 20;
 }
 
-/* Conteneur de l'avatar et du menu déroulant */
 .profile-dropdown {
     position: relative;
     height: 100%;
@@ -41,7 +40,6 @@
     align-items: center;
 }
 
-/* L'icône de profil (déclencheur) */
 .profile-icon {
     display: flex;
     align-items: center;
@@ -58,25 +56,21 @@
 }
 
 /* ==========================================================================
-   2. DROPDOWN COMPTE (AU SURVOL)
+   2. DROPDOWN COMPTE
    ========================================================================== */
-
-/* Menu masqué par défaut avec effet d'animation */
 .dropdown-menu-custom {
     display: block;
     position: absolute;
-    top: 48px; /* 🚀 Ajusté au plus près du bas de la navbar (50px) pour réduire le vide */
+    top: 48px;
     right: 0;
     z-index: 100;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-8px);
-    transition: all 0.2s ease-in-out; /* 🚀 Changé de 0.5s à 0.2s pour être beaucoup plus réactif */
+    transition: all 0.2s ease-in-out;
 }
 
-/* 🚀 L'ASTUCE MAGIQUE : Un pont invisible au-dessus de la carte blanche.
-   Il comble le vide physique de 10px ou 20px entre l'icône et la boîte.
-   Quand ta souris descend, elle reste techniquement sur le menu. */
+/* Pont invisible pour maintenir le hover */
 .dropdown-menu-custom::before {
     content: "";
     position: absolute;
@@ -84,17 +78,15 @@
     left: 0;
     width: 100%;
     height: 15px;
-    background: transparent; /* Totalement invisible */
+    background: transparent;
 }
 
-/* Déclenchement de l'affichage au survol */
 .profile-dropdown:hover .dropdown-menu-custom {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
 }
 
-/* Le conteneur blanc du menu (Rendu de ta capture) */
 .dropdown-card {
     background: #ffffff;
     border-radius: 8px;
@@ -123,17 +115,22 @@
 }
 
 .logout-btn:hover {
-    color: #dc3545; /* Devient rouge de sécurité au survol */
+    color: #dc3545;
 }
 
 /* ==========================================================================
    3. SIDEBAR (BARRE LATÉRALE)
    ========================================================================== */
-
 .sidebar {
-    width: 120px;
+    grid-column: 1;
+    grid-row: 2;
+
+    width: 220px;
+    min-width: 220px;
+    flex-shrink: 0;
     background: var(--sidebar);
     padding-top: 20px;
+    min-height: calc(100vh - 50px);
 }
 
 .sidebar-nav {
@@ -145,8 +142,8 @@
 
 .sidebar-link {
     display: block;
-    text-align: center;
-    padding: 10px 5px;
+    text-align: left;
+    padding: 10px 15px;
     color: #ffffff;
     text-decoration: none;
     font-size: 0.85rem;
@@ -155,13 +152,71 @@
     transition: background 0.2s ease;
 }
 
+/* Alignement spécifique pour les liens avec sous-menu */
+.sidebar-link[data-bs-toggle="collapse"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding: 10px 15px; /* Harmonisé avec les autres liens */
+}
+
 .sidebar-link:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
 }
 
-/* Style du bouton actif */
 .sidebar-link.active {
-    background: #262626;
+    background: rgba(0, 0, 0, 0.15); /* Transparence noire fluide au lieu du gris mat #262626 */
     font-weight: 600;
+}
+
+/* ==========================================================================
+   4. SOUS-MENU ATELIER (COLLAPSE & CHEVRON)
+   ========================================================================== */
+.submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px 0 10px 0;
+    margin: 0;
+    background: transparent;
+}
+
+.sidebar-sublink {
+    display: block;
+    text-align: left;
+    padding: 8px 15px 8px 32px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.82rem;
+    border-radius: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-sublink:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+}
+
+.sidebar-sublink.active {
+    background: rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    color: #ffffff;
+    border-left: 3px solid #ffffff;
+    padding-left: 29px; /* On compense les 3px de la bordure pour rester aligné avec le reste (32-3=29) */
+}
+
+/* --- Gestion du chevron (inchangée) --- */
+.sidebar-link .bi-chevron-down {
+    transition: transform 0.2s ease;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.sidebar-link[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
 }
