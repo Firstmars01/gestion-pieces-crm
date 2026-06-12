@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel utilisateur{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4 admin-user-page">
+        <div class="admin-user-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h1 class="h3 admin-user-page__title">Créer un utilisateur</h1>
+                <p class="admin-user-page__subtitle">Ajoutez un nouvel utilisateur et attribuez-lui les rôles nécessaires.</p>
+            </div>
+        </div>
+
+        {% include 'admin/user/_form.html.twig' with {
+            user: user,
+            roles: roles,
+            errors: errors,
+            selected_role_ids: selected_role_ids,
+            form_token_id: form_token_id,
+            submit_label: 'Créer l\'utilisateur',
+            is_edit: false,
+        } %}
+    </div>
+{% endblock %}
+

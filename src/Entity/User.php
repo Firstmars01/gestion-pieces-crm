@@ -87,9 +87,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isActif(): ?bool
+    public function isActif(): bool
     {
-        return $this->actif;
+        return (bool) $this->actif;
     }
 
     public function setActif(bool $actif): static
@@ -97,6 +97,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->actif = $actif;
 
         return $this;
+    }
+
+    public function getFullName(): string
+    {
+        return trim(sprintf('%s %s', $this->prenom ?? '', $this->nom ?? ''));
+    }
+
+    public function __toString(): string
+    {
+        return $this->getFullName() ?: (string) $this->email;
     }
 
     /**
@@ -117,7 +127,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles = [];
         // On boucle sur les entités Role liées pour extraire leur code (ex: 'ROLE_ADMIN')
         foreach ($this->userRoles as $roleEntity) {
-            $roles[] = $roleEntity->getCode();
+            if (null !== $roleEntity->getCode()) {
+                $roles[] = $roleEntity->getCode();
+            }
         }
 
         // guarantee every user at least has ROLE_USER
@@ -129,6 +141,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserRoles(): Collection
     {
         return $this->userRoles;
+    }
+
+    public function setUserRoles(iterable $roles): static
+    {
+        $this->userRoles->clear();
+
+        foreach ($roles as $role) {
+            if ($role instanceof Role) {
+                $this->addUserRole($role);
+            }
+        }
+
+        return $this;
+    }
+
+    public function clearUserRoles(): static
+    {
+        $this->userRoles->clear();
+
+        return $this;
+    }
+
+    public function hasRole(string $code): bool
+    {
+        foreach ($this->userRoles as $roleEntity) {
+            if ($roleEntity->getCode() === $code) {
+                return true;
+            }
+        }
+
+        return 'ROLE_USER' === $code;
     }
 
     public function addUserRole(Role $role): static
@@ -168,7 +211,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $data["\0".self::class."\0password"] = hash('crc32c', $this->password ?? '');
 
         return $data;
     }

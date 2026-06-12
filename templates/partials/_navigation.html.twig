@@ -9,7 +9,7 @@
             </div>
             <div class="dropdown-menu-custom">
                 <div class="dropdown-card">
-                    <span class="user-name">{{ app.user.prenom }} {{ app.user.nom }}</span>
+                    <span class="user-name">{{ app.user.fullName ?: app.user.email }}</span>
                     <a href="{{ path('app_logout') }}" class="logout-btn" title="Se déconnecter">
                         <i class="bi bi-box-arrow-right"></i>
                     </a>
@@ -19,13 +19,25 @@
     </div>
 </header>
 
+{# On récupère le nom de la route actuelle pour simplifier le code ensuite #}
+{% set current_route = app.request.attributes.get('_route') %}
+
 <aside class="sidebar">
     <nav class="sidebar-nav">
-        <a href="{{ path('app_home') }}" class="sidebar-link active">
+        {# Le lien Dashboard est actif si la route actuelle est 'app_home' #}
+        <a href="{{ path('app_home') }}" class="sidebar-link {% if current_route == 'app_home' %}active{% endif %}">
             Dashboard
         </a>
-        <a href="TEST" class="sidebar-link">
-            TEST
-        </a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            {#
+            Ici on utilise "starts with" au lieu de "==".
+            Comme ça, le bouton reste actif même si tu es sur les pages
+            admin_user_new, admin_user_edit, etc. (ton CRUD complet)
+            #}
+            <a href="{{ path('admin_user_index') }}" class="sidebar-link {% if current_route starts with 'admin_user_' %}active{% endif %}">
+                Administration utilisateur
+            </a>
+        {% endif %}
     </nav>
 </aside>

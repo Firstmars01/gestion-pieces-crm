@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration des utilisateurs{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4 admin-user-page">
+        <div class="admin-user-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h1 class="h3 admin-user-page__title">Administration des utilisateurs</h1>
+                <p class="admin-user-page__subtitle">Gérez les comptes, leurs rôles et leur statut d'activation.</p>
+            </div>
+
+            <a href="{{ path('admin_user_new') }}" class="btn btn-primary admin-user-page__cta">
+                <i class="bi bi-person-plus me-1"></i>
+                Nouvel utilisateur
+            </a>
+        </div>
+
+        <div class="admin-user-flash-stack">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }}" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <div class="card shadow-sm border-0 admin-user-card">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 admin-user-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Utilisateur</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Rôles</th>
+                            <th scope="col">Actif</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="admin-user-table__identity">
+                                        <div class="fw-semibold">{{ user.fullName ?: user.email }}</div>
+                                        <small class="admin-user-table__meta">#{{ user.id }}</small>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <div class="admin-user-roles">
+                                        {% for role in user.roles %}
+                                            <span class="badge text-bg-secondary">{{ role }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.actif %}
+                                        <span class="badge text-bg-success">Oui</span>
+                                    {% else %}
+                                        <span class="badge text-bg-danger">Non</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="admin-user-actions">
+                                        <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+
+                                        {% if app.user and app.user.id != user.id %}
+                                            <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                                            </form>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-outline-danger" type="button" disabled>Supprimer</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted admin-user-empty-state">
+                                    Aucun utilisateur trouvé.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

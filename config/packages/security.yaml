@@ -43,7 +43,10 @@ security:
         # 1. On laisse la page de login accessible à tout le monde
         - { path: ^/login$, roles: PUBLIC_ACCESS }
 
-        # 2. On bloque tout le reste du site aux utilisateurs non connectés
+        # 2. L'administration utilisateurs est réservée aux administrateurs
+        - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # 3. On bloque tout le reste du site aux utilisateurs non connectés
         - { path: ^/, roles: ROLE_USER }
 
 when@test:
