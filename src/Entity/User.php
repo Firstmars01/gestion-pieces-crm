@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -29,17 +31,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $actif = true;
 
-    /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = [];
+    #[ORM\ManyToMany(targetEntity: Role::class)]
+    #[ORM\JoinTable(name: 'user_role')] // Force le nom de la table de liaison comme dans votre diagramme
+    private Collection $userRoles;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    public function __construct()
+    {
+        $this->userRoles = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -109,19 +114,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
+        $roles = [];
+        // On boucle sur les entités Role liées pour extraire leur code (ex: 'ROLE_ADMIN')
+        foreach ($this->userRoles as $roleEntity) {
+            $roles[] = $roleEntity->getCode();
+        }
+
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
+    public function getUserRoles(): Collection
     {
-        $this->roles = $roles;
+        return $this->userRoles;
+    }
+
+    public function addUserRole(Role $role): static
+    {
+        if (!$this->userRoles->contains($role)) {
+            $this->userRoles->add($role);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRole(Role $role): static
+    {
+        $this->userRoles->removeElement($role);
 
         return $this;
     }
