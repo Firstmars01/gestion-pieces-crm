@@ -1,0 +1,103 @@
+/* ==========================================================================
+   1. STYLE GÉNÉRAL DES FORMULAIRES (SYNERGY CRM)
+   ========================================================================== */
+
+/* Les étiquettes (Labels) au-dessus des champs */
+.form-label {
+    font-weight: 600;
+    color: #333333;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+/* Les champs de saisie (Inputs, Selects) */
+.form-control,
+.form-select {
+    border: 1px solid #dce0e4;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: #212529;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Effet "Focus" (quand on clique dans le champ) : Utilise ton violet/bleu */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--sidebar); /* Reprend la variable de ton app.css */
+    box-shadow: 0 0 0 0.25rem rgba(70, 75, 164, 0.25); /* Halo violet transparent */
+    outline: 0;
+}
+
+/* Les petits textes d'aide en dessous des champs */
+.form-text {
+    font-size: 0.82rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Rend les champs désactivés bien visibles (grisés) */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #e9ecef;
+    opacity: 1;
+    cursor: not-allowed;
+    border-color: #ced4da;
+}
+
+/* ==========================================================================
+   2. GESTION DES ERREURS (ROUGE VISIBLE)
+   ========================================================================== */
+
+/* Le champ lui-même quand il est en erreur */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545;
+    background-color: #fff8f8; /* Un fond très légèrement rouge pour marquer l'erreur */
+}
+
+/* Le focus sur un champ en erreur (Halo rouge) */
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Le texte de l'erreur spécifique sous le champ */
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* ==========================================================================
+   3. ERREURS GLOBALES DU FORMULAIRE
+   ========================================================================== */
+/* Le bloc rouge généré en haut par {{ form_errors(form) }} s'il y a des erreurs générales */
+
+form > ul {
+    list-style-type: none;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    color: #842029;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+}
+
+form > ul li {
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ajoute un petit symbole d'alerte automatique devant l'erreur globale */
+form > ul li::before {
+    content: "⚠️";
+}

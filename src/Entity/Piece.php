@@ -7,8 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: PieceRepository::class)]
+#[UniqueEntity(fields: ['reference'], message: 'Cette référence de pièce existe déjà.')]
 class Piece
 {
     #[ORM\Id]
@@ -54,6 +58,26 @@ class Piece
         $this->utilisations = new ArrayCollection();
     }
 
+    #[Assert\Callback]
+    public function validateReglesMetier(ExecutionContextInterface $context, mixed $payload): void
+    {
+        // Règle : Les pièces non commercialisables ne doivent pas avoir de prix de vente
+        $typesNonCommercialisables = ['INTERMEDIAIRE', 'MATIERE_PREMIERE', 'ACHETEE'];
+
+        if (in_array($this->type, $typesNonCommercialisables) && null !== $this->prixVente) {
+            $context->buildViolation('Une pièce de type '.$this->type.' n\'est pas commercialisable. Elle ne peut donc pas avoir de prix de vente.')
+                ->atPath('prixVente')
+                ->addViolation();
+        }
+
+        // Règle : Une pièce livrable doit obligatoirement avoir un prix de vente
+        if ('LIVRABLE' === $this->type && null === $this->prixVente) {
+            $context->buildViolation('Une pièce livrable doit obligatoirement posséder un prix unitaire de vente.')
+                ->atPath('prixVente')
+                ->addViolation();
+        }
+    }
+
     public function getGamme(): ?Gamme
     {
         return $this->gamme;
@@ -67,6 +91,7 @@ class Piece
         }
 
         $this->gamme = $gamme;
+
         return $this;
     }
 

@@ -9,6 +9,10 @@
                 <h1 class="h3 atelier-stock-page__title">Stock des pièces</h1>
                 <p class="atelier-stock-page__subtitle">Consultez les références, les quantités disponibles et les composants associés.</p>
             </div>
+
+            <button class="btn btn-primary" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
+                <i class="bi bi-plus-circle me-1"></i> Nouvelle pièce
+            </button>
         </div>
 
         <div class="card shadow-sm border-0 atelier-stock-card">

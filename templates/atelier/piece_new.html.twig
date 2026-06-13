@@ -1,0 +1,90 @@
+{% extends app.request.xmlHttpRequest ? 'base_ajax.html.twig' : 'base.html.twig' %}
+
+{% block title %}Nouvelle Pièce{% endblock %}
+
+{% block body %}
+    {# On enlève les conteneurs superflus si on est dans la modale pour utiliser toute la place #}
+    <div class="{{ app.request.xmlHttpRequest ? '' : 'container-fluid py-4' }}">
+
+        <div class="mb-4">
+            <p class="text-muted small">Remplissez les informations de la pièce. Les règles de gestion s'appliqueront automatiquement.</p>
+        </div>
+
+        {# On démarre le formulaire #}
+        {{ form_start(form) }}
+
+        {# Affiche les erreurs globales s'il y en a #}
+        {{ form_errors(form) }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form_row(form.reference) }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_row(form.type) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_row(form.libelle) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form_row(form.prixVente) }}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form_row(form.prixCatalogue) }}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form_row(form.quantiteStock) }}
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div id="section-composants" class="mb-4">
+            <h5 class="fw-bold mb-3">Nomenclature (Composants)</h5>
+
+            <div class="composants-wrapper"
+                 data-index="{{ form.composants|length > 0 ? form.composants|last.vars.name + 1 : 0 }}"
+                 data-prototype="{{ form_widget(form.composants.vars.prototype)|e('html_attr') }}">
+
+                <div class="composants-list">
+                    {% for composantForm in form.composants %}
+                        <div class="row align-items-center mb-2 item-composant">
+                            <div class="col-8">
+                                {{ form_widget(composantForm.pieceEnfant) }}
+                            </div>
+                            <div class="col-3">
+                                {{ form_widget(composantForm.quantite) }}
+                            </div>
+                            <div class="col-1 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-composant">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-composant-btn">
+                    <i class="bi bi-plus-circle"></i> Ajouter une pièce à la nomenclature
+                </button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            {# Le bouton annuler peut fermer la modale directement en JS si on est en AJAX #}
+            {% if app.request.xmlHttpRequest %}
+                <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+            {% else %}
+                <a href="{{ path('atelier_stock') }}" class="btn btn-outline-secondary">Annuler</a>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Enregistrer la pièce</button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
