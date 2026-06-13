@@ -45,10 +45,29 @@ class Piece
     #[ORM\OneToMany(targetEntity: PieceComposition::class, mappedBy: 'pieceEnfant', cascade: ['remove'])]
     private Collection $utilisations;
 
+    #[ORM\OneToOne(targetEntity: Gamme::class, mappedBy: 'piece', cascade: ['persist', 'remove'])]
+    private ?Gamme $gamme = null;
+
     public function __construct()
     {
         $this->composants = new ArrayCollection();
         $this->utilisations = new ArrayCollection();
+    }
+
+    public function getGamme(): ?Gamme
+    {
+        return $this->gamme;
+    }
+
+    public function setGamme(Gamme $gamme): static
+    {
+        // On s'assure que la gamme pointe bien vers cette pièce
+        if ($gamme->getPiece() !== $this) {
+            $gamme->setPiece($this);
+        }
+
+        $this->gamme = $gamme;
+        return $this;
     }
 
     public function getId(): ?int

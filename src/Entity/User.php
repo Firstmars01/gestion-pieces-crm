@@ -41,9 +41,43 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\OneToMany(targetEntity: Gamme::class, mappedBy: 'user')]
+    private Collection $gammes;
+
     public function __construct()
     {
         $this->userRoles = new ArrayCollection();
+        $this->gammes = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, Gamme>
+     */
+    public function getGammes(): Collection
+    {
+        return $this->gammes;
+    }
+
+    public function addGamme(Gamme $gamme): static
+    {
+        if (!$this->gammes->contains($gamme)) {
+            $this->gammes->add($gamme);
+            $gamme->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGamme(Gamme $gamme): static
+    {
+        if ($this->gammes->removeElement($gamme)) {
+            // set the owning side to null (unless already changed)
+            if ($gamme->getUser() === $this) {
+                $gamme->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
     public function getId(): ?int
