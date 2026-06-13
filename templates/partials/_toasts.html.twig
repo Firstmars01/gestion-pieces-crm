@@ -1,0 +1,21 @@
+<div style="position: fixed; top: 25px; left: 50%; transform: translateX(-50%); z-index: 99999; pointer-events: none; min-width: 350px; display: flex; flex-direction: column; align-items: center;">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            {% set alertClass = label == 'error' ? 'danger' : label %}
+
+            <div class="alert alert-{{ alertClass }} alert-dismissible fade show shadow-lg border-0" role="alert" style="pointer-events: auto;">
+                <div class="d-flex align-items-center justify-content-center">
+                    {% if alertClass == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    {% elseif alertClass == 'danger' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                    {% endif %}
+                    <strong>{{ message }}</strong>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>

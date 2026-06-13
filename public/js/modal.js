@@ -165,20 +165,27 @@ function handleModalFormSubmit(modalBody, submitUrl) {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    return response.text();
+                // Si Symfony renvoie du JSON, c'est qu'on a réussi !
+                if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json')) {
+                    return response.json();
                 }
+                // Sinon, c'est du HTML (le formulaire nous revient avec des messages d'erreur rouges)
+                return response.text();
             })
-            .then(html => {
-                if (html) {
-                    modalBody.innerHTML = html;
+            .then(data => {
+                if (typeof data === 'object' && data.redirect) {
+                    // Succès : on redirige manuellement la page (le message flash est intact !)
+                    window.location.href = data.redirect;
+                } else if (typeof data === 'string') {
+                    // Erreur : on met à jour la modale avec les erreurs
+                    modalBody.innerHTML = data;
 
-                    // On ré-attache les écouteurs sur le nouveau HTML généré (après erreur)
                     handleModalFormSubmit(modalBody, submitUrl);
-                    // On relance la dynamique car le HTML a été remplacé
-                    setupPieceFormDynamics(modalBody);
+
+                    // Relance la dynamique si la fonction existe (pour le formulaire des pièces)
+                    if (typeof setupPieceFormDynamics === 'function') {
+                        setupPieceFormDynamics(modalBody);
+                    }
                 }
             })
             .catch(error => console.error('Erreur :', error));

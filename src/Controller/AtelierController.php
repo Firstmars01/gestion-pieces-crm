@@ -28,14 +28,20 @@ class AtelierController extends AbstractController
         // 4. Si le formulaire est soumis ET que toutes nos règles (Assert) sont valides
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // On prépare la sauvegarde et on exécute
             $entityManager->persist($piece);
             $entityManager->flush();
 
-            // Message de succès
+            // On ajoute le message flash normalement
             $this->addFlash('success', 'La pièce ' . $piece->getReference() . ' a été créée avec succès !');
 
-            // On redirige vers la page du stock (que tu as déjà créée)
+            // Si c'est notre JavaScript qui a envoyé le formulaire, on renvoie une réponse JSON
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'redirect' => $this->generateUrl('atelier_stock')
+                ]);
+            }
+
+            // Comportement normal si javascript est désactivé
             return $this->redirectToRoute('atelier_stock');
         }
 

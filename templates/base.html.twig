@@ -28,8 +28,11 @@
         {% include 'partials/_navigation.html.twig' %}
     {% endif %}
 
-    {# Le contenu principal s'adapte automatiquement #}
-    <main class="{{ app.user ? 'main-content' : 'login-content' }}">
+    {# Le contenu principal s'adapte automatiquement (Ajout de position-relative ici) #}
+    <main class="{{ app.user ? 'main-content' : 'login-content' }} position-relative">
+
+        {% include 'partials/_toasts.html.twig' %}
+
         {% block body %}{% endblock %}
     </main>
 
