@@ -55,6 +55,14 @@ final class UserAdministrationController extends AbstractController
 
                 $this->addFlash('success', 'Utilisateur créé avec succès.');
 
+                // Si la requête vient de la modale en AJAX, on renvoie une réponse JSON
+                if ($request->isXmlHttpRequest()) {
+                    return $this->json([
+                        'redirect' => $this->generateUrl('admin_user_index')
+                    ]);
+                }
+
+                // Comportement normal si appelé sans JavaScript
                 return $this->redirectToRoute('admin_user_index');
             }
         }
@@ -87,6 +95,13 @@ final class UserAdministrationController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash('success', 'Utilisateur mis à jour avec succès.');
+
+                // Si la requête vient de la modale en AJAX, on renvoie une réponse JSON
+                if ($request->isXmlHttpRequest()) {
+                    return $this->json([
+                        'redirect' => $this->generateUrl('admin_user_index')
+                    ]);
+                }
 
                 return $this->redirectToRoute('admin_user_index');
             }
@@ -178,7 +193,6 @@ final class UserAdministrationController extends AbstractController
             $user->setPassword($this->passwordHasher->hashPassword($user, $submittedPassword));
         }
 
-
         return [
             'errors' => $errors,
             'selectedRoleIds' => $selectedRoleIds,
@@ -224,4 +238,3 @@ final class UserAdministrationController extends AbstractController
         return $selectedRoleIds;
     }
 }
-

@@ -1,19 +1,17 @@
-{% extends 'base.html.twig' %}
+{# templates/admin/user/edit.html.twig #}
+{% extends app.request.xmlHttpRequest ? 'base_ajax.html.twig' : 'base.html.twig' %}
 
 {% block title %}Modifier l'utilisateur{% endblock %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
-{% endblock %}
-
 {% block body %}
-    <div class="container-fluid py-4 admin-user-page">
-        <div class="admin-user-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-            <div>
-                <h1 class="h3 admin-user-page__title">Modifier l'utilisateur</h1>
-                <p class="admin-user-page__subtitle">Mettez à jour les informations du compte {{ user.fullName ?: user.email }}.</p>
+    <div class="{{ app.request.xmlHttpRequest ? '' : 'container-fluid py-4' }}">
+
+        {% if not app.request.xmlHttpRequest %}
+            <div class="mb-4">
+                <h1 class="h3 mb-1">Modifier l'utilisateur</h1>
+                <p class="text-muted">Mettez à jour les informations du compte {{ user.fullName ?: user.email }}.</p>
             </div>
-        </div>
+        {% endif %}
 
         {% include 'admin/user/_form.html.twig' with {
             user: user,
@@ -26,4 +24,3 @@
         } %}
     </div>
 {% endblock %}
-

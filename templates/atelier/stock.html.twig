@@ -4,10 +4,10 @@
 
 {% block body %}
     <div class="container-fluid py-4 atelier-stock-page">
-        <div class="atelier-stock-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div class="atelier-stock-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
             <div>
                 <h1 class="h3 atelier-stock-page__title">Stock des pièces</h1>
-                <p class="atelier-stock-page__subtitle">Consultez les références, les quantités disponibles et les composants associés.</p>
+                <p class="atelier-stock-page__subtitle text-muted">Consultez les références, les quantités disponibles et les composants associés.</p>
             </div>
 
             <button class="btn btn-primary" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
@@ -19,55 +19,74 @@
             <div class="table-responsive">
                 <table class="table align-middle mb-0 atelier-stock-table">
                     <thead class="table-light">
-                        <tr>
-                            <th scope="col">Référence</th>
-                            <th scope="col">Libellé</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Quantité en stock</th>
-                            <th scope="col">Prix unitaire de vente</th>
-                            <th scope="col">Composants (quantité pour 1 unité)</th>
-                        </tr>
+                    <tr>
+                        <th scope="col">Référence</th>
+                        <th scope="col">Libellé</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Quantité en stock</th>
+                        <th scope="col">Prix unitaire de vente</th>
+                        <th scope="col">Composants (quantité pour 1 unité)</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for piece in pieces %}
-                            <tr>
-                                <td class="fw-semibold">{{ piece.reference }}</td>
-                                <td>{{ piece.libelle }}</td>
-                                <td>{{ piece.type }}</td>
-                                <td>{{ piece.quantiteStock }}</td>
-                                <td>
-                                    {% if piece.prixVente is not null %}
-                                        {{ piece.prixVente }} €
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td class="atelier-stock-components-cell">
-                                    {% if piece.composants|length == 0 %}
-                                        -
-                                    {% else %}
-                                        <ul class="atelier-stock-components mb-0">
-                                            {% for comp in piece.composants %}
-                                                {% set enfant = comp.pieceEnfant %}
-                                                <li>
-                                                    {{ comp.quantite }} × <strong>{{ enfant.reference }}</strong>
-                                                    — {{ enfant.libelle }}
-                                                    {% if enfant.prixVente is not null %}
-                                                        ({{ enfant.prixVente }} €)
-                                                    {% endif %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted atelier-stock-empty-state">
-                                    Aucune pièce trouvée.
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    {% for piece in pieces %}
+                        <tr>
+                            <td class="fw-semibold">{{ piece.reference }}</td>
+                            <td>{{ piece.libelle }}</td>
+                            <td>{{ piece.type }}</td>
+                            <td>{{ piece.quantiteStock }}</td>
+                            <td>
+                                {% if piece.prixVente is not null %}
+                                    {{ piece.prixVente }} €
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="atelier-stock-components-cell">
+                                {% if piece.composants|length == 0 %}
+                                    -
+                                {% else %}
+                                    <ul class="atelier-stock-components mb-0">
+                                        {% for comp in piece.composants %}
+                                            {% set enfant = comp.pieceEnfant %}
+                                            <li>
+                                                {{ comp.quantite }} × <strong>{{ enfant.reference }}</strong>
+                                                — {{ enfant.libelle }}
+                                                {% if enfant.prixVente is not null %}
+                                                    ({{ enfant.prixVente }} €)
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+
+                                    {# Bouton Modifier #}
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier la pièce', '{{ path('atelier_piece_edit', {id: piece.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary">
+                                        Modifier
+                                    </button>
+
+                                    {# Bouton Supprimer #}
+                                    <form method="post" action="{{ path('atelier_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pièce ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ piece.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4 atelier-stock-empty-state">
+                                Aucune pièce trouvée.
+                            </td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -75,3 +94,6 @@
     </div>
 {% endblock %}
 
+{% block javascripts %}
+    <script src="{{ asset('js/modal_piece.js') }}"></script>
+{% endblock %}

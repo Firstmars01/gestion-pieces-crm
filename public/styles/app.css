@@ -128,3 +128,21 @@ body {
     overflow-y: auto; /* Permet de scroller si le contenu est trop long */
     flex-grow: 1;
 }
+
+
+/* --- EFFET APPARITION DES BOUTONS AU SURVOL DES TABLEAUX --- */
+
+/* Uniquement sur les appareils qui gèrent le survol (souris/ordinateur) */
+@media (hover: hover) {
+    .table tbody tr .action-buttons {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    }
+
+    /* Quand on survole la ligne (tr), on affiche les boutons */
+    .table tbody tr:hover .action-buttons {
+        opacity: 1;
+        visibility: visible;
+    }
+}

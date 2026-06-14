@@ -50,4 +50,59 @@ class AtelierController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    // ======================================================
+    // MODIFIER UNE PIÈCE
+    // ======================================================
+    #[Route('/piece/{id}/modifier', name: 'atelier_piece_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Piece $piece, EntityManagerInterface $entityManager): Response
+    {
+        // On crée le formulaire avec la pièce existante
+        $form = $this->createForm(PieceType::class, $piece);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // Le persist() n'est pas nécessaire en modification, flush() suffit
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La pièce ' . $piece->getReference() . ' a été modifiée avec succès !');
+
+            // Si c'est notre JavaScript qui a envoyé le formulaire (Modale AJAX)
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'redirect' => $this->generateUrl('atelier_stock')
+                ]);
+            }
+
+            return $this->redirectToRoute('atelier_stock');
+        }
+
+        // 💡 ASTUCE : On réutilise exactement le même fichier Twig que pour la création !
+        return $this->render('atelier/piece_new.html.twig', [
+            'form' => $form->createView(),
+            'piece' => $piece, // On passe la pièce si on veut adapter le titre dans Twig plus tard
+        ]);
+    }
+
+    // ======================================================
+    // SUPPRIMER UNE PIÈCE
+    // ======================================================
+    #[Route('/piece/{id}/supprimer', name: 'atelier_piece_delete', methods: ['POST'])]
+    public function delete(Request $request, Piece $piece, EntityManagerInterface $entityManager): Response
+    {
+        // Vérification de sécurité du token CSRF
+        if ($this->isCsrfTokenValid('delete'.$piece->getId(), $request->request->get('_token'))) {
+
+            $entityManager->remove($piece);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La pièce a été supprimée de la base de données.');
+        } else {
+            $this->addFlash('error', 'Action non autorisée (Token CSRF invalide).');
+        }
+
+        return $this->redirectToRoute('atelier_stock');
+    }
 }
+
