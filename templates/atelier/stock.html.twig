@@ -15,7 +15,7 @@
             </button>
         </div>
 
-        <div class="card shadow-sm border-0 atelier-stock-card">
+        <div class="card shadow-sm border-0 atelier-stock-card overflow-hidden">
             <div class="table-responsive">
                 <table class="table align-middle mb-0 atelier-stock-table table-sortable">
                     <thead class="table-light">
@@ -24,6 +24,7 @@
                         <th scope="col" data-sort="string">Libellé</th>
                         <th scope="col" data-sort="string">Type</th>
                         <th scope="col" data-sort="number">Quantité</th>
+                        <th scope="col" data-sort="number">Prix d'achat</th>
                         <th scope="col" data-sort="number">Prix vente</th>
                         <th scope="col">Composants</th>
                         <th scope="col" class="text-end"></th>{# Action #}
@@ -36,6 +37,13 @@
                             <td>{{ piece.libelle }}</td>
                             <td>{{ piece.type }}</td>
                             <td>{{ piece.quantiteStock }}</td>
+                            <td>
+                                {% if piece.prixCatalogue is not null %}
+                                    {{ piece.prixCatalogue }} €
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if piece.prixVente is not null %}
                                     {{ piece.prixVente }} €
@@ -82,7 +90,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4 atelier-stock-empty-state">
+                            <td colspan="8" class="text-center text-muted py-4 atelier-stock-empty-state">
                                 Aucune pièce trouvée.
                             </td>
                         </tr>
