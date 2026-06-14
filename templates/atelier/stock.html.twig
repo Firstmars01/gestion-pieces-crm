@@ -17,16 +17,16 @@
 
         <div class="card shadow-sm border-0 atelier-stock-card">
             <div class="table-responsive">
-                <table class="table align-middle mb-0 atelier-stock-table">
+                <table class="table align-middle mb-0 atelier-stock-table table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">Référence</th>
-                        <th scope="col">Libellé</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Quantité en stock</th>
-                        <th scope="col">Prix unitaire de vente</th>
-                        <th scope="col">Composants (quantité pour 1 unité)</th>
-                        <th scope="col" class="text-end"></th>
+                        <th scope="col" data-sort="string">Référence</th>
+                        <th scope="col" data-sort="string">Libellé</th>
+                        <th scope="col" data-sort="string">Type</th>
+                        <th scope="col" data-sort="number">Quantité</th>
+                        <th scope="col" data-sort="number">Prix vente</th>
+                        <th scope="col">Composants</th>
+                        <th scope="col" class="text-end"></th>{# Action #}
                     </tr>
                     </thead>
                     <tbody>
