@@ -1,11 +1,6 @@
-{# templates/admin/user/index.html.twig #}
-{% extends 'base.html.twig' %}
+{% extends './base.html.twig' %}
 
 {% block title %}Administration des utilisateurs{% endblock %}
-
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('styles/admin.css') }}">
-{% endblock %}
 
 {% block body %}
     <div class="container-fluid py-4 admin-user-page">
@@ -15,14 +10,14 @@
                 <p class="admin-user-page__subtitle text-muted">Gérez les comptes, leurs rôles et leur statut d'activation.</p>
             </div>
 
-            {# Appel AJAX pour le nouvel utilisateur #}
+            {# Bouton de création qui ouvre la modale AJAX #}
             <button type="button" onclick="openModalAjax('Nouvel utilisateur', '{{ path('admin_user_new') }}')" class="btn btn-primary admin-user-page__cta">
                 <i class="bi bi-person-plus me-1"></i>
                 Nouvel utilisateur
             </button>
         </div>
 
-        <div class="card shadow-sm border-0 admin-user-card">
+        <div class="card shadow-sm border-0 admin-user-card overflow-hidden">
             <div class="table-responsive">
                 <table class="table align-middle mb-0 admin-user-table">
                     <thead class="table-light">
@@ -39,15 +34,15 @@
                         <tr>
                             <td>
                                 <div class="admin-user-table__identity">
-                                    <div class="fw-semibold">{{ user.fullName ?: user.email }}</div>
+                                    <div class="fw-semibold">{{ user.nom }} {{ user.prenom }}</div>
                                     <small class="admin-user-table__meta text-muted">#{{ user.id }}</small>
                                 </div>
                             </td>
                             <td>{{ user.email }}</td>
                             <td>
                                 <div class="admin-user-roles gap-1 d-flex flex-wrap">
-                                    {% for role in user.roles %}
-                                        <span class="badge text-bg-secondary">{{ role }}</span>
+                                    {% for role in user.userRoles %}
+                                        <span class="badge text-bg-secondary">{{ role.code }}</span>
                                     {% endfor %}
                                 </div>
                             </td>
@@ -59,18 +54,25 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2 action-buttons">
-                                    {# Appel AJAX pour la modification #}
-                                    <button type="button" onclick="openModalAjax('Modifier l\'utilisateur', '{{ path('admin_user_edit', {id: user.id}) }}')" class="btn btn-sm btn-outline-primary">Modifier</button>
+                                <div class="admin-user-actions d-flex justify-content-end gap-2 action-buttons">
 
+                                    {# Bouton Modifier (Modale AJAX) #}
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier l\'utilisateur', '{{ path('admin_user_edit', {id: user.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary">
+                                        Modifier
+                                    </button>
+
+                                    {# Bouton Supprimer #}
                                     {% if app.user and app.user.id != user.id %}
-                                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
                                             <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
                                         </form>
                                     {% else %}
-                                        <button class="btn btn-sm btn-outline-danger" type="button" disabled>Supprimer</button>
+                                        <button class="btn btn-sm btn-outline-danger" type="button" disabled title="Vous ne pouvez pas vous supprimer vous-même">Supprimer</button>
                                     {% endif %}
+
                                 </div>
                             </td>
                         </tr>
@@ -89,5 +91,6 @@
 {% endblock %}
 
 {% block javascripts %}
+    {# Si tu as un fichier modal_admin.js, on l'appelle ici #}
     <script src="{{ asset('js/modal_admin.js') }}"></script>
 {% endblock %}

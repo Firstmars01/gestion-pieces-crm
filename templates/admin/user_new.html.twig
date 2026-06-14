@@ -1,0 +1,78 @@
+{{ form_start(form, {'attr': {'class': 'admin-user-form'}}) }}
+
+<div class="row g-3">
+    <div class="col-md-6">
+        {{ form_row(form.email) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_row(form.plainPassword, {
+            'help': user.id ? 'Laisser vide pour conserver l\'existant' : ''
+        }) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_row(form.nom) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_row(form.prenom) }}
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <label class="form-label mb-0 fw-bold">Rôles</label>
+            <small class="text-muted">ROLE_USER est toujours ajouté automatiquement</small>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% for child in form.userRoles %}
+                <div>
+                    {# 🚀 CORRECTION : On génère le bouton manuellement pour bloquer le texte en double #}
+                    <input type="checkbox"
+                           class="btn-check"
+                           name="{{ child.vars.full_name }}"
+                           id="{{ child.vars.id }}"
+                           value="{{ child.vars.value }}"
+                           {% if child.vars.checked %}checked{% endif %}>
+
+                    <label class="btn btn-outline-primary btn-sm" for="{{ child.vars.id }}">
+                        {{ child.vars.label }}
+                    </label>
+                </div>
+            {% endfor %}
+            {# On indique à Symfony qu'on a déjà affiché ce champ manuellement #}
+            {% do form.userRoles.setRendered() %}
+        </div>
+
+        {{ form_errors(form.userRoles) }}
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="form-check form-switch ms-2">
+            <input type="checkbox"
+                   class="form-check-input"
+                   name="{{ form.actif.vars.full_name }}"
+                   id="{{ form.actif.vars.id }}"
+                   value="1"
+                   {% if form.actif.vars.checked %}checked{% endif %}>
+
+            <label class="form-check-label fw-bold" for="{{ form.actif.vars.id }}">
+                Compte actif (autorisé à se connecter)
+            </label>
+        </div>
+        {# On indique à Symfony qu'on a déjà affiché ce champ manuellement #}
+        {% do form.actif.setRendered() %}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        {{ user.id ? 'Enregistrer les modifications' : 'Créer l\'utilisateur' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

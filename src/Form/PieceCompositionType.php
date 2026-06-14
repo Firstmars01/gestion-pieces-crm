@@ -26,18 +26,18 @@ class PieceCompositionType extends AbstractType
                         ->orderBy('p.libelle', 'ASC');
                 },
                 'choice_label' => function (Piece $piece) {
-                    return $piece->getReference() . ' - ' . $piece->getLibelle();
+                    return $piece->getReference().' - '.$piece->getLibelle();
                 },
                 'label' => false,
-                'attr' => ['class' => 'form-select form-select-sm']
+                'attr' => ['class' => 'form-select form-select-sm'],
             ])
             ->add('quantite', IntegerType::class, [
                 'label' => false,
                 'attr' => [
                     'min' => 1,
                     'placeholder' => 'Quantité',
-                    'class' => 'form-control form-control-sm'
-                ]
+                    'class' => 'form-control form-control-sm',
+                ],
             ])
         ;
     }
