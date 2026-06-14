@@ -72,17 +72,20 @@
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
 
-                                    {# Bouton Modifier #}
+                                    {# Bouton Modifier (Icône seule avec title) #}
                                     <button type="button"
-                                            onclick="openModalAjax('Modifier la pièce', '{{ path('atelier_piece_edit', {id: piece.id}) }}')"
-                                            class="btn btn-sm btn-outline-primary">
-                                        Modifier
+                                            onclick="openModalAjax('Modifier', '{{ path('atelier_piece_edit', {id: piece.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    {# Bouton Supprimer #}
-                                    <form method="post" action="{{ path('atelier_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pièce ?');">
+                                    {# Bouton Supprimer (Icône seule avec title) #}
+                                    <form method="post" action="{{ path('atelier_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ piece.id) }}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </form>
 
                                 </div>

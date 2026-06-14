@@ -21,10 +21,12 @@ class Piece
     private ?int $id = null;
 
     // La référence unique demandée par le CDC
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'La référence est obligatoire.')]
     private ?string $reference = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le libellé est obligatoire.')]
     private ?string $libelle = null;
 
     // Le type permettra de différencier : LIVRABLE, INTERMEDIAIRE, MATIERE_PREMIERE, ACHETEE
@@ -39,7 +41,9 @@ class Piece
     private ?string $prixCatalogue = null;
 
     #[ORM\Column]
-    private ?int $quantiteStock = 0;
+    #[Assert\NotBlank(message: 'Veuillez saisir une quantité.')]
+    #[Assert\Type(type: 'integer', message: 'Veuillez saisir un nombre valide.')]
+    private ?int $quantiteStock = null;
 
     // Ce dont la pièce est constituée (Ses enfants)
     #[ORM\OneToMany(targetEntity: PieceComposition::class, mappedBy: 'pieceParent', cascade: ['persist', 'remove'])]
@@ -105,10 +109,9 @@ class Piece
         return $this->reference;
     }
 
-    public function setReference(string $reference): static
+    public function setReference(?string $reference): static
     {
         $this->reference = $reference;
-
         return $this;
     }
 
@@ -117,10 +120,9 @@ class Piece
         return $this->libelle;
     }
 
-    public function setLibelle(string $libelle): static
+    public function setLibelle(?string $libelle): static
     {
         $this->libelle = $libelle;
-
         return $this;
     }
 
@@ -165,10 +167,9 @@ class Piece
         return $this->quantiteStock;
     }
 
-    public function setQuantiteStock(int $quantiteStock): static
+    public function setQuantiteStock(?int $quantiteStock): static
     {
         $this->quantiteStock = $quantiteStock;
-
         return $this;
     }
 

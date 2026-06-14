@@ -1,5 +1,3 @@
-// public/js/modal_global.js
-
 // === FONCTIONS DE LA MODALE GLOBALE === //
 
 function closeModal() {

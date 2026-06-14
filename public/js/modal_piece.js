@@ -1,5 +1,3 @@
-// public/js/modal_piece.js
-
 // On écoute le "cri" du fichier global
 document.addEventListener('modal:loaded', function(e) {
     const modalBody = e.detail.modalBody;
@@ -90,4 +88,32 @@ function setupPieceFormDynamics(modalBody) {
             }
         });
     }
+
+    // On écoute tous les changements sur la page
+    document.addEventListener('change', function(event) {
+
+        // On vérifie si l'élément modifié est bien notre menu déroulant "Type"
+        // (Symfony génère généralement l'ID "piece_type" pour ce champ)
+        if (event.target && event.target.tagName === 'SELECT' && event.target.id.includes('type')) {
+
+            // 1. On trouve le formulaire dans lequel on se trouve
+            const form = event.target.closest('form');
+            if (!form) return;
+
+            // 2. On enlève les bordures rouges de tous les champs
+            form.querySelectorAll('.is-invalid').forEach(function(input) {
+                input.classList.remove('is-invalid');
+            });
+
+            // 3. On supprime les textes d'erreur rouges (générés par Bootstrap/Symfony)
+            form.querySelectorAll('.invalid-feedback').forEach(function(errorMessage) {
+                errorMessage.remove(); // On supprime complètement le texte
+            });
+
+            // Bonus : Si tu as des alertes globales en haut du formulaire, tu peux aussi les cacher
+            form.querySelectorAll('.alert-danger').forEach(function(alertBox) {
+                alertBox.style.display = 'none';
+            });
+        }
+    });
 }

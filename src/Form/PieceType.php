@@ -51,7 +51,7 @@ class PieceType extends AbstractType
             ])
             ->add('quantiteStock', IntegerType::class, [
                 'label' => 'Quantité en stock',
-                'empty_data' => '0',
+                'attr' => ['placeholder' => 'Ex: 10'],
             ])
             ->add('composants', CollectionType::class, [
                 'entry_type' => PieceCompositionType::class,
@@ -67,6 +67,9 @@ class PieceType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Piece::class,
+            'attr' => [
+                'novalidate' => 'novalidate',
+            ],
         ]);
     }
 }

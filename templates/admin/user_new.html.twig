@@ -28,7 +28,7 @@
         <div class="d-flex flex-wrap gap-2">
             {% for child in form.userRoles %}
                 <div>
-                    {# 🚀 CORRECTION : On génère le bouton manuellement pour bloquer le texte en double #}
+                    {# On génère le bouton manuellement pour bloquer le texte en double #}
                     <input type="checkbox"
                            class="btn-check"
                            name="{{ child.vars.full_name }}"

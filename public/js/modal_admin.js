@@ -1,5 +1,3 @@
-// public/js/modal_admin.js
-
 document.addEventListener('modal:loaded', function(e) {
     const modalBody = e.detail.modalBody;
 

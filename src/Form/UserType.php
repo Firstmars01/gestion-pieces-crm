@@ -66,6 +66,9 @@ class UserType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'is_edit' => false, // Option personnalisée pour savoir si on est en création ou modification
+            'attr' => [
+                'novalidate' => 'novalidate',
+            ],
         ]);
     }
 }
