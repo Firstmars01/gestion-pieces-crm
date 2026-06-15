@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Piece;
+use App\Entity\PieceComposition;
 use App\Form\PieceType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,17 +28,16 @@ class AtelierController extends AbstractController
 
         // 4. Si le formulaire est soumis ET que toutes nos règles (Assert) sont valides
         if ($form->isSubmitted() && $form->isValid()) {
-
             $entityManager->persist($piece);
             $entityManager->flush();
 
             // On ajoute le message flash normalement
-            $this->addFlash('success', 'La pièce ' . $piece->getReference() . ' a été créée avec succès !');
+            $this->addFlash('success', 'La pièce '.$piece->getReference().' a été créée avec succès !');
 
             // Si c'est notre JavaScript qui a envoyé le formulaire, on renvoie une réponse JSON
             if ($request->isXmlHttpRequest()) {
                 return $this->json([
-                    'redirect' => $this->generateUrl('atelier_stock')
+                    'redirect' => $this->generateUrl('atelier_stock'),
                 ]);
             }
 
@@ -62,16 +62,15 @@ class AtelierController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             // Le persist() n'est pas nécessaire en modification, flush() suffit
             $entityManager->flush();
 
-            $this->addFlash('success', 'La pièce ' . $piece->getReference() . ' a été modifiée avec succès !');
+            $this->addFlash('success', 'La pièce '.$piece->getReference().' a été modifiée avec succès !');
 
             // Si c'est notre JavaScript qui a envoyé le formulaire (Modale AJAX)
             if ($request->isXmlHttpRequest()) {
                 return $this->json([
-                    'redirect' => $this->generateUrl('atelier_stock')
+                    'redirect' => $this->generateUrl('atelier_stock'),
                 ]);
             }
 
@@ -93,16 +92,27 @@ class AtelierController extends AbstractController
     {
         // Vérification de sécurité du token CSRF
         if ($this->isCsrfTokenValid('delete'.$piece->getId(), $request->request->get('_token'))) {
+            // On cherche si cette pièce est utilisée comme composant enfant
+            $isUsedAsComponent = $entityManager->getRepository(PieceComposition::class)->findOneBy([
+                'pieceEnfant' => $piece,
+            ]);
 
+            // Si on trouve au moins un résultat, on bloque la suppression
+            if ($isUsedAsComponent) {
+                $this->addFlash('danger', 'Impossible de supprimer la pièce car elle est utilisée comme composant dans une autre pièce.');
+
+                return $this->redirectToRoute('atelier_stock');
+            }
+
+            // Si elle n'est pas utilisée, on procède à la suppression
             $entityManager->remove($piece);
             $entityManager->flush();
 
             $this->addFlash('success', 'La pièce a été supprimée de la base de données.');
         } else {
-            $this->addFlash('error', 'Action non autorisée (Token CSRF invalide).');
+            $this->addFlash('danger', 'Action non autorisée (Token CSRF invalide).');
         }
 
         return $this->redirectToRoute('atelier_stock');
     }
 }
-
