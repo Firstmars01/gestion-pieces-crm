@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Gamme;
 use App\Entity\Piece;
 use App\Entity\PieceComposition;
+use App\Form\GammeType;
 use App\Form\PieceType;
+use App\Repository\GammeRepository;
 use App\Repository\PieceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -141,5 +144,96 @@ class AtelierController extends AbstractController
         return $this->render('atelier/stock.html.twig', [
             'pieces' => $pieces,
         ]);
+    }
+
+    #[Route('/atelier/gammes', name: 'atelier_gamme_index', methods: ['GET'])]
+    public function gammeIndex(Request $request, GammeRepository $gammeRepository, PaginatorInterface $paginator): Response
+    {
+        // On utilise l'alias 'g' pour Gamme, et on joint la Pièce ('p') et l'Utilisateur ('u')
+        // Les jointures permettent d'optimiser les requêtes et de faire des recherches sur ces tables
+        $queryBuilder = $gammeRepository->createQueryBuilder('g')
+            ->leftJoin('g.piece', 'p')
+            ->addSelect('p')
+            ->leftJoin('g.user', 'u')
+            ->addSelect('u');
+
+        // Récupération du terme de recherche
+        $recherche = $request->query->get('q');
+
+        // Recherche insensible à la casse sur le nom de la gamme, la référence de la pièce ou le nom du responsable
+        if ($recherche) {
+            $queryBuilder->andWhere('LOWER(g.libelle) LIKE LOWER(:recherche) OR LOWER(p.reference) LIKE LOWER(:recherche) OR LOWER(u.nom) LIKE LOWER(:recherche) OR LOWER(u.prenom) LIKE LOWER(:recherche)')
+                ->setParameter('recherche', '%'.$recherche.'%');
+        }
+
+        $gammes = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            20 // Nombre de gammes par page
+        );
+
+        return $this->render('atelier/gamme_index.html.twig', [
+            'gammes' => $gammes,
+        ]);
+    }
+
+    #[Route('/atelier/gammes/new', name: 'atelier_gamme_new', methods: ['GET', 'POST'])]
+    public function gammeNew(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $gamme = new Gamme();
+        $form = $this->createForm(GammeType::class, $gamme);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($gamme);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La gamme a été créée avec succès.');
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['redirect' => $this->generateUrl('atelier_gamme_index')]);
+            }
+            return $this->redirectToRoute('atelier_gamme_index');
+        }
+
+        return $this->render('atelier/gamme_new.html.twig', [
+            'form' => $form->createView(),
+            'gamme' => $gamme,
+        ]);
+    }
+
+    #[Route('/atelier/gammes/{id}/edit', name: 'atelier_gamme_edit', methods: ['GET', 'POST'])]
+    public function gammeEdit(Request $request, Gamme $gamme, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(GammeType::class, $gamme);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La gamme a été mise à jour.');
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['redirect' => $this->generateUrl('atelier_gamme_index')]);
+            }
+            return $this->redirectToRoute('atelier_gamme_index');
+        }
+
+        return $this->render('atelier/gamme_new.html.twig', [
+            'form' => $form->createView(),
+            'gamme' => $gamme,
+        ]);
+    }
+
+    #[Route('/atelier/gammes/{id}', name: 'atelier_gamme_delete', methods: ['POST'])]
+    public function gammeDelete(Request $request, Gamme $gamme, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete_gamme_' . $gamme->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($gamme);
+            $entityManager->flush();
+            $this->addFlash('success', 'La gamme a été supprimée.');
+        }
+
+        return $this->redirectToRoute('atelier_gamme_index');
     }
 }

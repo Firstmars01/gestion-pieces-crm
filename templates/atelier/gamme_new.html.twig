@@ -1,0 +1,26 @@
+{{ form_start(form, {'attr': {'id': 'form-gamme'}}) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        {{ form_row(form.libelle) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_row(form.piece) }}
+    </div>
+
+    <div class="col-md-6">
+        {{ form_row(form.user) }}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        {{ gamme.id ? 'Enregistrer les modifications' : 'Créer la gamme' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

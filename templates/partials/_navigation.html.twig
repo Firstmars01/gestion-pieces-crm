@@ -50,9 +50,9 @@
                     <a href="{{ path('atelier_stock') }}" class="sidebar-sublink {% if current_route starts with 'atelier_stock' %}active{% endif %}">
                         Stock des pièces
                     </a>
-                    {# Exemple pour ajouter d'autres pages atelier à l'avenir :
-                        <a href="{{ path('atelier_composition') }}" class="sidebar-sublink {% if current_route starts with 'atelier_composition' %}active{% endif %}">Composition</a>
-                    #}
+                    <a href="{{ path('atelier_gamme_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_gamme_index' %}active{% endif %}">
+                        Gammes de fabrication
+                    </a>
                 </nav>
             </div>
         {% endif %}
