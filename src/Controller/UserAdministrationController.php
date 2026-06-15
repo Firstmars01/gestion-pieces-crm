@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface; // Import indispensable pour la pagination
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,10 +26,23 @@ final class UserAdministrationController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request, PaginatorInterface $paginator): Response
     {
+        // On crée la requête avec l'alias 'u' pour que les tris Twig (u.nom, u.email) fonctionnent
+        // On joint aussi les rôles pour optimiser les performances (éviter les requêtes N+1)
+        $queryBuilder = $this->userRepository->createQueryBuilder('u')
+            ->leftJoin('u.userRoles', 'r')
+            ->addSelect('r');
+
+        // On génère la pagination
+        $users = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1), // Page actuelle, 1 par défaut
+            20 // Nombre d'utilisateurs par page
+        );
+
         return $this->render('admin/users.html.twig', [
-            'users' => $this->userRepository->findAllWithRolesOrdered(),
+            'users' => $users,
         ]);
     }
 
@@ -37,7 +51,6 @@ final class UserAdministrationController extends AbstractController
     {
         $user = new User();
 
-        // On utilise maintenant ton dossier Form !
         $form = $this->createForm(UserType::class, $user, ['is_edit' => false]);
         $form->handleRequest($request);
 
@@ -67,7 +80,6 @@ final class UserAdministrationController extends AbstractController
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user): Response
     {
-        // 🚀 On utilise le même formulaire, mais en mode édition
         $form = $this->createForm(UserType::class, $user, ['is_edit' => true]);
         $form->handleRequest($request);
 

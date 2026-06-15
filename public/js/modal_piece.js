@@ -1,8 +1,9 @@
-// On écoute le "cri" du fichier global
+// public/js/modal_piece.js
+
+// Gestion de l'ouverture de la modale
 document.addEventListener('modal:loaded', function(e) {
     const modalBody = e.detail.modalBody;
 
-    // On vérifie si on est bien sur un formulaire de pièce en cherchant le selecteur de type
     if (modalBody.querySelector('#piece_type')) {
         setupPieceFormDynamics(modalBody);
     }
@@ -20,7 +21,6 @@ function setupPieceFormDynamics(modalBody) {
         const type = typeSelect.value;
         prixVenteInput.disabled = true;
         prixCatalogueInput.disabled = true;
-
 
         if (sectionComposants) {
             if (type === 'LIVRABLE' || type === 'INTERMEDIAIRE') {
@@ -47,8 +47,6 @@ function setupPieceFormDynamics(modalBody) {
     const list = modalBody.querySelector('.composants-list');
 
     if (addBtn && wrapper && list) {
-        // Pour éviter d'ajouter de multiples écouteurs si la page se recharge avec une erreur
-        // On clone et remplace le bouton pour vider les anciens eventListeners
         const newAddBtn = addBtn.cloneNode(true);
         addBtn.parentNode.replaceChild(newAddBtn, addBtn);
 
@@ -81,39 +79,30 @@ function setupPieceFormDynamics(modalBody) {
             list.appendChild(newRow);
         });
 
-        // La délégation d'événement pour la suppression peut se faire directement
         list.addEventListener('click', function(e) {
             if (e.target.closest('.btn-remove-composant')) {
                 e.target.closest('.item-composant').remove();
             }
         });
     }
-
-    // On écoute tous les changements sur la page
-    document.addEventListener('change', function(event) {
-
-        // On vérifie si l'élément modifié est bien notre menu déroulant "Type"
-        // (Symfony génère généralement l'ID "piece_type" pour ce champ)
-        if (event.target && event.target.tagName === 'SELECT' && event.target.id.includes('type')) {
-
-            // 1. On trouve le formulaire dans lequel on se trouve
-            const form = event.target.closest('form');
-            if (!form) return;
-
-            // 2. On enlève les bordures rouges de tous les champs
-            form.querySelectorAll('.is-invalid').forEach(function(input) {
-                input.classList.remove('is-invalid');
-            });
-
-            // 3. On supprime les textes d'erreur rouges (générés par Bootstrap/Symfony)
-            form.querySelectorAll('.invalid-feedback').forEach(function(errorMessage) {
-                errorMessage.remove(); // On supprime complètement le texte
-            });
-
-            // Bonus : Si tu as des alertes globales en haut du formulaire, tu peux aussi les cacher
-            form.querySelectorAll('.alert-danger').forEach(function(alertBox) {
-                alertBox.style.display = 'none';
-            });
-        }
-    });
 }
+
+// Nettoyage des messages d'erreur lors du changement de type de pièce
+document.addEventListener('change', function(event) {
+    if (event.target && event.target.tagName === 'SELECT' && event.target.id.includes('type')) {
+        const form = event.target.closest('form');
+        if (!form) return;
+
+        form.querySelectorAll('.is-invalid').forEach(function(input) {
+            input.classList.remove('is-invalid');
+        });
+
+        form.querySelectorAll('.invalid-feedback').forEach(function(errorMessage) {
+            errorMessage.remove();
+        });
+
+        form.querySelectorAll('.alert-danger').forEach(function(alertBox) {
+            alertBox.style.display = 'none';
+        });
+    }
+});

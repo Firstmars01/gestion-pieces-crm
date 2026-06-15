@@ -10,24 +10,24 @@
                 <p class="atelier-stock-page__subtitle text-muted">Consultez les références, les quantités disponibles et les composants associés.</p>
             </div>
 
-            <button class="btn btn-primary" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
+            <button class="btn btn-primary-custom" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
                 <i class="bi bi-plus-circle me-1"></i> Nouvelle pièce
             </button>
         </div>
 
         <div class="card shadow-sm border-0 atelier-stock-card overflow-hidden">
             <div class="table-responsive">
-                <table class="table align-middle mb-0 atelier-stock-table table-sortable">
+                <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col" data-sort="string">Référence</th>
-                        <th scope="col" data-sort="string">Libellé</th>
-                        <th scope="col" data-sort="string">Type</th>
-                        <th scope="col" data-sort="number">Quantité</th>
-                        <th scope="col" data-sort="number">Prix d'achat</th>
-                        <th scope="col" data-sort="number">Prix vente</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Référence', 'p.reference') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Libellé', 'p.libelle') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Type', 'p.type') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Quantité', 'p.quantiteStock') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Prix d\'achat', 'p.prixCatalogue') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Prix vente', 'p.prixVente') }}</th>
                         <th scope="col">Composants</th>
-                        <th scope="col" class="text-end"></th>{# Action #}
+                        <th scope="col" class="text-end"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -72,7 +72,6 @@
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
 
-                                    {# Bouton Modifier (Icône seule avec title) #}
                                     <button type="button"
                                             onclick="openModalAjax('Modifier', '{{ path('atelier_piece_edit', {id: piece.id}) }}')"
                                             class="btn btn-sm btn-outline-primary"
@@ -80,7 +79,6 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    {# Bouton Supprimer (Icône seule avec title) #}
                                     <form method="post" action="{{ path('atelier_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ piece.id) }}">
                                         <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
@@ -102,9 +100,14 @@
                 </table>
             </div>
         </div>
+
+        <div class="pagination-container pagination-pill">
+            {{ knp_pagination_render(pieces) }}
+        </div>
     </div>
 {% endblock %}
 
 {% block javascripts %}
     <script src="{{ asset('js/modal_piece.js') }}"></script>
+
 {% endblock %}

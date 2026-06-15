@@ -10,8 +10,7 @@
                 <p class="admin-user-page__subtitle text-muted">Gérez les comptes, leurs rôles et leur statut d'activation.</p>
             </div>
 
-            {# Bouton de création qui ouvre la modale AJAX #}
-            <button type="button" onclick="openModalAjax('Nouvel utilisateur', '{{ path('admin_user_new') }}')" class="btn btn-primary admin-user-page__cta">
+            <button type="button" onclick="openModalAjax('Nouvel utilisateur', '{{ path('admin_user_new') }}')" class="btn btn-primary-custom">
                 <i class="bi bi-person-plus me-1"></i>
                 Nouvel utilisateur
             </button>
@@ -22,10 +21,10 @@
                 <table class="table align-middle mb-0 admin-user-table table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col" data-sort="string">Utilisateur</th>
-                        <th scope="col" data-sort="string">Email</th>
-                        <th scope="col" data-sort="string">Rôles</th>
-                        <th scope="col" data-sort="string">Actif</th>
+                        <th scope="col">{{ knp_pagination_sortable(users, 'Utilisateur', 'u.nom') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(users, 'Email', 'u.email') }}</th>
+                        <th scope="col">Rôles</th>
+                        <th scope="col">{{ knp_pagination_sortable(users, 'Actif', 'u.actif') }}</th>
                         <th scope="col" class="text-end">Actions</th>
                     </tr>
                     </thead>
@@ -56,7 +55,6 @@
                             <td class="text-end">
                                 <div class="admin-user-actions d-flex justify-content-end gap-2 action-buttons">
 
-                                    {# Bouton Modifier (Modale AJAX) avec icône #}
                                     <button type="button"
                                             onclick="openModalAjax('Modifier l\'utilisateur', '{{ path('admin_user_edit', {id: user.id}) }}')"
                                             class="btn btn-sm btn-outline-primary"
@@ -64,7 +62,6 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    {# Bouton Supprimer avec icône #}
                                     {% if app.user and app.user.id != user.id %}
                                         <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
@@ -92,10 +89,14 @@
                 </table>
             </div>
         </div>
+
+        {# Affichage de la pagination en bas au centre #}
+        <div class="pagination-container pagination-pill">
+            {{ knp_pagination_render(users) }}
+        </div>
     </div>
 {% endblock %}
 
 {% block javascripts %}
-    {# Si tu as un fichier modal_admin.js, on l'appelle ici #}
     <script src="{{ asset('js/modal_admin.js') }}"></script>
 {% endblock %}

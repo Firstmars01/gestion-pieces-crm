@@ -27,13 +27,10 @@ body {
 .app-container {
     display: grid;
     grid-template-rows: 50px 1fr;
-
     grid-template-columns: 220px 1fr;
-
     height: 100vh;
     width: 100vw;
 }
-
 
 /* Calage immédiat du contenu en haut à droite (2ème colonne, 2ème ligne) */
 .main-content {
@@ -129,20 +126,141 @@ body {
     flex-grow: 1;
 }
 
+/* ==========================================================================
+   TABLEAUX & ACTIONS GLOBALES (Survol et Tri)
+   ========================================================================== */
 
-/* --- EFFET APPARITION DES BOUTONS AU SURVOL DES TABLEAUX --- */
+/* --- Tri des colonnes (KnpPaginator) --- */
+.table-sortable th a {
+    color: #212529;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
 
-/* Uniquement sur les appareils qui gèrent le survol (souris/ordinateur) */
-@media (hover: hover) {
-    .table tbody tr .action-buttons {
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-    }
+.table-sortable th a:hover {
+    color: #0d6efd;
+}
 
-    /* Quand on survole la ligne (tr), on affiche les boutons */
-    .table tbody tr:hover .action-buttons {
-        opacity: 1;
-        visibility: visible;
-    }
+/* --- Boutons d'action au survol --- */
+.table tbody tr .action-buttons {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.table tbody tr:hover .action-buttons {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ==========================================================================
+   Pagination (Style Pilule)
+   ========================================================================== */
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.pagination-pill .pagination {
+    background-color: #ffffff;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 0.25rem 0.5rem;
+    align-items: center;
+    margin-bottom: 0;
+    gap: 2px;
+}
+
+.pagination-pill .page-item .page-link {
+    border: none;
+    background: transparent;
+    color: #4b5563;
+    border-radius: 12px;
+    padding: 0.4rem 0.8rem;
+    font-weight: 500;
+}
+
+.pagination-pill .page-item.active .page-link {
+    background-color: #243c84;
+    color: #ffffff;
+}
+
+.pagination-pill .page-item:not(.active) .page-link:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.pagination-pill .page-item.disabled .page-link {
+    color: #9ca3af;
+}
+
+/* ==========================================================================
+    Boutons personnalisés
+    ========================================================================== */
+
+.btn-primary-custom {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   Surcharges Bootstrap Globales (Couleurs Custom pour toute l'application)
+   ========================================================================== */
+
+/* 1. Boutons d'action principaux */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--sidebar); /* Violet au survol/clic */
+    border-color: var(--sidebar);
+    color: #ffffff;
+}
+
+/* 2. Boutons "outline" (ex: sélection des rôles, annuler, etc.) */
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Quand le bouton outline est coché (btn-check) OU survolé */
+.btn-check:checked + .btn-outline-primary,
+.btn-outline-primary:hover,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+/* 3. Switchs, Checkboxes et Boutons Radio quand ils sont cochés */
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* 4. Champs de texte (Inputs, Selects) au clic (Focus) */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: var(--primary);
+    /* Halo bleu clair autour du champ cliqué (calculé d'après ta couleur #243c84) */
+    box-shadow: 0 0 0 0.25rem rgba(36, 60, 132, 0.25);
 }

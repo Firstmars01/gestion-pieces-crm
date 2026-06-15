@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Atelier / Stock des pièces
+   Atelier / Stock des pièces (Spécifique)
    ========================================================================== */
 
 .atelier-stock-page {
@@ -48,14 +48,3 @@
 .atelier-stock-empty-state {
     padding: 2rem 1rem;
 }
-
-@media (max-width: 575.98px) {
-    .atelier-stock-page {
-        gap: 1rem;
-    }
-
-    .atelier-stock-components {
-        padding-left: 1rem;
-    }
-}
-

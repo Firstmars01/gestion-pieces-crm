@@ -35,14 +35,6 @@
     overflow: hidden;
 }
 
-.admin-user-table {
-    margin-bottom: 0;
-}
-
-.admin-user-table tbody tr {
-    vertical-align: middle;
-}
-
 .admin-user-table__identity {
     display: flex;
     flex-direction: column;
@@ -54,83 +46,7 @@
     font-size: 0.875rem;
 }
 
-.admin-user-roles {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.admin-user-actions {
-    display: inline-flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.admin-user-actions form {
-    margin: 0;
-}
-
 .admin-user-empty-state {
     padding: 2rem 1rem;
-}
-
-.admin-user-form {
-    overflow: hidden;
-}
-
-.admin-user-form__body {
-    background: #ffffff;
-}
-
-.admin-user-form__errors {
-    margin-bottom: 0;
-}
-
-
-.admin-user-form__role-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.admin-user-form__help {
-    color: #6c757d;
-}
-
-.admin-user-form__footer {
-    background: #ffffff;
-}
-
-@media (max-width: 575.98px) {
-    .admin-user-page {
-        gap: 1rem;
-    }
-
-    .admin-user-page__cta {
-        width: 100%;
-    }
-
-    .admin-user-actions {
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .admin-user-actions > * {
-        flex: 1 1 auto;
-    }
-
-    .admin-user-actions form,
-    .admin-user-actions .btn {
-        width: 100%;
-    }
-
-    .admin-user-form__footer {
-        align-items: stretch;
-    }
-
-    .admin-user-form__footer .btn {
-        width: 100%;
-    }
 }
 

@@ -10,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\PieceRepository;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/atelier')]
 class AtelierController extends AbstractController
@@ -114,5 +116,23 @@ class AtelierController extends AbstractController
         }
 
         return $this->redirectToRoute('atelier_stock');
+    }
+
+    #[Route('/stock', name: 'atelier_stock')]
+    public function index(PieceRepository $pieceRepository, PaginatorInterface $paginator, Request $request): Response
+    {
+        // On prépare la requête sans l'exécuter
+        $queryBuilder = $pieceRepository->createQueryBuilder('p');
+
+        // On passe la requête au paginateur
+        $pieces = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1), // Numéro de la page en cours, 1 par défaut
+            20 // Nombre d'éléments par page
+        );
+
+        return $this->render('atelier/stock.html.twig', [
+            'pieces' => $pieces,
+        ]);
     }
 }

@@ -24,19 +24,18 @@
     background-color: #cccccc; /* Le gris neutre en fond comme sur ta maquette */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 🚀 Modifié : Aligne le contenu vers le haut pour enlever le vide */
+    justify-content: flex-start;
     align-items: center;         /* Centre horizontalement la carte et le logo */
-    padding: 40px 40px 20px 40px; /* 🚀 Ajusté : Espace global autour */
+    padding: 40px 40px 20px 40px;
 }
 
-/* 🚀 AJOUT : Ce bloc regroupe le logo et la carte pour qu'ils restent bien alignés horizontalement,
-   et on lui donne un léger espace par rapport au haut de l'écran pour que le logo respire sans excès. */
+
 .login-center-block {
     width: 100%;
     max-width: 440px;
     display: flex;
     flex-direction: column;
-    margin-top: 5vh; /* 🚀 Ajuste cette valeur (ex: 2vh, 8vh) pour monter ou descendre le logo à l'œil */
+    margin-top: 5vh;
 }
 
 /* ==========================================================================
@@ -44,7 +43,7 @@
    ========================================================================== */
 
 .login-logo-container {
-    margin-bottom: 20px; /* 🚀 Réduit de 40px à 20px pour resserrer l'espace entre le logo et la carte */
+    margin-bottom: 20px;
     text-align: center;
 }
 
