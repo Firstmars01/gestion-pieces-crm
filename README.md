@@ -30,19 +30,39 @@ L'application permet de :
 
 ### Backend
 
-- PHP 8.3
-- Symfony 7
-- Doctrine ORM
+- PHP >= 8.2 (projet teste avec PHP 8.3)
+- Symfony 7.4
+- Doctrine ORM + Doctrine Migrations
+- Symfony Security (form login + roles)
+- KnpPaginatorBundle (pagination des listes)
 
 ### Base de données
 
-- PostgreSQL
+- PostgreSQL 16
 
 ### Frontend
 
 - Twig
-- Bootstrap 5
-- JavaScript
+- Bootstrap 5.3 (via CDN)
+- Bootstrap Icons (via CDN)
+- Tom Select (via CDN)
+- JavaScript vanilla
+
+### Qualite / tests
+
+- PHPUnit
+- PHPStan
+- PHP CS Fixer
+
+## Fonctionnalites disponibles
+
+### Authentification
+
+- page de connexion `/login`
+- deconnexion `/logout`
+- controle d'acces par roles
+
+### Atelier
 
 ### Outils
 
@@ -159,7 +179,7 @@ L'application permet de :
 - PHP >= 8.3
 - Composer
 - PostgreSQL
-- Symfony CLI
+- Symfony CLI (optionnel mais pratique)
 
 ### Cloner le projet
 
@@ -179,74 +199,70 @@ composer install
 Créer le fichier `.env.local` :
 
 ```env
-DATABASE_URL="postgresql://postgres:password@127.0.0.1:5432/crm_pieces?serverVersion=16&charset=utf8"
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/crm_local?serverVersion=16&charset=utf8"
 ```
 
 ### Création de la base de données
 
 ```bash
 php bin/console doctrine:database:create
+php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:fixtures:load --no-interaction
 ```
 
 ### Exécution des migrations
 
 ```bash
-php bin/console doctrine:migrations:migrate
-```
-
-### Chargement des données de démonstration
-
-```bash
-php bin/console doctrine:fixtures:load
-```
-
-### Lancement du serveur
-
-```bash
 symfony server:start
 ```
 
-Application accessible sur :
+Application disponible sur `http://localhost:8000`.
 
-```text
-http://localhost:8000
+## Installation (Docker - PostgreSQL)
+
+Le fichier `docker-compose.yml` fournit un service PostgreSQL 16 expose sur le port `5432`.
+
+```bash
+docker compose up -d database
 ```
 
----
+## Comptes de demonstration (fixtures)
 
-## Architecture du projet
+Mot de passe par defaut : `password123`
+
+- `admin@crm.com` (ROLE_ADMIN)
+- `atelier@crm.com` (ROLE_ATELIER)
+- `commercial@crm.com` (ROLE_COMMERCIAL)
+- `compta@crm.com` (ROLE_COMPTABLE)
+
+## Commandes utiles
+
+```bash
+php bin/console doctrine:migrations:status
+php bin/console doctrine:fixtures:load --no-interaction
+php bin/phpunit
+vendor/bin/phpstan analyse
+vendor/bin/php-cs-fixer fix --dry-run --diff
+```
+
+## Architecture actuelle (src)
 
 ```text
 src/
-│
 ├── Controller/
-│   ├── PieceController
-│   ├── DevisController
-│   ├── CommandeController
-│   ├── AchatController
-│   └── AdminController
-│
+│   ├── AtelierController.php
+│   ├── HomeController.php
+│   ├── SecurityController.php
+│   └── UserAdministrationController.php
 ├── Entity/
-│   ├── User
-│   ├── Piece
-│   ├── Devis
-│   ├── Commande
-│   ├── Facture
-│   └── Fournisseur
-│
-├── Repository/
-│
+│   ├── Gamme.php
+│   ├── Piece.php
+│   ├── PieceComposition.php
+│   ├── Role.php
+│   └── User.php
 ├── Form/
-│
-├── Security/
-│
-├── Service/
-│   ├── PdfService
-│   ├── CsvExportService
-│   ├── StockService
-│   └── PriceCalculatorService
-│
-└── EventSubscriber/
+├── Repository/
+└── DataFixtures/
 ```
 
 ---
@@ -294,8 +310,6 @@ Module Commercial :
 ---
 
 ## Auteur
-
-Projet réalisé dans le cadre du Projet de Synthèse M1 ESIMED 2026.
 
 Développeur : Clément MARIE
 

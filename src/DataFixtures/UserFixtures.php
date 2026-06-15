@@ -77,7 +77,21 @@ class UserFixtures extends Fixture
         $comptable->setPassword($this->passwordHasher->hashPassword($comptable, $defaultPassword));
         $manager->persist($comptable);
 
-        // 6. On envoie le tout en base de données
+        // 6. Création de 10 utilisateurs sans rôle spécial
+        $nomsCommuns = ['Lefebvre', 'Moreau', 'Simon', 'Laurent', 'Petit', 'Durand', 'Lecomte', 'Fournier', 'Renault', 'Germain'];
+        $prenomsCommuns = ['Marie', 'Pierre', 'Luc', 'Anne', 'Thomas', 'Isabelle', 'Marc', 'Catherine', 'Laurent', 'Viviane'];
+
+        for ($i = 0; $i < 10; $i++) {
+            $user = new User();
+            $user->setEmail('user' . ($i + 1) . '@crm.com');
+            $user->setNom($nomsCommuns[$i]);
+            $user->setPrenom($prenomsCommuns[$i]);
+            $user->setActif(true);
+            $user->setPassword($this->passwordHasher->hashPassword($user, $defaultPassword));
+            $manager->persist($user);
+        }
+
+        // 7. On envoie le tout en base de données
         $manager->flush();
     }
 }
