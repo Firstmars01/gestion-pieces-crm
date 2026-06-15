@@ -21,14 +21,13 @@
 /* Coté droit : Zone grise du formulaire */
 .login-form-side {
     flex: 1;
-    background-color: #cccccc; /* Le gris neutre en fond comme sur ta maquette */
+    background-color: var(--background, #cccccc); /* Le gris neutre en fond */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;         /* Centre horizontalement la carte et le logo */
+    align-items: center; /* Centre horizontalement la carte et le logo */
     padding: 40px 40px 20px 40px;
 }
-
 
 .login-center-block {
     width: 100%;
@@ -83,11 +82,13 @@
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Accentuation sur ta couleur primaire au clic */
 .form-control-custom:focus {
-    border-color: #464ba4; /* Accentuation sur ton violet au clic */
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(36, 60, 132, 0.15); /* Petit halo bleuté discret */
 }
 
 /* Placeholder gris très clair */
@@ -99,25 +100,29 @@
    BOUTONS ET LIENS
    ========================================================================== */
 
-/* Bouton violet plat de ta maquette */
+/* Bouton principal de connexion */
 .btn-login-submit {
     width: 100%;
-    background-color: #464ba4; /* Ton beau violet de marque */
-    color: #ffffff;
-    border: none;
     padding: 12px;
     font-size: 0.95rem;
     font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
     margin-top: 15px;
-    transition: background-color 0.2s ease;
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+    color: #ffffff;
+    transition: all 0.2s ease-in-out;
 }
 
-.btn-login-submit:hover {
-    background-color: #373b82; /* Assombrissement au survol */
+.btn-login-submit:hover,
+.btn-login-submit:focus {
+    background-color: var(--sidebar);
+    border-color: var(--sidebar);
+    color: #ffffff;
 }
 
+/* Lien mot de passe oublié */
 .forgot-password-container {
     margin-top: 20px;
     text-align: left;
@@ -131,5 +136,5 @@
 }
 
 .forgot-password-link:hover {
-    color: #000000;
+    color: var(--primary); /* Reprend ton bleu au survol */
 }

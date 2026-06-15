@@ -23,7 +23,7 @@
 
                         {% if app.user %}
                             <div class="mb-3">
-                                Vous êtes connecter avec {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Déconnexion</a>
+                                Vous êtes connecté avec {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Déconnexion</a>
                             </div>
                         {% endif %}
 
@@ -39,13 +39,15 @@
 
                         <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-                        <button class="btn-login-submit" type="submit">
+                        {# Utilisation des classes Bootstrap "btn btn-primary" pour récupérer tes couleurs #}
+                        <button class="btn btn-primary w-100 py-2 mt-2" type="submit">
                             Connexion
                         </button>
 
                     </form>
                 </div>
 
-            </div> </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
