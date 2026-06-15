@@ -25,18 +25,12 @@
     overflow: hidden;
 }
 
-.atelier-stock-table {
-    margin-bottom: 0;
-}
-
-.atelier-stock-table tbody tr {
-    vertical-align: middle;
-}
-
+/* Alignement en haut pour la cellule des composants pour plus de lisibilité */
 .atelier-stock-components-cell {
     vertical-align: top;
 }
 
+/* Liste des composants enfants */
 .atelier-stock-components {
     padding-left: 1.25rem;
     margin-bottom: 0;
@@ -45,6 +39,7 @@
     gap: 0.25rem;
 }
 
+/* État vide quand il n'y a aucune pièce */
 .atelier-stock-empty-state {
     padding: 2rem 1rem;
 }

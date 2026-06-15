@@ -5,13 +5,13 @@ namespace App\Controller;
 use App\Entity\Piece;
 use App\Entity\PieceComposition;
 use App\Form\PieceType;
+use App\Repository\PieceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Repository\PieceRepository;
-use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/atelier')]
 class AtelierController extends AbstractController
@@ -121,14 +121,21 @@ class AtelierController extends AbstractController
     #[Route('/stock', name: 'atelier_stock')]
     public function index(PieceRepository $pieceRepository, PaginatorInterface $paginator, Request $request): Response
     {
-        // On prépare la requête sans l'exécuter
         $queryBuilder = $pieceRepository->createQueryBuilder('p');
 
-        // On passe la requête au paginateur
+        // Récupération du terme de recherche
+        $recherche = $request->query->get('q');
+
+        // Si une recherche est faite, on filtre la requête (insensible à la casse)
+        if ($recherche) {
+            $queryBuilder->andWhere('LOWER(p.reference) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(p.type) LIKE LOWER(:recherche)')
+                ->setParameter('recherche', '%'.$recherche.'%');
+        }
+
         $pieces = $paginator->paginate(
             $queryBuilder,
-            $request->query->getInt('page', 1), // Numéro de la page en cours, 1 par défaut
-            20 // Nombre d'éléments par page
+            $request->query->getInt('page', 1),
+            20
         );
 
         return $this->render('atelier/stock.html.twig', [

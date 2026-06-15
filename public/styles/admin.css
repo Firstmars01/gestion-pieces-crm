@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Administration des utilisateurs
+   Administration des utilisateurs (Spécifique)
    ========================================================================== */
 
 .admin-user-page {
@@ -21,16 +21,6 @@
     color: #6c757d;
 }
 
-.admin-user-page__cta {
-    align-self: flex-start;
-}
-
-.admin-user-flash-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
 .admin-user-card {
     overflow: hidden;
 }
@@ -49,4 +39,3 @@
 .admin-user-empty-state {
     padding: 2rem 1rem;
 }
-

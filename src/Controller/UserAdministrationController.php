@@ -28,17 +28,23 @@ final class UserAdministrationController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request, PaginatorInterface $paginator): Response
     {
-        // On crée la requête avec l'alias 'u' pour que les tris Twig (u.nom, u.email) fonctionnent
-        // On joint aussi les rôles pour optimiser les performances (éviter les requêtes N+1)
         $queryBuilder = $this->userRepository->createQueryBuilder('u')
             ->leftJoin('u.userRoles', 'r')
             ->addSelect('r');
 
-        // On génère la pagination
+        // Récupération du terme de recherche
+        $recherche = $request->query->get('q');
+
+        // Si une recherche est faite, on filtre la requête (insensible à la casse)
+        if ($recherche) {
+            $queryBuilder->andWhere('LOWER(u.nom) LIKE LOWER(:recherche) OR LOWER(u.prenom) LIKE LOWER(:recherche) OR LOWER(u.email) LIKE LOWER(:recherche)')
+                ->setParameter('recherche', '%'.$recherche.'%');
+        }
+
         $users = $paginator->paginate(
             $queryBuilder,
-            $request->query->getInt('page', 1), // Page actuelle, 1 par défaut
-            20 // Nombre d'utilisateurs par page
+            $request->query->getInt('page', 1),
+            20
         );
 
         return $this->render('admin/users.html.twig', [
@@ -68,6 +74,7 @@ final class UserAdministrationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('admin_user_index')]);
             }
+
             return $this->redirectToRoute('admin_user_index');
         }
 
@@ -96,6 +103,7 @@ final class UserAdministrationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('admin_user_index')]);
             }
+
             return $this->redirectToRoute('admin_user_index');
         }
 
@@ -110,12 +118,14 @@ final class UserAdministrationController extends AbstractController
     {
         if (!$this->isCsrfTokenValid(sprintf('delete_user_%d', $user->getId()), (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Jeton CSRF invalide.');
+
             return $this->redirectToRoute('admin_user_index');
         }
 
         $currentUser = $this->getUser();
         if ($currentUser && $currentUser->getId() === $user->getId()) {
             $this->addFlash('danger', 'Vous ne pouvez pas supprimer votre propre compte.');
+
             return $this->redirectToRoute('admin_user_index');
         }
 
@@ -123,6 +133,7 @@ final class UserAdministrationController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+
         return $this->redirectToRoute('admin_user_index');
     }
 }

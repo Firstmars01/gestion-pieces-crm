@@ -4,15 +4,37 @@
 
 {% block body %}
     <div class="container-fluid py-4 atelier-stock-page">
-        <div class="atelier-stock-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+        <div class="atelier-stock-page__header d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
             <div>
                 <h1 class="h3 atelier-stock-page__title">Stock des pièces</h1>
                 <p class="atelier-stock-page__subtitle text-muted">Consultez les références, les quantités disponibles et les composants associés.</p>
             </div>
 
-            <button class="btn btn-primary-custom" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
-                <i class="bi bi-plus-circle me-1"></i> Nouvelle pièce
-            </button>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                {# Formulaire de recherche #}
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <label>
+                            <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+                        </label>
+
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('atelier_stock') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+
+                        {# Ajoutons-les aussi sur le bouton de recherche pour être sûr qu'ils soient identiques #}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <button class="btn btn-primary text-nowrap" onclick="openModalAjax('Ajout d\'une nouvelle pièce', '{{ path('atelier_piece_new') }}')">
+                    <i class="bi bi-plus-circle me-1"></i> Nouvelle pièce
+                </button>
+            </div>
         </div>
 
         <div class="card shadow-sm border-0 atelier-stock-card overflow-hidden">
