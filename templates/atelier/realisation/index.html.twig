@@ -11,6 +11,20 @@
             </div>
 
             <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher..." aria-label="Rechercher" value="{{ app.request.query.get('q') }}">
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('atelier_realisation_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
                 <button type="button" onclick="openModalAjax('Lancer une fabrication', '{{ path('atelier_realisation_new') }}')" class="btn btn-primary text-nowrap">
                     <i class="bi bi-play-circle me-1"></i> Lancer une fabrication
                 </button>
@@ -19,12 +33,12 @@
 
         <div class="card shadow-sm border-0 overflow-hidden">
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
+                <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">Numéro (OF)</th>
-                        <th scope="col">Gamme associée</th>
-                        <th scope="col">Pièce à produire</th>
+                        <th scope="col" style="width: 120px;">{{ knp_pagination_sortable(realisations, 'Numéro', 'r.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(realisations, 'Gamme associée', 'g.libelle') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(realisations, 'Pièce à produire', 'p.reference') }}</th>
                         <th scope="col" style="min-width: 150px;">Avancement</th>
                         <th scope="col" class="text-end"></th>
                     </tr>

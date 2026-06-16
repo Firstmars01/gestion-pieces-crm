@@ -23,6 +23,28 @@ class RealisationController extends AbstractController
             ->leftJoin('g.piece', 'p')->addSelect('p')
             ->orderBy('r.id', 'DESC'); // Les plus récentes en premier
 
+        $q = trim((string) $request->query->get('q', ''));
+
+        if ($q !== '') {
+            $searchConditions = [
+                'LOWER(g.libelle) LIKE LOWER(:q)',
+                'LOWER(p.reference) LIKE LOWER(:q)',
+                'LOWER(p.libelle) LIKE LOWER(:q)',
+            ];
+
+            if (ctype_digit($q)) {
+                $searchConditions[] = 'r.id = :id';
+            }
+
+            $queryBuilder
+                ->andWhere('(' . implode(' OR ', $searchConditions) . ')')
+                ->setParameter('q', '%' . $q . '%');
+
+            if (ctype_digit($q)) {
+                $queryBuilder->setParameter('id', (int) $q);
+            }
+        }
+
         $realisations = $paginator->paginate(
             $queryBuilder,
             $request->query->getInt('page', 1),

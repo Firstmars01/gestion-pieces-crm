@@ -23,11 +23,11 @@ class QualificationController extends AbstractController
             ->leftJoin('q.poste', 'p')->addSelect('p')
             ->orderBy('q.id', 'DESC'); // On affiche les plus récentes en premier
 
-        $recherche = $request->query->get('recherche');
+        $q = trim((string) $request->query->get('q', ''));
 
-        if ($recherche) {
+        if ('' !== $q) {
             $queryBuilder->andWhere('LOWER(u.nom) LIKE LOWER(:recherche) OR LOWER(u.prenom) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%' . $recherche . '%');
+                ->setParameter('recherche', '%'.$q.'%');
         }
 
         $qualifications = $paginator->paginate(
@@ -52,7 +52,7 @@ class QualificationController extends AbstractController
             // Optionnel : Vérifier si l'utilisateur a déjà cette qualification pour éviter les doublons
             $exists = $entityManager->getRepository(Qualification::class)->findOneBy([
                 'user' => $qualification->getUser(),
-                'poste' => $qualification->getPoste()
+                'poste' => $qualification->getPoste(),
             ]);
 
             if ($exists) {
@@ -66,6 +66,7 @@ class QualificationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_qualification_index')]);
             }
+
             return $this->redirectToRoute('atelier_qualification_index');
         }
 
@@ -88,6 +89,7 @@ class QualificationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_qualification_index')]);
             }
+
             return $this->redirectToRoute('atelier_qualification_index');
         }
 
@@ -100,7 +102,7 @@ class QualificationController extends AbstractController
     #[Route('/{id}', name: 'atelier_qualification_delete', methods: ['POST'])]
     public function delete(Request $request, Qualification $qualification, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete_qualification_' . $qualification->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_qualification_'.$qualification->getId(), $request->request->get('_token'))) {
             $entityManager->remove($qualification);
             $entityManager->flush();
             $this->addFlash('success', 'La qualification a été retirée.');
