@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\GammeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: GammeRepository::class)]
 class Gamme
@@ -26,6 +28,14 @@ class Gamme
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\OneToMany(mappedBy: 'gamme', targetEntity: GammeOperation::class, cascade: ['persist', 'remove'])]
+    private Collection $gammeOperations;
+
+    public function __construct()
+    {
+        $this->gammeOperations = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -39,6 +49,7 @@ class Gamme
     public function setLibelle(string $libelle): static
     {
         $this->libelle = $libelle;
+
         return $this;
     }
 
@@ -50,6 +61,7 @@ class Gamme
     public function setPiece(Piece $piece): static
     {
         $this->piece = $piece;
+
         return $this;
     }
 
@@ -61,6 +73,37 @@ class Gamme
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GammeOperation>
+     */
+    public function getGammeOperations(): Collection
+    {
+        return $this->gammeOperations;
+    }
+
+    public function addGammeOperation(GammeOperation $gammeOperation): static
+    {
+        if (!$this->gammeOperations->contains($gammeOperation)) {
+            $this->gammeOperations->add($gammeOperation);
+            $gammeOperation->setGamme($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGammeOperation(GammeOperation $gammeOperation): static
+    {
+        if ($this->gammeOperations->removeElement($gammeOperation)) {
+            // set the owning side to null (unless already changed)
+            if ($gammeOperation->getGamme() === $this) {
+                $gammeOperation->setGamme(null);
+            }
+        }
+
         return $this;
     }
 }
