@@ -47,7 +47,7 @@ final class UserAdministrationController extends AbstractController
             20
         );
 
-        return $this->render('admin/users.html.twig', [
+        return $this->render('admin/index.html.twig', [
             'users' => $users,
         ]);
     }
@@ -78,7 +78,7 @@ final class UserAdministrationController extends AbstractController
             return $this->redirectToRoute('admin_user_index');
         }
 
-        return $this->render('admin/user_new.html.twig', [
+        return $this->render('admin/new.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
         ]);
@@ -107,7 +107,7 @@ final class UserAdministrationController extends AbstractController
             return $this->redirectToRoute('admin_user_index');
         }
 
-        return $this->render('admin/user_new.html.twig', [
+        return $this->render('admin/new.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
         ]);
