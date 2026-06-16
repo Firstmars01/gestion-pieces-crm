@@ -1,4 +1,17 @@
-// public/js/modal_piece.js
+
+// Fonction pour initialiser Tom Select sur les champs ciblés
+function initTomSelects(container) {
+    container.querySelectorAll('.select-searchable:not(.tomselected)').forEach(function(select) {
+        new TomSelect(select, {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            },
+            placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
+        });
+    });
+}
 
 // Gestion de l'ouverture de la modale
 document.addEventListener('modal:loaded', function(e) {
@@ -7,6 +20,9 @@ document.addEventListener('modal:loaded', function(e) {
     if (modalBody.querySelector('#piece_type')) {
         setupPieceFormDynamics(modalBody);
     }
+
+    // Initialiser Tom Select sur les champs déjà présents au chargement
+    initTomSelects(modalBody);
 });
 
 function setupPieceFormDynamics(modalBody) {
@@ -77,6 +93,9 @@ function setupPieceFormDynamics(modalBody) {
             }
 
             list.appendChild(newRow);
+
+            // On initialise Tom Select SUR LA NOUVELLE LIGNE qu'on vient d'ajouter !
+            initTomSelects(newRow);
         });
 
         list.addEventListener('click', function(e) {

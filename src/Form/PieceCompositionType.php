@@ -29,7 +29,8 @@ class PieceCompositionType extends AbstractType
                     return $piece->getReference().' - '.$piece->getLibelle();
                 },
                 'label' => false,
-                'attr' => ['class' => 'form-select form-select-sm'],
+                'placeholder' => 'Sélectionnez un composant...',
+                'attr' => ['class' => 'select-searchable'],
             ])
             ->add('quantite', IntegerType::class, [
                 'label' => false,
