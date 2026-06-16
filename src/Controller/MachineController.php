@@ -97,9 +97,17 @@ class MachineController extends AbstractController
     public function delete(Request $request, Machine $machine, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete_machine_'.$machine->getId(), $request->request->get('_token'))) {
+            if (!$machine->getPosteMachines()->isEmpty()) {
+                // Si elle a des postes, on bloque la suppression et on affiche un message d'erreur clair
+                $this->addFlash('danger', 'Impossible de supprimer cette machine car elle est actuellement assignée à un ou plusieurs postes de travail.');
+
+                return $this->redirectToRoute('atelier_machine_index');
+            }
+
+            // Si elle est libre, on la supprime normalement
             $entityManager->remove($machine);
             $entityManager->flush();
-            $this->addFlash('success', 'La machine a été supprimée.');
+            $this->addFlash('success', 'La machine a été supprimée avec succès.');
         }
 
         return $this->redirectToRoute('atelier_machine_index');
