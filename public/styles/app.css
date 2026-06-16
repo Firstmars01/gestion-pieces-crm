@@ -264,3 +264,32 @@ body {
     /* Halo bleu clair autour du champ cliqué (calculé d'après ta couleur #243c84) */
     box-shadow: 0 0 0 0.25rem rgba(36, 60, 132, 0.25);
 }
+
+
+/* ==========================================================================
+   Composant : Avatar Initiales (Utilisateurs)
+   ========================================================================== */
+.avatar-initials {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Variante de couleur par défaut (Bleu Primaire) */
+.avatar-initials-primary {
+    background-color: rgba(13, 110, 253, 0.1); /* L'équivalent de bg-primary bg-opacity-10 */
+    color: #0d6efd;                            /* L'équivalent de text-primary */
+}
+
+/* Dans ton public/css/app.css */
+.badge-role {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+}

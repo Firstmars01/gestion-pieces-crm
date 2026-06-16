@@ -55,9 +55,9 @@
                             </td>
                             <td>
                                 {% if operation.posteMachine %}
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-medium text-dark"><i class="bi bi-gear me-1 text-muted"></i> {{ operation.posteMachine.machine.libelle }}</span>
-                                        <span class="text-muted fs-7"><i class="bi bi-geo-alt me-1"></i> {{ operation.posteMachine.poste.libelle }}</span>
+                                    <div class="flex-column">
+                                        <span class="badge bg-light text-dark border me-1">{{ operation.posteMachine.machine.libelle }}</span>
+                                        <span class="badge bg-light text-dark border me-1">{{ operation.posteMachine.poste.libelle }}</span>
                                     </div>
                                 {% else %}
                                     <span class="text-danger fst-italic">Non défini</span>

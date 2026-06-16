@@ -54,9 +54,13 @@
                     {% for user in users %}
                         <tr>
                             <td>
-                                <div class="admin-user-table__identity">
-                                    <div class="fw-semibold">{{ user.nom }} {{ user.prenom }}</div>
-                                    <small class="admin-user-table__meta text-muted">#{{ user.id }}</small>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initials avatar-initials-primary me-2">
+                                        {{ user.nom|first|upper }}{{ user.prenom|first|upper }}
+                                    </div>
+                                    <div class="admin-user-table__identity">
+                                        <div class="fw-semibold">{{ user.nom }} {{ user.prenom }}</div>
+                                    </div>
                                 </div>
                             </td>
                             <td>{{ user.email }}</td>

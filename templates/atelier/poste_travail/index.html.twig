@@ -59,8 +59,18 @@
                             </td>
                             <td>
                                 {% for qualification in poste.qualifications %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary me-1 mb-1" title="Qualifié">
-                                        <i class="bi bi-person me-1"></i>{{ qualification.user.nom }} {{ qualification.user.prenom }}
+                                    <span class="badge text-black me-2" title="Qualifié">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-initials avatar-initials-primary me-2">
+                                                {{ qualification.user.nom|first|upper }}{{ qualification.user.prenom|first|upper }}
+                                            </div>
+
+                                            <div class="admin-user-table__identity">
+                                                <div class="fw-semibold">
+                                                    {{ qualification.user.nom }} {{ qualification.user.prenom }}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </span>
                                 {% else %}
                                     <span class="text-muted fst-italic fs-7">Aucun ouvrier qualifié</span>

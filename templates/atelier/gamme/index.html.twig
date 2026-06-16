@@ -64,9 +64,14 @@
                             </td>
                             <td>
                                 {% if gamme.user %}
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-person-badge text-primary"></i>
-                                        {{ gamme.user.nom }} {{ gamme.user.prenom }}
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-initials avatar-initials-primary me-2">
+                                            {{ gamme.user.nom|first|upper }}{{ gamme.user.prenom|first|upper }}
+                                        </div>
+
+                                        <div class="admin-user-table__identity">
+                                            <div class="fw-semibold">{{ gamme.user.nom }} {{ gamme.user.prenom }}</div>
+                                        </div>
                                     </div>
                                 {% else %}
                                     <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Sans responsable</span>
