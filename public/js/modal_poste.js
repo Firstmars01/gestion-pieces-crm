@@ -1,20 +1,6 @@
 document.addEventListener('modal:loaded', function(e) {
     const modalBody = e.detail.modalBody;
 
-    // Fonction pour activer la barre de recherche sur les select
-    function initTomSelects(container) {
-        container.querySelectorAll('.select-searchable:not(.tomselected)').forEach(function(select) {
-            new TomSelect(select, {
-                create: false,
-                sortField: { field: "text", direction: "asc" },
-                placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
-            });
-        });
-    }
-
-    // Initialisation au démarrage de la modale
-    initTomSelects(modalBody);
-
     // Gestion de l'ajout d'une ligne
     const addBtn = modalBody.querySelector('#add-machine-btn');
     const wrapper = modalBody.querySelector('.machines-wrapper');
@@ -44,7 +30,14 @@ document.addEventListener('modal:loaded', function(e) {
             `;
 
             list.appendChild(newRow);
-            initTomSelects(newRow); // On active Tom Select sur la nouvelle ligne !
+
+            newRow.querySelectorAll('.select-searchable:not(.tomselected)').forEach(function(select) {
+                new TomSelect(select, {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" },
+                    placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
+                });
+            });
         });
 
         // Gestion de la suppression d'une ligne

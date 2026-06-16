@@ -1,0 +1,34 @@
+{{ form_start(form, {'attr': {'id': 'form-operation'}}) }}
+
+<div class="row g-3">
+    <div class="col-md-8">
+        {{ form_row(form.libelle) }}
+    </div>
+    <div class="col-md-4">
+        {{ form_row(form.tempsPrevu) }}
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="alert alert-light border d-flex align-items-center mb-0">
+            <i class="bi bi-info-circle text-primary fs-4 me-3"></i>
+            <div>
+                <p class="mb-0 small text-muted">Sélectionnez le duo théorique prévu par le Bureau des méthodes. Lors de la réalisation, l'ouvrier pourra ajuster le temps et le poste réellement utilisés.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-3">
+        {{ form_row(form.posteMachine) }}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        {{ operation.id ? 'Enregistrer les modifications' : 'Ajouter l\'opération' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

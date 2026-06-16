@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\OperationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: OperationRepository::class)]
 class Operation
 {
     #[ORM\Id]

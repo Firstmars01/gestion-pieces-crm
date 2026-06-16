@@ -1,18 +1,3 @@
-
-// Fonction pour initialiser Tom Select sur les champs ciblés
-function initTomSelects(container) {
-    container.querySelectorAll('.select-searchable:not(.tomselected)').forEach(function(select) {
-        new TomSelect(select, {
-            create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            },
-            placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
-        });
-    });
-}
-
 // Gestion de l'ouverture de la modale
 document.addEventListener('modal:loaded', function(e) {
     const modalBody = e.detail.modalBody;
@@ -20,9 +5,7 @@ document.addEventListener('modal:loaded', function(e) {
     if (modalBody.querySelector('#piece_type')) {
         setupPieceFormDynamics(modalBody);
     }
-
-    // Initialiser Tom Select sur les champs déjà présents au chargement
-    initTomSelects(modalBody);
+    // Plus besoin d'initialiser Tom Select ici, le script global s'en charge tout seul à l'ouverture !
 });
 
 function setupPieceFormDynamics(modalBody) {
@@ -94,8 +77,13 @@ function setupPieceFormDynamics(modalBody) {
 
             list.appendChild(newRow);
 
-            // On initialise Tom Select SUR LA NOUVELLE LIGNE qu'on vient d'ajouter !
-            initTomSelects(newRow);
+            newRow.querySelectorAll('.select-searchable:not(.tomselected)').forEach(function(select) {
+                new TomSelect(select, {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" },
+                    placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
+                });
+            });
         });
 
         list.addEventListener('click', function(e) {
