@@ -1,0 +1,26 @@
+{{ form_start(form, {'attr': {'id': 'form-pointage'}}) }}
+
+<div class="alert alert-info border-info bg-info bg-opacity-10 mb-4">
+    <h6 class="alert-heading fw-bold mb-1"><i class="bi bi-info-circle me-1"></i> Rappel Théorique</h6>
+    <p class="mb-0 small">
+        L'opération <strong>{{ gammeOperation.operation.libelle }}</strong> était prévue pour durer <strong>{{ gammeOperation.operation.tempsPrevu }} minutes</strong>. Ajustez les valeurs ci-dessous si la réalité de l'atelier a été différente.
+    </p>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        {{ form_row(form.temps) }}
+    </div>
+    <div class="col-md-8">
+        {{ form_row(form.posteMachine) }}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> Valider ce pointage</button>
+</div>
+
+{{ form_end(form) }}

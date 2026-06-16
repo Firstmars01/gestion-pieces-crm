@@ -48,6 +48,7 @@
                         <th scope="col">{{ knp_pagination_sortable(gammes, 'Gamme', 'g.libelle') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(gammes, 'Pièce fabriquée', 'p.reference') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(gammes, 'Responsable', 'u.nom') }}</th>
+                        <th scope="col" class="text-center">Étapes</th>
                         <th scope="col" class="text-end"></th>
                     </tr>
                     </thead>
@@ -77,9 +78,27 @@
                                     <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Sans responsable</span>
                                 {% endif %}
                             </td>
+                            <td class="text-center">
+                                {% set nb_operations = gamme.gammeOperations|length %}
+                                {% if nb_operations > 0 %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                        <i class="bi bi-list-ol me-1"></i> {{ nb_operations }} étape(s)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Vide
+                                    </span>
+                                {% endif %}
+                            </td>
                             <td class="text-end">
                                 {# Boutons d'actions au survol #}
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <a href="{{ path('atelier_gamme_show', {id: gamme.id}) }}"
+                                       class="btn btn-sm btn-outline-info"
+                                       title="Gérer les étapes de fabrication">
+                                        <i class="bi bi-ui-checks-grid"></i>
+                                    </a>
+
                                     <button type="button"
                                             onclick="openModalAjax('Modifier la gamme', '{{ path('atelier_gamme_edit', {id: gamme.id}) }}')"
                                             class="btn btn-sm btn-outline-primary"

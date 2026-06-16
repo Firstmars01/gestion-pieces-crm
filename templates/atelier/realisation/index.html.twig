@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ordres de Fabrication{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Ordres de Fabrication</h1>
+                <p class="text-muted mb-0">Suivez l'avancement des lancements en production de l'atelier.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button type="button" onclick="openModalAjax('Lancer une fabrication', '{{ path('atelier_realisation_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-play-circle me-1"></i> Lancer une fabrication
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">Numéro (OF)</th>
+                        <th scope="col">Gamme associée</th>
+                        <th scope="col">Pièce à produire</th>
+                        <th scope="col" style="min-width: 150px;">Avancement</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for realisation in realisations %}
+
+                        {# Calcul automatique de l'avancement #}
+                        {% set total_steps = realisation.gamme.gammeOperations|length %}
+                        {% set done_steps = realisation.realisationPostes|length %}
+                        {% set progress_percent = total_steps > 0 ? (done_steps / total_steps * 100)|round : 0 %}
+
+                        <tr>
+                            <td class="fw-bold text-primary">
+                                OF-{{ '%04d'|format(realisation.id) }}
+                            </td>
+                            <td class="fw-semibold">{{ realisation.gamme.libelle }}</td>
+                            <td>
+                                {% if realisation.gamme.piece %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                                        {{ realisation.gamme.piece.reference }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">Non définie</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2" title="{{ done_steps }} étape(s) sur {{ total_steps }}">
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar {{ progress_percent == 100 ? 'bg-success' : 'bg-primary' }}"
+                                             role="progressbar"
+                                             style="width: {{ progress_percent }}%"
+                                             aria-valuenow="{{ progress_percent }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted fw-medium">{{ progress_percent }}%</small>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    {# Attention ici, c'est un lien classique et non une modale, car le tableau de bord est une page complète #}
+                                    <a href="{{ path('atelier_realisation_show', {id: realisation.id}) }}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Ouvrir le tableau de bord">
+                                        <i class="bi bi-eye me-1"></i> Consulter
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2 text-secondary"></i>
+                                Aucun ordre de fabrication en cours. Cliquez sur "Lancer une fabrication" pour commencer.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-container pagination-pill mt-3">
+            {{ knp_pagination_render(realisations) }}
+        </div>
+    </div>
+{% endblock %}

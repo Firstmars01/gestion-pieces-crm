@@ -2,8 +2,21 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity]
+// Contrainte 1 : On cible l'erreur sur le champ "ordre"
+#[UniqueEntity(
+    fields: ['gamme', 'ordre'],
+    message: 'Cette étape existe déjà ! Veuillez choisir un numéro d\'ordre différent pour cette gamme.',
+    errorPath: 'ordre'
+)]
+// Contrainte 2 : On cible l'erreur sur le champ "operation"
+#[UniqueEntity(
+    fields: ['gamme', 'operation'],
+    message: 'Cette opération a déjà été ajoutée à cette gamme de fabrication !',
+    errorPath: 'operation'
+)]
 class GammeOperation
 {
     #[ORM\Id]
@@ -62,5 +75,4 @@ class GammeOperation
 
         return $this;
     }
-
 }

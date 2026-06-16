@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Gamme;
 use App\Form\GammeType;
 use App\Repository\GammeRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -59,6 +60,7 @@ class GammeController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_gamme_index')]);
             }
+
             return $this->redirectToRoute('atelier_gamme_index');
         }
 
@@ -82,6 +84,7 @@ class GammeController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_gamme_index')]);
             }
+
             return $this->redirectToRoute('atelier_gamme_index');
         }
 
@@ -94,7 +97,7 @@ class GammeController extends AbstractController
     #[Route('/{id}', name: 'atelier_gamme_delete', methods: ['POST'])]
     public function delete(Request $request, Gamme $gamme, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete_gamme_' . $gamme->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_gamme_'.$gamme->getId(), $request->request->get('_token'))) {
             $entityManager->remove($gamme);
             $entityManager->flush();
             $this->addFlash('success', 'La gamme a été supprimée.');
@@ -103,5 +106,92 @@ class GammeController extends AbstractController
         }
 
         return $this->redirectToRoute('atelier_gamme_index');
+    }
+
+    #[Route('/{id}/etapes', name: 'atelier_gamme_show', methods: ['GET'])]
+    public function show(Gamme $gamme): Response
+    {
+        return $this->render('atelier/gamme/show.html.twig', [
+            'gamme' => $gamme,
+        ]);
+    }
+
+    #[Route('/{id}/etape/nouvelle', name: 'atelier_gamme_etape_new', methods: ['GET', 'POST'])]
+    public function newEtape(Request $request, Gamme $gamme, EntityManagerInterface $entityManager): Response
+    {
+        $gammeOperation = new \App\Entity\GammeOperation();
+        $gammeOperation->setGamme($gamme);
+
+        $nextOrdre = count($gamme->getGammeOperations()) + 1;
+        $gammeOperation->setOrdre($nextOrdre);
+
+        $form = $this->createForm(\App\Form\GammeOperationType::class, $gammeOperation);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($gammeOperation);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'L\'étape a bien été ajoutée à la gamme.');
+
+            // On redirige vers la page de détails de la gamme
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['redirect' => $this->generateUrl('atelier_gamme_show', ['id' => $gamme->getId()])]);
+            }
+
+            return $this->redirectToRoute('atelier_gamme_show', ['id' => $gamme->getId()]);
+        }
+
+        return $this->render('atelier/gamme/_form_etape.html.twig', [
+            'form' => $form->createView(),
+            'gamme' => $gamme,
+            'gammeOperation' => $gammeOperation,
+        ]);
+    }
+
+    #[Route('/etape/{id}/modifier', name: 'atelier_gamme_etape_edit', methods: ['GET', 'POST'])]
+    public function editEtape(Request $request, \App\Entity\GammeOperation $gammeOperation, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(\App\Form\GammeOperationType::class, $gammeOperation);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'L\'étape a bien été modifiée.');
+
+            // On retourne sur la page de la gamme après modification
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['redirect' => $this->generateUrl('atelier_gamme_show', ['id' => $gammeOperation->getGamme()->getId()])]);
+            }
+
+            return $this->redirectToRoute('atelier_gamme_show', ['id' => $gammeOperation->getGamme()->getId()]);
+        }
+
+        return $this->render('atelier/gamme/_form_etape.html.twig', [
+            'form' => $form->createView(),
+            'gammeOperation' => $gammeOperation,
+            'gamme' => $gammeOperation->getGamme(),
+        ]);
+    }
+
+    #[Route('/etape/{id}/supprimer', name: 'atelier_gamme_etape_delete', methods: ['POST'])]
+    public function deleteEtape(Request $request, \App\Entity\GammeOperation $gammeOperation, EntityManagerInterface $entityManager): Response
+    {
+        $gammeId = $gammeOperation->getGamme()->getId();
+
+        if ($this->isCsrfTokenValid('delete_etape_'.$gammeOperation->getId(), $request->request->get('_token'))) {
+            try {
+                $entityManager->remove($gammeOperation);
+                $entityManager->flush();
+                $this->addFlash('success', 'L\'étape a été retirée de la gamme.');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                // Si la base de données bloque la suppression à cause de l'historique
+                $this->addFlash('danger', 'Impossible de supprimer cette étape : des pointages ont déjà été réalisés par l\'atelier sur cette opération.');
+            }
+        } else {
+            $this->addFlash('danger', 'Action non autorisée (Token CSRF invalide).');
+        }
+
+        return $this->redirectToRoute('atelier_gamme_show', ['id' => $gammeId]);
     }
 }

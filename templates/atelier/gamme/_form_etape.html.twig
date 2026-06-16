@@ -1,0 +1,33 @@
+{{ form_start(form, {'attr': {'id': 'form-gamme-etape'}}) }}
+
+{{ form_errors(form) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="alert alert-secondary bg-opacity-10 py-2 border-0 mb-2">
+            {% if gammeOperation.id %}
+                Modification de l'étape <strong>{{ gammeOperation.ordre }}</strong>
+            {% else %}
+                Ajout d'une étape pour la gamme : <strong>{{ gamme.libelle }}</strong>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        {{ form_row(form.operation) }}
+    </div>
+    <div class="col-md-3">
+        {{ form_row(form.ordre) }}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check2"></i> {{ gammeOperation.id ? 'Enregistrer les modifications' : 'Ajouter l\'étape' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

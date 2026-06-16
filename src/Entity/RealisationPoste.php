@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
+use App\Repository\RealisationPosteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: RealisationPosteRepository::class)]
 class RealisationPoste
 {
     #[ORM\Id]
@@ -12,36 +13,24 @@ class RealisationPoste
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $temps = null; // Temps réel passé (en minutes)
-
-    #[ORM\ManyToOne(targetEntity: Realisation::class)]
+    #[ORM\ManyToOne(inversedBy: 'realisationPostes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Realisation $realisation = null;
 
-    #[ORM\ManyToOne(targetEntity: GammeOperation::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?GammeOperation $gammeOperation = null;
 
-    #[ORM\ManyToOne(targetEntity: PosteMachine::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?PosteMachine $posteMachine = null;
+
+    #[ORM\Column]
+    private ?int $temps = null; // Le temps réel passé en minutes
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTemps(): ?int
-    {
-        return $this->temps;
-    }
-
-    public function setTemps(int $temps): static
-    {
-        $this->temps = $temps;
-
-        return $this;
     }
 
     public function getRealisation(): ?Realisation
@@ -52,7 +41,6 @@ class RealisationPoste
     public function setRealisation(?Realisation $realisation): static
     {
         $this->realisation = $realisation;
-
         return $this;
     }
 
@@ -64,7 +52,6 @@ class RealisationPoste
     public function setGammeOperation(?GammeOperation $gammeOperation): static
     {
         $this->gammeOperation = $gammeOperation;
-
         return $this;
     }
 
@@ -76,7 +63,17 @@ class RealisationPoste
     public function setPosteMachine(?PosteMachine $posteMachine): static
     {
         $this->posteMachine = $posteMachine;
+        return $this;
+    }
 
+    public function getTemps(): ?int
+    {
+        return $this->temps;
+    }
+
+    public function setTemps(int $temps): static
+    {
+        $this->temps = $temps;
         return $this;
     }
 }
