@@ -51,7 +51,7 @@ class AtelierController extends AbstractController
         }
 
         // 5. On affiche la page avec le formulaire
-        return $this->render('atelier/piece_new.html.twig', [
+        return $this->render('atelier/piece/piece_new.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -141,7 +141,7 @@ class AtelierController extends AbstractController
             20
         );
 
-        return $this->render('atelier/stock.html.twig', [
+        return $this->render('atelier/piece/stock.html.twig', [
             'pieces' => $pieces,
         ]);
     }
@@ -172,7 +172,7 @@ class AtelierController extends AbstractController
             20 // Nombre de gammes par page
         );
 
-        return $this->render('atelier/gamme_index.html.twig', [
+        return $this->render('atelier/gamme/gamme_index.html.twig', [
             'gammes' => $gammes,
         ]);
     }
@@ -219,7 +219,7 @@ class AtelierController extends AbstractController
             return $this->redirectToRoute('atelier_gamme_index');
         }
 
-        return $this->render('atelier/gamme_new.html.twig', [
+        return $this->render('atelier/gamme/gamme_new.html.twig', [
             'form' => $form->createView(),
             'gamme' => $gamme,
         ]);

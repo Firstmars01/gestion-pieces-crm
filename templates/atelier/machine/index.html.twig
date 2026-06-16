@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Machines{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Parc Machines</h1>
+                <p class="text-muted mb-0">Gérez les machines disponibles dans l'atelier de fabrication.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher une machine..." value="{{ app.request.query.get('q') }}">
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('atelier_machine_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <button type="button" onclick="openModalAjax('Nouvelle machine', '{{ path('atelier_machine_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-plus-circle me-1"></i> Ajouter
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-sortable">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 100px;">{{ knp_pagination_sortable(machines, 'ID', 'm.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(machines, 'Libellé de la machine', 'm.libelle') }}</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for machine in machines %}
+                        <tr>
+                            <td class="text-muted">#{{ machine.id }}</td>
+                            <td class="fw-semibold">{{ machine.libelle }}</td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier la machine', '{{ path('atelier_machine_edit', {id: machine.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <form method="post" action="{{ path('atelier_machine_delete', {id: machine.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette machine ?');" class="mb-0">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_machine_' ~ machine.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                Aucune machine trouvée dans l'atelier.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-container pagination-pill">
+            {{ knp_pagination_render(machines) }}
+        </div>
+    </div>
+{% endblock %}

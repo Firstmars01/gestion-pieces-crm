@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
+use App\Repository\MachineRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: MachineRepository::class)]
 class Machine
 {
     #[ORM\Id]
