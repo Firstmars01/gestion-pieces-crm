@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\QualificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: QualificationRepository::class)]
 class Qualification
 {
     #[ORM\Id]

@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Matrice des Qualifications{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Qualifications</h1>
+                <p class="text-muted mb-0">Gérez les habilitations de vos ouvriers sur les différents postes de l'atelier.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="recherche" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('recherche') }}">
+                        {% if app.request.query.get('recherche') %}
+                            <a href="{{ path('atelier_qualification_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <button type="button" onclick="openModalAjax('Nouvelle qualification', '{{ path('atelier_qualification_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-plus-circle me-1"></i> Ajouter
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">Ouvrier</th>
+                        <th scope="col">Poste de travail autorisé</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for qualification in qualifications %}
+                        <tr>
+                            <td class="fw-semibold">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        {{ qualification.user.nom|first|upper }}{{ qualification.user.prenom|first|upper }}
+                                    </div>
+                                    {{ qualification.user.nom }} {{ qualification.user.prenom }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                    <i class="bi bi-check-circle me-1"></i> {{ qualification.poste.libelle }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier la qualification', '{{ path('atelier_qualification_edit', {id: qualification.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <form method="post" action="{{ path('atelier_qualification_delete', {id: qualification.id}) }}" onsubmit="return confirm('Retirer cette qualification à cet ouvrier ?');" class="mb-0">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_qualification_' ~ qualification.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                Aucune qualification définie pour le moment.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-container pagination-pill mt-3">
+            {{ knp_pagination_render(qualifications) }}
+        </div>
+    </div>
+{% endblock %}

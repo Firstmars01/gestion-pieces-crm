@@ -13,7 +13,9 @@
             <div class="d-flex flex-column flex-sm-row gap-2">
                 <form method="get" class="mb-0">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Rechercher un poste..." value="{{ app.request.query.get('q') }}">
+                        <label>
+                            <input type="text" name="q" class="form-control" placeholder="Rechercher un poste..." value="{{ app.request.query.get('q') }}">
+                        </label>
                         {% if app.request.query.get('q') %}
                             <a href="{{ path('atelier_poste_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
                                 <i class="bi bi-x-lg"></i>
@@ -39,6 +41,7 @@
                         <th scope="col" style="width: 100px;">{{ knp_pagination_sortable(postes, 'ID', 'p.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(postes, 'Libellé du poste', 'p.libelle') }}</th>
                         <th scope="col">Machines affectées</th>
+                        <th scope="col">Ouvriers qualifiés</th>
                         <th scope="col" class="text-end"></th>
                     </tr>
                     </thead>
@@ -52,6 +55,15 @@
                                     <span class="badge bg-light text-dark border me-1">{{ pm.machine.libelle }}</span>
                                 {% else %}
                                     <span class="text-muted fst-italic fs-7">Aucune machine affectée</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for qualification in poste.qualifications %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary me-1 mb-1" title="Qualifié">
+                                        <i class="bi bi-person me-1"></i>{{ qualification.user.nom }} {{ qualification.user.prenom }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted fst-italic fs-7">Aucun ouvrier qualifié</span>
                                 {% endfor %}
                             </td>
                             <td class="text-end">

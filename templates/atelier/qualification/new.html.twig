@@ -1,0 +1,26 @@
+{{ form_start(form, {'attr': {'id': 'form-qualification'}}) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        {{ form_row(form.user) }}
+    </div>
+
+    <div class="col-12 text-center text-muted my-2">
+        <i class="bi bi-arrow-down"></i> est autorisé sur <i class="bi bi-arrow-down"></i>
+    </div>
+
+    <div class="col-12">
+        {{ form_row(form.poste) }}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        {{ qualification.id ? 'Mettre à jour' : 'Ajouter la qualification' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

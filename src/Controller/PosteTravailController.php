@@ -18,12 +18,22 @@ class PosteTravailController extends AbstractController
     #[Route('/', name: 'atelier_poste_index', methods: ['GET'])]
     public function index(Request $request, PosteTravailRepository $posteRepository, PaginatorInterface $paginator): Response
     {
-        $queryBuilder = $posteRepository->createQueryBuilder('m')
-            ->orderBy('m.id', 'ASC');
+        $queryBuilder = $posteRepository->createQueryBuilder('p')
+
+            // 1. On joint les machines liées à ce poste
+            ->leftJoin('p.posteMachines', 'pm')->addSelect('pm')
+            ->leftJoin('pm.machine', 'm')->addSelect('m')
+
+            // 2. On joint les qualifications (ouvriers) liées à ce poste
+            ->leftJoin('p.qualifications', 'q')->addSelect('q')
+            ->leftJoin('q.user', 'u')->addSelect('u')
+
+            ->orderBy('p.id', 'ASC');
 
         $recherche = $request->query->get('q');
 
         if ($recherche) {
+            // La recherche marchera parfaitement maintenant avec le bon alias 'p'
             $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }

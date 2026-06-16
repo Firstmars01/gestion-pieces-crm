@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Entity;
 
 use App\Repository\PosteTravailRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Qualification;
 
 #[ORM\Entity(repositoryClass: PosteTravailRepository::class)]
 class PosteTravail
@@ -20,9 +22,21 @@ class PosteTravail
     #[ORM\OneToMany(targetEntity: PosteMachine::class, mappedBy: 'poste', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $posteMachines;
 
+    #[ORM\OneToMany(targetEntity: Qualification::class, mappedBy: 'poste')]
+    private Collection $qualifications;
+
     public function __construct()
     {
         $this->posteMachines = new ArrayCollection();
+        $this->qualifications = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, Qualification>
+     */
+    public function getQualifications(): Collection
+    {
+        return $this->qualifications;
     }
 
     /**
@@ -39,6 +53,7 @@ class PosteTravail
             $this->posteMachines->add($posteMachine);
             $posteMachine->setPoste($this);
         }
+
         return $this;
     }
 
@@ -49,6 +64,7 @@ class PosteTravail
                 $posteMachine->setPoste(null);
             }
         }
+
         return $this;
     }
 
@@ -68,6 +84,4 @@ class PosteTravail
 
         return $this;
     }
-
-
 }

@@ -86,6 +86,7 @@ class UserFixtures extends Fixture
             $user->setEmail('user' . ($i + 1) . '@crm.com');
             $user->setNom($nomsCommuns[$i]);
             $user->setPrenom($prenomsCommuns[$i]);
+            $user->addUserRole($roleAtelier);
             $user->setActif(true);
             $user->setPassword($this->passwordHasher->hashPassword($user, $defaultPassword));
             $manager->persist($user);
