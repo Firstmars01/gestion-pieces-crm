@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\PosteTravailRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PosteTravailRepository::class)]
 class PosteTravail
 {
     #[ORM\Id]

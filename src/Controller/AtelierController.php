@@ -83,7 +83,7 @@ class AtelierController extends AbstractController
         }
 
         // 💡 ASTUCE : On réutilise exactement le même fichier Twig que pour la création !
-        return $this->render('atelier/piece_new.html.twig', [
+        return $this->render('atelier/piece/piece_new.html.twig', [
             'form' => $form->createView(),
             'piece' => $piece, // On passe la pièce si on veut adapter le titre dans Twig plus tard
         ]);
