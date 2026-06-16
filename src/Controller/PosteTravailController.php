@@ -18,12 +18,14 @@ class PosteTravailController extends AbstractController
     #[Route('/', name: 'atelier_poste_index', methods: ['GET'])]
     public function index(Request $request, PosteTravailRepository $posteRepository, PaginatorInterface $paginator): Response
     {
-        $queryBuilder = $posteRepository->createQueryBuilder('p');
+        $queryBuilder = $posteRepository->createQueryBuilder('m')
+            ->orderBy('m.id', 'ASC');
+
         $recherche = $request->query->get('q');
 
         if ($recherche) {
             $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%' . $recherche . '%');
+                ->setParameter('recherche', '%'.$recherche.'%');
         }
 
         $postes = $paginator->paginate(
@@ -53,6 +55,7 @@ class PosteTravailController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_poste_index')]);
             }
+
             return $this->redirectToRoute('atelier_poste_index');
         }
 
@@ -76,6 +79,7 @@ class PosteTravailController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_poste_index')]);
             }
+
             return $this->redirectToRoute('atelier_poste_index');
         }
 
@@ -88,7 +92,7 @@ class PosteTravailController extends AbstractController
     #[Route('/{id}', name: 'atelier_poste_delete', methods: ['POST'])]
     public function delete(Request $request, PosteTravail $poste, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete_poste_' . $poste->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_poste_'.$poste->getId(), $request->request->get('_token'))) {
             $entityManager->remove($poste);
             $entityManager->flush();
             $this->addFlash('success', 'Le poste de travail a été supprimé.');

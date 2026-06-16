@@ -38,6 +38,7 @@
                     <tr>
                         <th scope="col" style="width: 100px;">{{ knp_pagination_sortable(postes, 'ID', 'p.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(postes, 'Libellé du poste', 'p.libelle') }}</th>
+                        <th scope="col">Machines affectées</th>
                         <th scope="col" class="text-end">Actions</th>
                     </tr>
                     </thead>
@@ -46,6 +47,13 @@
                         <tr>
                             <td class="text-muted">#{{ poste.id }}</td>
                             <td class="fw-semibold">{{ poste.libelle }}</td>
+                            <td>
+                                {% for pm in poste.posteMachines %}
+                                    <span class="badge bg-light text-dark border me-1">{{ pm.machine.libelle }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic fs-7">Aucune machine affectée</span>
+                                {% endfor %}
+                            </td>
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
                                     <button type="button"
@@ -80,4 +88,9 @@
             {{ knp_pagination_render(postes) }}
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/modal_poste.js') }}"></script>
 {% endblock %}

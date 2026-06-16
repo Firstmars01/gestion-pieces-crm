@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MachineRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MachineRepository::class)]
@@ -15,6 +17,22 @@ class Machine
 
     #[ORM\Column(length: 255)]
     private ?string $libelle = null;
+
+    #[ORM\OneToMany(targetEntity: PosteMachine::class, mappedBy: 'machine')]
+    private Collection $posteMachines;
+
+    public function __construct()
+    {
+        $this->posteMachines = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, PosteMachine>
+     */
+    public function getPosteMachines(): Collection
+    {
+        return $this->posteMachines;
+    }
 
     public function getId(): ?int
     {
@@ -32,5 +50,4 @@ class Machine
 
         return $this;
     }
-
 }

@@ -4,6 +4,30 @@
     <div class="col-12">
         {{ form_row(form.libelle) }}
     </div>
+
+    {# La zone pour ajouter les machines #}
+    <div class="col-12 mt-4">
+        <h5 class="border-bottom pb-2 fs-6 text-muted">Machines compatibles sur ce poste</h5>
+
+        <div class="machines-wrapper" data-prototype="{{ form_widget(form.posteMachines.vars.prototype)|e('html_attr') }}" data-index="{{ form.posteMachines|length }}">
+            <div class="machines-list">
+                {% for machineField in form.posteMachines %}
+                    <div class="row align-items-center mb-2 item-machine">
+                        <div class="col-10">{{ form_row(machineField.machine) }}</div>
+                        <div class="col-2 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-machine" title="Retirer">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-machine-btn" class="btn btn-sm btn-outline-secondary mt-2">
+                <i class="bi bi-plus-circle"></i> Ajouter une machine
+            </button>
+        </div>
+    </div>
 </div>
 
 <hr class="my-4">

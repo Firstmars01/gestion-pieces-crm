@@ -18,12 +18,18 @@ class MachineController extends AbstractController
     #[Route('/', name: 'atelier_machine_index', methods: ['GET'])]
     public function index(Request $request, MachineRepository $machineRepository, PaginatorInterface $paginator): Response
     {
-        $queryBuilder = $machineRepository->createQueryBuilder('m');
+        $queryBuilder = $machineRepository->createQueryBuilder('m')
+            ->leftJoin('m.posteMachines', 'pm')
+            ->addSelect('pm')
+            ->leftJoin('pm.poste', 'p')
+            ->addSelect('p')
+            ->orderBy('m.id', 'ASC');
+
         $recherche = $request->query->get('q');
 
         if ($recherche) {
             $queryBuilder->andWhere('LOWER(m.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%' . $recherche . '%');
+                ->setParameter('recherche', '%'.$recherche.'%');
         }
 
         $machines = $paginator->paginate(
@@ -53,6 +59,7 @@ class MachineController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_machine_index')]);
             }
+
             return $this->redirectToRoute('atelier_machine_index');
         }
 
@@ -76,6 +83,7 @@ class MachineController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_machine_index')]);
             }
+
             return $this->redirectToRoute('atelier_machine_index');
         }
 
@@ -88,7 +96,7 @@ class MachineController extends AbstractController
     #[Route('/{id}', name: 'atelier_machine_delete', methods: ['POST'])]
     public function delete(Request $request, Machine $machine, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete_machine_' . $machine->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_machine_'.$machine->getId(), $request->request->get('_token'))) {
             $entityManager->remove($machine);
             $entityManager->flush();
             $this->addFlash('success', 'La machine a été supprimée.');

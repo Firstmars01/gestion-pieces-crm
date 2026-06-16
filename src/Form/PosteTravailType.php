@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class PosteTravailType extends AbstractType
 {
@@ -18,6 +19,13 @@ class PosteTravailType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Ex: Poste Soudure...',
                 ],
+            ])
+            ->add('posteMachines', CollectionType::class, [
+                'entry_type' => PosteMachineType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => false,
             ])
         ;
     }

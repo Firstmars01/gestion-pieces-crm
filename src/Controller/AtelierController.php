@@ -196,7 +196,7 @@ class AtelierController extends AbstractController
             return $this->redirectToRoute('atelier_gamme_index');
         }
 
-        return $this->render('atelier/gamme_new.html.twig', [
+        return $this->render('atelier/gamme/gamme_new.html.twig', [
             'form' => $form->createView(),
             'gamme' => $gamme,
         ]);
