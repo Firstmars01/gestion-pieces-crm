@@ -42,9 +42,9 @@ RUN mkdir -p var && chown -R www-data:www-data var
 
 EXPOSE 80
 
-# On lance les migrations, PUIS l'admin, on donne les droits, et on démarre.
-# (On a retiré les fixtures d'ici pour éviter de purger la BDD à chaque redémarrage)
+# On lance les migrations, on vérifie l'interrupteur pour les fixtures, on fait l'admin et on démarre.
 CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod \
+    && if [ "$LOAD_FIXTURES" = "1" ]; then php bin/console doctrine:fixtures:load --no-interaction --env=prod; fi \
     && php bin/create_admin.php \
     && chown -R www-data:www-data var \
     && apache2-foreground
