@@ -25,6 +25,8 @@ class RealisationPosteType extends AbstractType
                     return $pm->getMachine()->getLibelle() . ' (sur ' . $pm->getPoste()->getLibelle() . ')';
                 },
                 'label' => 'Machine et Poste réellement utilisés',
+                'placeholder' => 'Sélectionnez obligatoirement une machine...',
+                'required' => true,
                 'attr' => ['class' => 'select-searchable']
             ])
         ;

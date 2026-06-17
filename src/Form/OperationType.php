@@ -35,6 +35,7 @@ class OperationType extends AbstractType
                 },
                 'label' => 'Duo Machine / Poste requis',
                 'placeholder' => 'Sélectionnez une machine affectée à un poste...',
+                'required' => true,
                 'attr' => ['class' => 'select-searchable'], // Toujours notre barre de recherche magique
             ])
         ;

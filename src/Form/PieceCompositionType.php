@@ -30,6 +30,7 @@ class PieceCompositionType extends AbstractType
                 },
                 'label' => false,
                 'placeholder' => 'Sélectionnez un composant...',
+                'required' => true,
                 'attr' => ['class' => 'select-searchable'],
             ])
             ->add('quantite', IntegerType::class, [

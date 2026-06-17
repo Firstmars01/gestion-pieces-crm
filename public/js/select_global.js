@@ -5,7 +5,12 @@ function initGlobalTomSelect(container = document) {
         new TomSelect(select, {
             create: false,
             sortField: { field: "text", direction: "asc" },
-            placeholder: select.getAttribute('placeholder') || 'Sélectionner...'
+            placeholder: select.getAttribute('placeholder') || 'Sélectionner...',
+
+            onChange: function(value) {
+                // Déclenche l'événement "change" classique pour que le navigateur et Symfony comprennent
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         });
     });
 }

@@ -57,6 +57,7 @@ class GammeType extends AbstractType
                 },
                 'label' => 'Pièce fabriquée',
                 'placeholder' => 'Sélectionnez une pièce...',
+                'required' => true,
                 // Maintien de Tom Select
                 'attr' => ['class' => 'select-searchable'],
             ])
@@ -67,6 +68,7 @@ class GammeType extends AbstractType
                 },
                 'label' => 'Responsable de la gamme',
                 'placeholder' => 'Sélectionnez un responsable...',
+                'required' => true,
                 // Maintien de Tom Select
                 'attr' => ['class' => 'select-searchable'],
             ]);

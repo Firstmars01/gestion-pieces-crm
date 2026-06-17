@@ -21,6 +21,7 @@ class RealisationType extends AbstractType
                 },
                 'label' => 'Gamme à fabriquer',
                 'placeholder' => 'Sélectionnez une gamme...',
+                'required' => true,
                 'attr' => ['class' => 'select-searchable']
             ])
         ;

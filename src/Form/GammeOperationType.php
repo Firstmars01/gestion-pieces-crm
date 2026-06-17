@@ -22,6 +22,7 @@ class GammeOperationType extends AbstractType
                 },
                 'label' => 'Opération à ajouter',
                 'placeholder' => 'Sélectionnez une opération...',
+                'required' => true,
                 'attr' => ['class' => 'select-searchable']
             ])
             ->add('ordre', IntegerType::class, [
