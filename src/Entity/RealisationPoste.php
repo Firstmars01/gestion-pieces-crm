@@ -18,15 +18,24 @@ class RealisationPoste
     private ?Realisation $realisation = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?GammeOperation $gammeOperation = null;
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Operation $operation = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?PosteMachine $posteMachine = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $operationLibelleArchive = null;
 
     #[ORM\Column]
-    private ?int $temps = null; // Le temps réel passé en minutes
+    private ?int $ordre = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $tempsPrevu = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?PosteMachine $posteMachine = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $temps = null;
 
     public function getId(): ?int
     {
@@ -44,14 +53,47 @@ class RealisationPoste
         return $this;
     }
 
-    public function getGammeOperation(): ?GammeOperation
+    public function getOperation(): ?Operation
     {
-        return $this->gammeOperation;
+        return $this->operation;
     }
 
-    public function setGammeOperation(?GammeOperation $gammeOperation): static
+    public function setOperation(?Operation $operation): static
     {
-        $this->gammeOperation = $gammeOperation;
+        $this->operation = $operation;
+        return $this;
+    }
+
+    public function getOperationLibelleArchive(): ?string
+    {
+        return $this->operationLibelleArchive;
+    }
+
+    public function setOperationLibelleArchive(?string $operationLibelleArchive): static
+    {
+        $this->operationLibelleArchive = $operationLibelleArchive;
+        return $this;
+    }
+
+    public function getOrdre(): ?int
+    {
+        return $this->ordre;
+    }
+
+    public function setOrdre(int $ordre): static
+    {
+        $this->ordre = $ordre;
+        return $this;
+    }
+
+    public function getTempsPrevu(): ?int
+    {
+        return $this->tempsPrevu;
+    }
+
+    public function setTempsPrevu(?int $tempsPrevu): static
+    {
+        $this->tempsPrevu = $tempsPrevu;
         return $this;
     }
 
@@ -71,7 +113,7 @@ class RealisationPoste
         return $this->temps;
     }
 
-    public function setTemps(int $temps): static
+    public function setTemps(?int $temps): static
     {
         $this->temps = $temps;
         return $this;

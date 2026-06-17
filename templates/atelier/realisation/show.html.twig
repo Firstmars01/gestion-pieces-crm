@@ -13,16 +13,23 @@
                     Ordre de Fabrication #{{ realisation.id }}
                 </h1>
                 <p class="text-muted mb-0">
-                    Gamme : <strong>{{ realisation.gamme.libelle }}</strong> |
-                    Pièce à produire : <span class="badge bg-primary">{{ realisation.gamme.piece.reference }}</span>
+                    {# On utilise le système d'archive (Snapshot) si la gamme a été supprimée #}
+                    Gamme : <strong>{{ realisation.gamme ? realisation.gamme.libelle : realisation.gammeLibelleArchive ~ ' (Archive)' }}</strong> |
+                    Pièce à produire : <span class="badge bg-primary">{{ realisation.gamme and realisation.gamme.piece ? realisation.gamme.piece.reference : realisation.pieceReferenceArchive }}</span>
                 </p>
             </div>
         </div>
 
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-light border-bottom">
+            <div class="card-header bg-light border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 py-3">
                 <h5 class="mb-0 fs-6"><i class="bi bi-list-check me-2"></i> Étapes de fabrication</h5>
+
+                <div class="input-group input-group-sm" style="max-width: 300px;">
+                    <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchStepsInput" class="form-control border-start-0 ps-0" placeholder="Rechercher une étape, opération...">
+                </div>
             </div>
+
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead class="table-light">
@@ -34,42 +41,41 @@
                         <th class="text-end"></th>
                     </tr>
                     </thead>
-                    <tbody>
-                    {# On boucle sur toutes les opérations de la gamme, triées par ordre théorique #}
-                    {% for gammeOp in realisation.gamme.gammeOperations|sort((a, b) => a.ordre <=> b.ordre) %}
+                    <tbody id="stepsTableBody">
 
-                        {# On cherche si un pointage réel a déjà été fait pour cette étape #}
-                        {% set pointageReel = null %}
-                        {% for rp in realisation.realisationPostes %}
-                            {% if rp.gammeOperation.id == gammeOp.id %}
-                                {% set pointageReel = rp %}
-                            {% endif %}
-                        {% endfor %}
+                    {# LA NOUVELLE BOUCLE : On boucle directement sur les pointages qui ont été copiés au lancement #}
+                    {% for pointage in realisation.realisationPostes|sort((a, b) => a.ordre <=> b.ordre) %}
 
-                        <tr class="{{ pointageReel ? 'table-success bg-opacity-10' : '' }}">
-                            <td class="fw-bold text-muted">Étape {{ gammeOp.ordre }}</td>
-                            <td class="fw-semibold">{{ gammeOp.operation.libelle }}</td>
+                        {% set estTermine = pointage.temps is not null %}
 
-                            {# Affichage de la THÉORIE #}
+                        <tr class="{{ estTermine ? 'table-success bg-opacity-10' : '' }}">
+                            <td class="fw-bold text-muted">Étape {{ pointage.ordre }}</td>
+
+                            {# Affichage du nom de l'opération (ou de son archive si elle a été supprimée du dico) #}
+                            <td class="fw-semibold">
+                                {{ pointage.operation ? pointage.operation.libelle : pointage.operationLibelleArchive }}
+                            </td>
+
+                            {# Affichage de la THÉORIE (copiée au lancement) #}
                             <td>
                                 <div class="text-muted small">
-                                    <span class="bi-stopwatch badge bg-light text-dark border"> {{ gammeOp.operation.tempsPrevu }} min</span>
+                                    <span class="bi-stopwatch badge bg-light text-dark border"> {{ pointage.tempsPrevu }} min</span>
 
-                                    {% if gammeOp.operation.posteMachine %}
-                                        <span class="badge bg-light text-dark border">{{ gammeOp.operation.posteMachine.machine.libelle }}</span>
-                                        <span class="badge bg-light text-dark border">{{ gammeOp.operation.posteMachine.poste.libelle }}</span>
+                                    {% if pointage.operation and pointage.operation.posteMachine %}
+                                        <span class="badge bg-light text-dark border"><i class="bi bi-gear"></i> {{ pointage.operation.posteMachine.machine.libelle }}</span>
+                                        <span class="badge bg-light text-dark border">{{ pointage.operation.posteMachine.poste.libelle }}</span>
                                     {% endif %}
                                 </div>
                             </td>
 
-                            {# Affichage de la RÉALITÉ #}
+                            {# Affichage de la RÉALITÉ (saisie par l'ouvrier) #}
                             <td>
-                                {% if pointageReel %}
+                                {% if estTermine %}
                                     <div class="text-success fw-medium small">
                                         <div class="d-flex flex-wrap gap-1 mt-1">
-                                            <span class="bi-stopwatch badge bg-light text-dark border"> {{ gammeOp.operation.tempsPrevu }} min</span>
-                                            <span class="badge bg-light text-dark border">{{ pointageReel.posteMachine.machine.libelle }}</span>
-                                            <span class="badge bg-light text-dark border">{{ pointageReel.posteMachine.poste.libelle }}</span>
+                                            <span class="bi-stopwatch badge bg-light text-dark border"> {{ pointage.temps }} min</span>
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-gear"></i> {{ pointage.posteMachine.machine.libelle }}</span>
+                                            <span class="badge bg-light text-dark border">{{ pointage.posteMachine.poste.libelle }}</span>
                                         </div>
                                     </div>
                                 {% else %}
@@ -78,20 +84,21 @@
                             </td>
 
                             <td class="text-end">
-                                {% if pointageReel %}
+                                {% if estTermine %}
                                     <i class="bi bi-check-circle-fill text-success fs-5" title="Opération terminée"></i>
                                 {% else %}
+                                    {# ATTENTION : L'URL prend maintenant poste_id et non operation_id ! #}
                                     <button type="button"
-                                            onclick="openModalAjax('Pointer l\'étape {{ gammeOp.ordre }}', '{{ path('atelier_realisation_pointer', {id: realisation.id, operation_id: gammeOp.id}) }}')"
-                                            class="btn btn-sm btn-primary">
-                                        <i class="bi bi-play-fill"></i> Pointer
+                                            onclick="openModalAjax('Pointer l\'étape {{ pointage.ordre }}', '{{ path('atelier_realisation_pointer', {id: realisation.id, poste_id: pointage.id}) }}')"
+                                            class="btn btn-sm btn-primary text-nowrap shadow-sm">
+                                        <i class="bi bi-play-fill me-1"></i> Pointer
                                     </button>
                                 {% endif %}
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Cette gamme ne contient aucune opération.</td>
+                            <td colspan="5" class="text-center text-muted py-4">Aucune étape n'a été générée pour cette fabrication.</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -99,4 +106,31 @@
             </div>
         </div>
     </div>
+
+    {# Script JavaScript pour le filtrage instantané #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchStepsInput');
+            const tableBody = document.getElementById('stepsTableBody');
+
+            if (searchInput && tableBody) {
+                searchInput.addEventListener('keyup', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = tableBody.getElementsByTagName('tr');
+
+                    for (let row of rows) {
+                        if (row.cells.length === 1) continue;
+
+                        const rowText = row.textContent.toLowerCase();
+
+                        if (rowText.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

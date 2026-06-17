@@ -15,16 +15,46 @@ class Realisation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'realisations')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] // <-- À CHANGER ICI
     private ?Gamme $gamme = null;
 
-    #[ORM\OneToMany(mappedBy: 'realisation', targetEntity: RealisationPoste::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RealisationPoste::class, mappedBy: 'realisation', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $realisationPostes;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gammeLibelleArchive = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pieceReferenceArchive = null;
 
     public function __construct()
     {
         $this->realisationPostes = new ArrayCollection();
+    }
+
+    public function getGammeLibelleArchive(): ?string
+    {
+        return $this->gammeLibelleArchive;
+    }
+
+    public function setGammeLibelleArchive(?string $gammeLibelleArchive): static
+    {
+        $this->gammeLibelleArchive = $gammeLibelleArchive;
+
+        return $this;
+    }
+
+    public function getPieceReferenceArchive(): ?string
+    {
+        return $this->pieceReferenceArchive;
+    }
+
+    public function setPieceReferenceArchive(?string $pieceReferenceArchive): static
+    {
+        $this->pieceReferenceArchive = $pieceReferenceArchive;
+
+        return $this;
     }
 
     public function getId(): ?int

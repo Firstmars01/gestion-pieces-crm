@@ -2,9 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\GammeOperation;
 use App\Entity\PosteMachine;
-use App\Entity\Realisation;
 use App\Entity\RealisationPoste;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -14,34 +12,32 @@ class RealisationPosteFixtures extends Fixture implements DependentFixtureInterf
 {
     public function load(ObjectManager $manager): void
     {
-        $realisations = $manager->getRepository(Realisation::class)->findAll();
-        $gammeOperations = $manager->getRepository(GammeOperation::class)->findAll();
+        // On récupère les étapes qui viennent d'être générées par RealisationFixtures
+        $etapes = $manager->getRepository(RealisationPoste::class)->findAll();
         $posteMachines = $manager->getRepository(PosteMachine::class)->findAll();
 
-        if (0 === count($realisations) || 0 === count($gammeOperations) || 0 === count($posteMachines)) {
+        if (0 === count($etapes) || 0 === count($posteMachines)) {
             return;
         }
 
-        foreach ($realisations as $index => $realisation) {
-            $operationCount = 2 + ($index % 4); // 2 à 5 pointages par réalisation
-            $goPool = $gammeOperations;
-            $pmPool = $posteMachines;
-            shuffle($goPool);
-            shuffle($pmPool);
+        foreach ($etapes as $etape) {
+            // On simule que 60% des étapes ont déjà été "pointées" par les ouvriers
+            if (rand(1, 100) <= 60) {
+                $operation = $etape->getOperation();
 
-            $selectedGo = array_slice($goPool, 0, min($operationCount, count($goPool)));
-            $selectedPm = array_slice($pmPool, 0, min($operationCount, count($pmPool)));
+                // On prend la machine par défaut de l'opération, sinon une au hasard
+                $posteMachine = ($operation && $operation->getPosteMachine())
+                    ? $operation->getPosteMachine()
+                    : $posteMachines[array_rand($posteMachines)];
 
-            foreach ($selectedGo as $idx => $gammeOperation) {
-                $posteMachine = $selectedPm[$idx] ?? $selectedPm[0];
-                $operation = $gammeOperation->getOperation();
+                $etape->setPosteMachine($posteMachine);
 
-                $pointage = new RealisationPoste();
-                $pointage->setRealisation($realisation);
-                $pointage->setGammeOperation($gammeOperation);
-                $pointage->setPosteMachine($posteMachine);
-                $pointage->setTemps($operation ? max(5, (int) round($operation->getTempsPrevu() * (0.8 + (($index + $idx) % 5) * 0.1))) : 15);
-                $manager->persist($pointage);
+                // On simule un temps réel (temps prévu avec +/- 20% de variation)
+                $tempsPrevu = $etape->getTempsPrevu() ?? 15;
+                $variation = rand(-20, 20) / 100;
+                $etape->setTemps(max(1, (int) round($tempsPrevu * (1 + $variation))));
+
+                $manager->persist($etape);
             }
         }
 
@@ -52,9 +48,7 @@ class RealisationPosteFixtures extends Fixture implements DependentFixtureInterf
     {
         return [
             RealisationFixtures::class,
-            GammeOperationFixtures::class,
             PosteTravailFixtures::class,
         ];
     }
 }
-

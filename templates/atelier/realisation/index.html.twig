@@ -46,25 +46,29 @@
                     <tbody>
                     {% for realisation in realisations %}
 
-                        {# Calcul automatique de l'avancement #}
-                        {% set total_steps = realisation.gamme.gammeOperations|length %}
-                        {% set done_steps = realisation.realisationPostes|length %}
+                        {# 👇 CORRECTION DU CALCUL DE L'AVANCEMENT 👇 #}
+                        {# Le total est le nombre de pointages générés. Terminée = temps n'est pas nul #}
+                        {% set total_steps = realisation.realisationPostes|length %}
+                        {% set done_steps = realisation.realisationPostes|filter(rp => rp.temps is not null)|length %}
                         {% set progress_percent = total_steps > 0 ? (done_steps / total_steps * 100)|round : 0 %}
 
                         <tr>
                             <td class="fw-bold text-primary">
                                 OF-{{ '%04d'|format(realisation.id) }}
                             </td>
-                            <td class="fw-semibold">{{ realisation.gamme.libelle }}</td>
-                            <td>
-                                {% if realisation.gamme.piece %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                                        {{ realisation.gamme.piece.reference }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted fst-italic">Non définie</span>
-                                {% endif %}
+
+                            {# 👇 CORRECTION : Affichage de la gamme ou de son archive si supprimée 👇 #}
+                            <td class="fw-semibold">
+                                {{ realisation.gamme ? realisation.gamme.libelle : realisation.gammeLibelleArchive ~ ' (Archive)' }}
                             </td>
+
+                            {# 👇 CORRECTION : Affichage de la pièce ou de son archive 👇 #}
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                                    {{ realisation.gamme and realisation.gamme.piece ? realisation.gamme.piece.reference : realisation.pieceReferenceArchive }}
+                                </span>
+                            </td>
+
                             <td>
                                 <div class="d-flex align-items-center gap-2" title="{{ done_steps }} étape(s) sur {{ total_steps }}">
                                     <div class="progress flex-grow-1" style="height: 8px;">
@@ -80,7 +84,6 @@
                             </td>
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
-                                    {# Attention ici, c'est un lien classique et non une modale, car le tableau de bord est une page complète #}
                                     <a href="{{ path('atelier_realisation_show', {id: realisation.id}) }}"
                                        class="btn btn-sm btn-outline-primary"
                                        title="Ouvrir le tableau de bord">

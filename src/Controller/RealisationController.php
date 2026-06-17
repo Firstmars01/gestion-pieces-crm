@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Realisation;
+use App\Entity\RealisationPoste;
 use App\Form\RealisationType;
 use App\Repository\RealisationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,11 +22,11 @@ class RealisationController extends AbstractController
         $queryBuilder = $realisationRepository->createQueryBuilder('r')
             ->leftJoin('r.gamme', 'g')->addSelect('g')
             ->leftJoin('g.piece', 'p')->addSelect('p')
-            ->orderBy('r.id', 'DESC'); // Les plus récentes en premier
+            ->orderBy('r.id', 'DESC');
 
         $q = trim((string) $request->query->get('q', ''));
 
-        if ($q !== '') {
+        if ('' !== $q) {
             $searchConditions = [
                 'LOWER(g.libelle) LIKE LOWER(:q)',
                 'LOWER(p.reference) LIKE LOWER(:q)',
@@ -37,8 +38,8 @@ class RealisationController extends AbstractController
             }
 
             $queryBuilder
-                ->andWhere('(' . implode(' OR ', $searchConditions) . ')')
-                ->setParameter('q', '%' . $q . '%');
+                ->andWhere('('.implode(' OR ', $searchConditions).')')
+                ->setParameter('q', '%'.$q.'%');
 
             if (ctype_digit($q)) {
                 $queryBuilder->setParameter('id', (int) $q);
@@ -65,14 +66,40 @@ class RealisationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($realisation);
+
+            if ($realisation->getGamme()) {
+                // ARCHIVE DE LA GAMME ET DE LA PIÈCE
+                $realisation->setGammeLibelleArchive($realisation->getGamme()->getLibelle());
+                if ($realisation->getGamme()->getPiece()) {
+                    $realisation->setPieceReferenceArchive($realisation->getGamme()->getPiece()->getReference());
+                } else {
+                    $realisation->setPieceReferenceArchive('Non définie');
+                }
+
+                foreach ($realisation->getGamme()->getGammeOperations() as $gammeOp) {
+                    $etapeReelle = new RealisationPoste();
+                    $etapeReelle->setRealisation($realisation);
+                    $etapeReelle->setOperation($gammeOp->getOperation());
+                    $etapeReelle->setOrdre($gammeOp->getOrdre());
+
+                    if ($gammeOp->getOperation()) {
+                        // ARCHIVE DU NOM DE L'OPÉRATION
+                        $etapeReelle->setOperationLibelleArchive($gammeOp->getOperation()->getLibelle());
+                        $etapeReelle->setTempsPrevu($gammeOp->getOperation()->getTempsPrevu());
+                    }
+
+                    $entityManager->persist($etapeReelle);
+                }
+            }
+
             $entityManager->flush();
 
-            $this->addFlash('success', 'L\'ordre de fabrication a été lancé.');
+            $this->addFlash('success', 'L\'ordre de fabrication a été lancé et ses étapes ont été générées.');
 
-            // Une fois créé, on redirige l'ouvrier directement sur la page de pointage de ce lot !
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_realisation_show', ['id' => $realisation->getId()])]);
             }
+
             return $this->redirectToRoute('atelier_realisation_show', ['id' => $realisation->getId()]);
         }
 
@@ -84,41 +111,33 @@ class RealisationController extends AbstractController
     #[Route('/{id}/pointage', name: 'atelier_realisation_show', methods: ['GET'])]
     public function show(Realisation $realisation): Response
     {
-        // C'est ici que l'ouvrier viendra pointer ses heures plus tard !
         return $this->render('atelier/realisation/show.html.twig', [
             'realisation' => $realisation,
         ]);
     }
 
-    #[Route('/{id}/pointer/{operation_id}', name: 'atelier_realisation_pointer', methods: ['GET', 'POST'])]
+    #[Route('/{id}/pointer/{poste_id}', name: 'atelier_realisation_pointer', methods: ['GET', 'POST'])]
     public function pointer(
         Realisation $realisation,
-        int $operation_id,
+        int $poste_id,
         EntityManagerInterface $entityManager,
-        Request $request
+        Request $request,
     ): Response {
-        // On récupère l'étape théorique de la gamme
-        $gammeOperation = $entityManager->getRepository(\App\Entity\GammeOperation::class)->find($operation_id);
+        $pointage = $entityManager->getRepository(RealisationPoste::class)->find($poste_id);
 
-        if (!$gammeOperation) {
-            throw $this->createNotFoundException('Opération introuvable.');
+        if (!$pointage) {
+            throw $this->createNotFoundException('Étape introuvable.');
         }
 
-        $pointage = new \App\Entity\RealisationPoste();
-        $pointage->setRealisation($realisation);
-        $pointage->setGammeOperation($gammeOperation);
-
-        // On pré-remplit avec la théorie !
-        if ($operation = $gammeOperation->getOperation()) {
-            $pointage->setTemps($operation->getTempsPrevu());
-            $pointage->setPosteMachine($operation->getPosteMachine());
+        if (null === $pointage->getTemps() && $pointage->getOperation()) {
+            $pointage->setTemps($pointage->getTempsPrevu());
+            $pointage->setPosteMachine($pointage->getOperation()->getPosteMachine());
         }
 
         $form = $this->createForm(\App\Form\RealisationPosteType::class, $pointage);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($pointage);
             $entityManager->flush();
 
             $this->addFlash('success', 'Le pointage a été enregistré avec succès.');
@@ -126,12 +145,13 @@ class RealisationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_realisation_show', ['id' => $realisation->getId()])]);
             }
+
             return $this->redirectToRoute('atelier_realisation_show', ['id' => $realisation->getId()]);
         }
 
         return $this->render('atelier/realisation/pointage_new.html.twig', [
             'form' => $form->createView(),
-            'gammeOperation' => $gammeOperation,
+            'gammeOperation' => clone $pointage,
         ]);
     }
 }

@@ -4,8 +4,8 @@ namespace App\Entity;
 
 use App\Repository\GammeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GammeRepository::class)]
 class Gamme
@@ -31,9 +31,13 @@ class Gamme
     #[ORM\OneToMany(mappedBy: 'gamme', targetEntity: GammeOperation::class, cascade: ['persist', 'remove'])]
     private Collection $gammeOperations;
 
+    #[ORM\OneToMany(mappedBy: 'gamme', targetEntity: Realisation::class)]
+    private Collection $realisations;
+
     public function __construct()
     {
         $this->gammeOperations = new ArrayCollection();
+        $this->realisations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -101,6 +105,36 @@ class Gamme
             // set the owning side to null (unless already changed)
             if ($gammeOperation->getGamme() === $this) {
                 $gammeOperation->setGamme(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Realisation>
+     */
+    public function getRealisations(): Collection
+    {
+        return $this->realisations;
+    }
+
+    public function addRealisation(Realisation $realisation): static
+    {
+        if (!$this->realisations->contains($realisation)) {
+            $this->realisations->add($realisation);
+            $realisation->setGamme($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRealisation(Realisation $realisation): static
+    {
+        if ($this->realisations->removeElement($realisation)) {
+            // set the owning side to null (unless already changed)
+            if ($realisation->getGamme() === $this) {
+                $realisation->setGamme(null);
             }
         }
 
