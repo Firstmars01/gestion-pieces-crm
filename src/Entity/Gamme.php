@@ -140,4 +140,25 @@ class Gamme
 
         return $this;
     }
+
+    /**
+     * Recalcule automatiquement l'ordre des opérations pour éviter les "trous" (ex: 1, 2, 4 devient 1, 2, 3)
+     */
+    public function recalculerOrdreOperations(): void
+    {
+        // 1. On récupère toutes les opérations et on les met sous forme de tableau
+        $operations = $this->gammeOperations->toArray();
+
+        // 2. On les trie selon leur ordre actuel (pour être sûr de garder la bonne logique)
+        usort($operations, function (GammeOperation $a, GammeOperation $b) {
+            return $a->getOrdre() <=> $b->getOrdre();
+        });
+
+        // 3. On boucle et on réattribue des numéros propres de 1 en 1
+        $nouvelOrdre = 1;
+        foreach ($operations as $op) {
+            $op->setOrdre($nouvelOrdre);
+            $nouvelOrdre++;
+        }
+    }
 }

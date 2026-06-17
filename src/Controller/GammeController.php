@@ -177,15 +177,24 @@ class GammeController extends AbstractController
     #[Route('/etape/{id}/supprimer', name: 'atelier_gamme_etape_delete', methods: ['POST'])]
     public function deleteEtape(Request $request, \App\Entity\GammeOperation $gammeOperation, EntityManagerInterface $entityManager): Response
     {
-        $gammeId = $gammeOperation->getGamme()->getId();
+        // On récupère l'objet Gamme avant de supprimer l'étape
+        $gamme = $gammeOperation->getGamme();
+        $gammeId = $gamme->getId();
 
         if ($this->isCsrfTokenValid('delete_etape_'.$gammeOperation->getId(), $request->request->get('_token'))) {
             try {
+                // 1. On supprime l'étape
                 $entityManager->remove($gammeOperation);
                 $entityManager->flush();
-                $this->addFlash('success', 'L\'étape a été retirée de la gamme.');
+
+                if ($gamme) {
+                    $gamme->recalculerOrdreOperations();
+                    $entityManager->flush();
+                }
+
+                $this->addFlash('success', 'L\'étape a été retirée de la gamme et l\'ordre a été recalculé.');
             } catch (ForeignKeyConstraintViolationException $e) {
-                // Si la base de données bloque la suppression à cause de l'historique
+                // Si la base de données bloque la suppression à cause de l'historique (pour les vieilles données)
                 $this->addFlash('danger', 'Impossible de supprimer cette étape : des pointages ont déjà été réalisés par l\'atelier sur cette opération.');
             }
         } else {
