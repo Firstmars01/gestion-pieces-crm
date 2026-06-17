@@ -24,7 +24,6 @@
                             </a>
                         {% endif %}
 
-                        {# Ajoutons-les aussi sur le bouton de recherche pour être sûr qu'ils soient identiques #}
                         <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
@@ -45,9 +44,11 @@
                         <th scope="col">{{ knp_pagination_sortable(pieces, 'Référence', 'p.reference') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(pieces, 'Libellé', 'p.libelle') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(pieces, 'Type', 'p.type') }}</th>
-                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Quantité', 'p.quantiteStock') }}</th>
-                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Prix d\'achat', 'p.prixCatalogue') }}</th>
-                        <th scope="col">{{ knp_pagination_sortable(pieces, 'Prix vente', 'p.prixVente') }}</th>
+
+                        <th scope="col" class="text-end">{{ knp_pagination_sortable(pieces, 'Quantité', 'p.quantiteStock') }}</th>
+                        <th scope="col" class="text-end">{{ knp_pagination_sortable(pieces, 'Prix d\'achat', 'p.prixCatalogue') }}</th>
+                        <th scope="col" class="text-end">{{ knp_pagination_sortable(pieces, 'Prix vente', 'p.prixVente') }}</th>
+
                         <th scope="col">Composants</th>
                         <th scope="col" class="text-end"></th>
                     </tr>
@@ -58,33 +59,40 @@
                             <td class="fw-semibold">{{ piece.reference }}</td>
                             <td>{{ piece.libelle }}</td>
                             <td>{{ piece.type }}</td>
-                            <td>{{ piece.quantiteStock }}</td>
-                            <td>
+
+                            {# Cellule Quantité #}
+                            <td class="text-end">
+                                <span class="format-number fw-medium" data-value="{{ piece.quantiteStock }}">{{ piece.quantiteStock }}</span>
+                            </td>
+
+                            <td class="text-end">
                                 {% if piece.prixCatalogue is not null %}
-                                    {{ piece.prixCatalogue }} €
+                                    <span class="format-currency" data-value="{{ piece.prixCatalogue }}">{{ piece.prixCatalogue }}</span>
                                 {% else %}
-                                    -
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="text-end">
                                 {% if piece.prixVente is not null %}
-                                    {{ piece.prixVente }} €
+                                    <span class="format-currency" data-value="{{ piece.prixVente }}">{{ piece.prixVente }}</span>
                                 {% else %}
-                                    -
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
+
                             <td class="atelier-stock-components-cell">
                                 {% if piece.composants|length == 0 %}
-                                    -
+                                    <span class="text-muted">-</span>
                                 {% else %}
                                     <ul class="atelier-stock-components mb-0">
                                         {% for comp in piece.composants %}
                                             {% set enfant = comp.pieceEnfant %}
                                             <li>
-                                                {{ comp.quantite }} × <strong>{{ enfant.reference }}</strong>
+                                                <span class="format-number" data-value="{{ comp.quantite }}">{{ comp.quantite }}</span> × <strong>{{ enfant.reference }}</strong>
                                                 — {{ enfant.libelle }}
+
                                                 {% if enfant.prixVente is not null %}
-                                                    ({{ enfant.prixVente }} €)
+                                                    (<span class="format-currency text-muted" data-value="{{ enfant.prixVente }}">{{ enfant.prixVente }}</span>)
                                                 {% endif %}
                                             </li>
                                         {% endfor %}
@@ -114,6 +122,7 @@
                     {% else %}
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4 atelier-stock-empty-state">
+                                <i class="bi bi-box-seam fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Aucune pièce trouvée.
                             </td>
                         </tr>
@@ -123,7 +132,7 @@
             </div>
         </div>
 
-        <div class="pagination-container pagination-pill">
+        <div class="pagination-container pagination-pill mt-3">
             {{ knp_pagination_render(pieces) }}
         </div>
     </div>
@@ -131,5 +140,6 @@
 
 {% block javascripts %}
     <script src="{{ asset('js/modal_piece.js') }}"></script>
+    <script src="{{ asset('js/format_numbers.js') }}"></script>
 
 {% endblock %}
