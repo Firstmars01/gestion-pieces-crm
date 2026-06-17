@@ -220,3 +220,85 @@
 .sidebar-link[aria-expanded="true"] .bi-chevron-down {
     transform: rotate(180deg);
 }
+
+/* ==========================================================================
+   2. TIROIR PROFIL (ANIMATION GLISSEMENT VERS LA GAUCHE)
+   ========================================================================== */
+.profile-hover-menu {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border-radius: 8px;
+    height: 40px;
+    padding: 0 10px;
+    /* La transition sur le fond et l'espacement */
+    transition: background-color 0.4s ease, padding 0.4s ease;
+    cursor: default;
+}
+
+.profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    line-height: 1;
+    /* Transition pour que le bonhomme glisse doucement */
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.profile-hover-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    /* ÉTAT FERMÉ : Caché, compressé, et légèrement décalé */
+    max-width: 0;
+    opacity: 0;
+    transform: translateX(10px);
+    overflow: hidden;
+    white-space: nowrap;
+
+    height: 100%; /* Force la zone à prendre les 40px de haut pour laisser l'icône grossir */
+
+    /* Animation fluide sur l'ouverture, la transparence et le mouvement */
+    transition: max-width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.3s ease 0.1s,
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* --- L'ANIMATION MAGIQUE AU SURVOL --- */
+.profile-hover-menu:hover {
+    background-color: #f1f3f5;
+    padding: 0 15px; /* S'élargit un tout petit peu globalement */
+}
+
+.profile-hover-menu:hover .profile-hover-actions {
+    /* ÉTAT OUVERT : On déploie le tiroir ! */
+    max-width: 400px;
+    opacity: 1;
+    transform: translateX(0); /* Remet le texte à sa place */
+    margin-left: 15px; /* Crée l'espace qui pousse le bonhomme vers la gauche ! */
+}
+
+/* Effet de zoom sur les boutons à l'intérieur */
+.profile-action-btn {
+    background: transparent;
+    border: none;
+    padding: 4px; /* Un peu d'air interne au lieu de 0 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.profile-action-btn:hover {
+    transform: scale(1.2); /* Grossit de 20% au survol de la clé ou de la sortie */
+}
+
+.user-name-drawer {
+    color: #333333;
+    font-weight: 500;
+    font-size: 1rem;
+}
