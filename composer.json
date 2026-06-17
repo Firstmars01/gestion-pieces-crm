@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-pdo": "*",
         "doctrine/doctrine-bundle": "^2.18",
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6",
         "knplabs/knp-paginator-bundle": "^6.10",
@@ -30,7 +31,6 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.2",
