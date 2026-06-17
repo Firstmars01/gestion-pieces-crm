@@ -8,11 +8,22 @@
                 <i class="bi bi-person-circle"></i>
             </div>
             <div class="dropdown-menu-custom">
-                <div class="dropdown-card">
-                    <span class="user-name">{{ app.user.fullName ?: app.user.email }}</span>
-                    <a href="{{ path('app_logout') }}" class="logout-btn" title="Se déconnecter">
-                        <i class="bi bi-box-arrow-right"></i>
+                {# On utilise flex-row pour tout aligner sur la même ligne avec un peu d'espace (gap) #}
+                <div class="dropdown-card d-flex flex-row align-items-center justify-content-between gap-3 px-3 py-2">
+
+                    {# Icône Modification Mdp (Bleu, sans fond ni bordure) #}
+                    <button type="button" onclick="openModalAjax('Modifier mon mot de passe', '{{ path('app_profile_change_password') }}')" class="bg-transparent border-0 p-0 text-primary action-icon" title="Modifier le mot de passe">
+                        <i class="bi bi-key fs-5"></i>
+                    </button>
+
+                    {# Nom de l'utilisateur #}
+                    <span class="user-name fw-medium text-nowrap mb-0">{{ app.user.fullName ?: app.user.email }}</span>
+
+                    {# Icône Déconnexion (Rouge, sans fond ni bordure) #}
+                    <a href="{{ path('app_logout') }}" class="bg-transparent border-0 p-0 text-danger text-decoration-none action-icon" title="Se déconnecter">
+                        <i class="bi bi-box-arrow-right fs-5"></i>
                     </a>
+
                 </div>
             </div>
         </div>

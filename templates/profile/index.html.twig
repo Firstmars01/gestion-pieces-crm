@@ -1,0 +1,36 @@
+{{ form_start(form, {'action': path('app_profile_change_password'), 'attr': {'class': 'ajax-form'}}) }}
+
+    {# On retire le "p-4" pour retrouver l'espacement standard des modales #}
+<div class="modal-body">
+
+    <div class="alert alert-info d-flex align-items-center mb-3">
+        <i class="bi bi-shield-lock fs-5 me-2 text-info"></i>
+        <div>Par mesure de sécurité, vous devez confirmer votre mot de passe actuel.</div>
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.currentPassword) }}
+    </div>
+
+    {# Ligne séparatrice avec marge standard #}
+    <hr class="text-muted opacity-25 my-3">
+
+    <div class="mb-3">
+        {{ form_row(form.newPassword.first) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.newPassword.second) }}
+    </div>
+
+</div>
+
+{# Footer standard (qui remet la ligne grise au-dessus) #}
+<div class="modal-footer d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-circle me-1"></i> Enregistrer
+    </button>
+</div>
+
+{{ form_end(form) }}
