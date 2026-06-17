@@ -13,9 +13,7 @@
             <div class="d-flex flex-column flex-sm-row gap-2">
                 <form method="get" class="mb-0">
                     <div class="input-group">
-                        <label>
-                            <input type="text" name="q" class="form-control" placeholder="Rechercher un poste..." value="{{ app.request.query.get('q') }}">
-                        </label>
+                            <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
                         {% if app.request.query.get('q') %}
                             <a href="{{ path('atelier_poste_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
                                 <i class="bi bi-x-lg"></i>

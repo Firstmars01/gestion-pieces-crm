@@ -46,7 +46,6 @@
                     <tbody>
                     {% for realisation in realisations %}
 
-                        {# 👇 CORRECTION DU CALCUL DE L'AVANCEMENT 👇 #}
                         {# Le total est le nombre de pointages générés. Terminée = temps n'est pas nul #}
                         {% set total_steps = realisation.realisationPostes|length %}
                         {% set done_steps = realisation.realisationPostes|filter(rp => rp.temps is not null)|length %}
@@ -57,12 +56,10 @@
                                 OF-{{ '%04d'|format(realisation.id) }}
                             </td>
 
-                            {# 👇 CORRECTION : Affichage de la gamme ou de son archive si supprimée 👇 #}
                             <td class="fw-semibold">
                                 {{ realisation.gamme ? realisation.gamme.libelle : realisation.gammeLibelleArchive ~ ' (Archive)' }}
                             </td>
 
-                            {# 👇 CORRECTION : Affichage de la pièce ou de son archive 👇 #}
                             <td>
                                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">
                                     {{ realisation.gamme and realisation.gamme.piece ? realisation.gamme.piece.reference : realisation.pieceReferenceArchive }}
