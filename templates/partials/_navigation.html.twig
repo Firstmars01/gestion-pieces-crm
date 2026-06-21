@@ -60,12 +60,14 @@
             <div class="collapse {% if current_route starts with 'atelier_' %}show{% endif %} mt-1" id="atelierMenu">
                 <nav class="submenu">
                     <a href="{{ path('atelier_stock') }}" class="sidebar-sublink {% if current_route starts with 'atelier_stock' %}active{% endif %}">Stock des pièces</a>
-                    <a href="{{ path('atelier_gamme_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_gamme_index' %}active{% endif %}">Gammes de fabrication</a>
-                    <a href="{{ path('atelier_machine_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_machine_index' %}active{% endif %}">Machines</a>
-                    <a href="{{ path('atelier_poste_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_poste_index' %}active{% endif %}">Postes de travail</a>
-                    <a href="{{ path('atelier_operation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_operation_index' %}active{% endif %}">Opérations</a>
-                    <a href="{{ path('atelier_qualification_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_qualification_index' %}active{% endif %}">Qualifications</a>
-                    <a href="{{ path('atelier_realisation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_realisation_index' %}active{% endif %}">Réalisations</a>
+
+                    {# On a retiré "_index" à la fin de tous les "starts with" pour englober les sous-pages (show, edit, etapes...) #}
+                    <a href="{{ path('atelier_gamme_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_gamme_' %}active{% endif %}">Gammes de fabrication</a>
+                    <a href="{{ path('atelier_machine_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_machine_' %}active{% endif %}">Machines</a>
+                    <a href="{{ path('atelier_poste_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_poste_' %}active{% endif %}">Postes de travail</a>
+                    <a href="{{ path('atelier_operation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_operation_' %}active{% endif %}">Opérations</a>
+                    <a href="{{ path('atelier_qualification_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_qualification_' %}active{% endif %}">Qualifications</a>
+                    <a href="{{ path('atelier_realisation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_realisation_' %}active{% endif %}">Réalisations</a>
                 </nav>
             </div>
         {% endif %}
