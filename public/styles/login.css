@@ -138,3 +138,34 @@
 .forgot-password-link:hover {
     color: var(--primary); /* Reprend ton bleu au survol */
 }
+
+
+/* ==========================================================================
+   RESPONSIVE MOBILE (LOGIN)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .login-split-container {
+        flex-direction: column; /* On empile au lieu de mettre côte à côte */
+    }
+
+    .login-image-side {
+        flex: none;
+        height: 25vh; /* L'image devient un simple bandeau en haut */
+        background-position: top;
+    }
+
+    .login-form-side {
+        flex: 1;
+        height: 75vh;
+        padding: 20px;
+        justify-content: center; /* On centre le formulaire verticalement */
+    }
+
+    .login-main-logo {
+        height: 120px; /* On réduit le logo pour gagner de la place */
+    }
+
+    .login-card {
+        padding: 25px 20px; /* On réduit les marges internes de la carte */
+    }
+}

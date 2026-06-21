@@ -1,16 +1,22 @@
 <header class="top-navbar">
-    <div class="navbar-left">
+    <div class="navbar-left d-flex align-items-center gap-2">
+        {# 1. LE BOUTON HAMBURGER (visible uniquement sur mobile grâce aux classes Bootstrap d-lg-none) #}
+        <button type="button" class="mobile-toggle-btn d-lg-none bg-transparent border-0 fs-3 text-dark p-0 d-flex align-items-center" onclick="toggleSidebar()" title="Ouvrir le menu">
+            <i class="bi bi-list"></i>
+        </button>
+
         <img src="{{ asset('images/logo.png') }}" alt="Synergy CRM" class="navbar-logo">
     </div>
     <div class="navbar-right">
 
-        <div class="profile-hover-menu">
+        {# 2. LE CLIC PROFIL : L'ajout de onclick permet d'ajouter/retirer la classe "active-on-mobile" au toucher #}
+        <div class="profile-hover-menu" onclick="this.classList.toggle('active-on-mobile')">
             <div class="profile-icon">
                 <i class="bi bi-person-circle text-dark"></i>
             </div>
 
             <div class="profile-hover-actions">
-                <button type="button" onclick="openModalAjax('Modifier mon mot de passe', '{{ path('app_profile_change_password') }}')" class="profile-action-btn text-primary" title="Modifier le mot de passe">
+                <button type="button" onclick="event.stopPropagation(); openModalAjax('Modifier mon mot de passe', '{{ path('app_profile_change_password') }}')" class="profile-action-btn text-primary" title="Modifier le mot de passe">
                     <i class="bi bi-key"></i>
                 </button>
 
@@ -28,9 +34,12 @@
 {# On récupère le nom de la route actuelle pour simplifier le code ensuite #}
 {% set current_route = app.request.attributes.get('_route') %}
 
-<aside class="sidebar">
+{# Ajout d'un overlay sombre qui apparaîtra derrière la sidebar sur mobile #}
+<div id="mobile-sidebar-overlay" class="d-lg-none" onclick="toggleSidebar()"></div>
+
+{# Ajout d'un ID "main-sidebar" pour que le JavaScript puisse la trouver facilement #}
+<aside class="sidebar" id="main-sidebar">
     <nav class="sidebar-nav">
-        {# Le lien Dashboard est actif si la route actuelle est 'app_home' #}
         <a href="{{ path('app_home') }}" class="sidebar-link {% if current_route == 'app_home' %}active{% endif %}">
             Dashboard
         </a>
@@ -41,9 +50,7 @@
             </a>
         {% endif %}
 
-        {# Section Atelier : groupe avec sous-menu. Visible pour ROLE_ATELIER et ROLE_ADMIN #}
         {% if is_granted('ROLE_ATELIER') or is_granted('ROLE_ADMIN') %}
-            {# Le lien parent ultra propre #}
             <a href="#atelierMenu" class="sidebar-link {% if current_route starts with 'atelier_' %}active{% endif %}"
                data-bs-toggle="collapse" role="button" aria-expanded="{{ (current_route starts with 'atelier_') ? 'true' : 'false' }}" aria-controls="atelierMenu">
                 Atelier
@@ -52,31 +59,21 @@
 
             <div class="collapse {% if current_route starts with 'atelier_' %}show{% endif %} mt-1" id="atelierMenu">
                 <nav class="submenu">
-                    {# Liste des pages de l'atelier. Ajoute d'autres liens ici si besoin #}
-                    <a href="{{ path('atelier_stock') }}" class="sidebar-sublink {% if current_route starts with 'atelier_stock' %}active{% endif %}">
-                        Stock des pièces
-                    </a>
-                    <a href="{{ path('atelier_gamme_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_gamme_index' %}active{% endif %}">
-                        Gammes de fabrication
-                    </a>
-                    <a href="{{ path('atelier_machine_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_machine_index' %}active{% endif %}">
-                        Machines
-                    </a>
-                    <a href="{{ path('atelier_poste_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_poste_index' %}active{% endif %}">
-                        Postes de travail
-                    </a>
-                    <a href="{{ path('atelier_operation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_operation_index' %}active{% endif %}">
-                        Opérations
-                    </a>
-                    <a href="{{ path('atelier_qualification_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_qualification_index' %}active{% endif %}">
-                        Qualifications
-                    </a>
-                    <a href="{{ path('atelier_realisation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_realisation_index' %}active{% endif %}">
-                        Réalisations
-                    </a>
+                    <a href="{{ path('atelier_stock') }}" class="sidebar-sublink {% if current_route starts with 'atelier_stock' %}active{% endif %}">Stock des pièces</a>
+                    <a href="{{ path('atelier_gamme_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_gamme_index' %}active{% endif %}">Gammes de fabrication</a>
+                    <a href="{{ path('atelier_machine_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_machine_index' %}active{% endif %}">Machines</a>
+                    <a href="{{ path('atelier_poste_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_poste_index' %}active{% endif %}">Postes de travail</a>
+                    <a href="{{ path('atelier_operation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_operation_index' %}active{% endif %}">Opérations</a>
+                    <a href="{{ path('atelier_qualification_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_qualification_index' %}active{% endif %}">Qualifications</a>
+                    <a href="{{ path('atelier_realisation_index') }}" class="sidebar-sublink {% if current_route starts with 'atelier_realisation_index' %}active{% endif %}">Réalisations</a>
                 </nav>
             </div>
         {% endif %}
 
     </nav>
 </aside>
+
+{# 3. LE SCRIPT JAVASCRIPT POUR LE MENU MOBILE #}
+<script src="{{ asset('js/navbar_mobile.js') }}"></script>
+
+

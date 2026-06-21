@@ -302,3 +302,59 @@
     font-weight: 500;
     font-size: 1rem;
 }
+
+/* ==========================================================================
+   RESPONSIVE MOBILE (NAVBAR)
+   ========================================================================== */
+@media (max-width: 992px) {
+    .top-navbar {
+        padding: 0 15px; /* Moins de marge sur les côtés */
+    }
+
+    .navbar-left {
+        width: auto;
+        min-width: auto;
+        padding-top: 0;
+    }
+
+
+    .user-name-drawer {
+        display: none; /* Optionnel : cacher le nom sur mobile pour gagner de la place, garder juste les icônes */
+    }
+
+    .profile-hover-menu.active-on-mobile {
+        background-color: #f1f3f5;
+        padding: 0 15px;
+    }
+
+    .profile-hover-menu.active-on-mobile .profile-hover-actions {
+        max-width: 400px;
+        opacity: 1;
+        transform: translateX(0);
+        margin-left: 15px;
+    }
+
+    /* Le bouton hamburger ne doit pas s'afficher sur les grands écrans */
+    .mobile-toggle-btn {
+        display: block;
+    }
+}
+
+/* Écran sombre derrière la barre latérale mobile */
+#mobile-sidebar-overlay {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 50px);
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040; /* Juste en dessous de la sidebar qui est à 1050 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#mobile-sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}

@@ -293,3 +293,48 @@ body {
     padding: 0.35em 0.65em;
     border-radius: 0.25rem;
 }
+
+
+/* ==========================================================================
+   RESPONSIVE MOBILE (STRUCTURE & SIDEBAR)
+   ========================================================================== */
+@media (max-width: 992px) {
+    /* On passe à une seule colonne (1fr) au lieu de deux */
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        grid-column: 1; /* Le contenu prend toute la largeur */
+        padding: 15px; /* On réduit les marges sur mobile */
+    }
+
+    /* La sidebar sort du flux normal et se cache à gauche */
+    .sidebar {
+        position: fixed;
+        top: 50px; /* Sous la navbar */
+        left: -250px; /* Cachée hors de l'écran par défaut */
+        height: calc(100vh - 50px);
+        width: 250px;
+        z-index: 1050;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* Classe dynamique (à ajouter via JS lors du clic sur un bouton "Menu") */
+    .sidebar.mobile-open {
+        left: 0;
+    }
+
+    /* Modale : s'assurer qu'elle prend bien tout l'écran sans déborder */
+    .custom-modal-card {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    /* Sur mobile, le hover n'existe pas, on affiche donc les boutons d'action en permanence */
+    .table tbody tr .action-buttons {
+        opacity: 1;
+        visibility: visible;
+    }
+}
