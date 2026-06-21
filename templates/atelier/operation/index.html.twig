@@ -39,7 +39,7 @@
                         <th scope="col" style="width: 80px;">{{ knp_pagination_sortable(operations, 'ID', 'o.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(operations, 'Opération', 'o.libelle') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(operations, 'Temps prévu', 'o.tempsPrevu') }}</th>
-                        <th scope="col">Ressources (Machine & Poste)</th>
+                        <th scope="col">Ressources</th>
                         <th scope="col" class="text-end"></th>
                     </tr>
                     </thead>
@@ -49,9 +49,7 @@
                             <td class="text-muted">#{{ operation.id }}</td>
                             <td class="fw-semibold">{{ operation.libelle }}</td>
                             <td>
-                                <span class="badge bg-info text-dark bg-opacity-10 border border-info">
-                                    <i class="bi bi-stopwatch me-1"></i> {{ operation.tempsPrevu }} min
-                                </span>
+                                <span class="bi-stopwatch badge bg-light text-dark border"> {{ operation.tempsPrevu }} min</span>
                             </td>
                             <td>
                                 {% if operation.posteMachine %}
