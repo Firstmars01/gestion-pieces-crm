@@ -1,11 +1,27 @@
 {# templates/atelier/realisation/new.html.twig #}
 {{ form_start(form, {'attr': {'id': 'form-realisation'}}) }}
 
+{# Ligne très importante : c'est ici qu'apparaîtra le bloc rouge si le stock est insuffisant #}
+{{ form_errors(form) }}
+
 <div class="row g-3">
     <div class="col-12 text-center text-muted mb-2">
         <i class="bi bi-play-circle fs-1 text-primary"></i>
         <p class="mt-2">Sélectionnez la gamme pour démarrer un nouvel ordre de fabrication dans l'atelier.</p>
     </div>
+
+    {# Nouvel encart d'information pour prévenir de la déduction des stocks #}
+    <div class="col-12">
+        <div class="alert alert-warning border-warning bg-warning bg-opacity-10 d-flex align-items-center p-3 mb-1">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+            <div class="small text-dark">
+                <strong>Information :</strong> Le lancement de cette fabrication nécessitera les pièces enfants associées.
+                Elles seront <strong>automatiquement déduites de votre stock</strong>.
+                L'opération sera bloquée si les quantités en stock sont insuffisantes.
+            </div>
+        </div>
+    </div>
+
     <div class="col-12">
         {{ form_row(form.gamme) }}
     </div>
@@ -15,7 +31,9 @@
 
 <div class="d-flex justify-content-end gap-2">
     <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
-    <button type="submit" class="btn btn-primary">Lancer la fabrication</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-gear-fill me-1"></i> Lancer la fabrication
+    </button>
 </div>
 
 {{ form_end(form) }}

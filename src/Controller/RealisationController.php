@@ -9,6 +9,7 @@ use App\Repository\RealisationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -65,6 +66,45 @@ class RealisationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $gamme = $realisation->getGamme();
+            $pieceAProduire = $gamme ? $gamme->getPiece() : null;
+
+            // 1. VÉRIFICATION ET DÉDUCTION DES STOCKS DE MATIÈRES PREMIÈRES
+            if ($pieceAProduire) {
+                $peutFabriquer = true;
+                $manquants = [];
+
+                // On boucle sur la composition (nomenclature) de la pièce
+                foreach ($pieceAProduire->getComposants() as $composant) {
+                    // On récupère la matière première et la quantité grâce à ton entité PieceComposition
+                    $matiere = $composant->getPieceEnfant();
+                    $quantiteNecessaire = $composant->getQuantite();
+
+                    if ($matiere->getQuantiteStock() < $quantiteNecessaire) {
+                        $peutFabriquer = false;
+                        $manquants[] = $matiere->getLibelle().' (Requis : '.$quantiteNecessaire.', Stock : '.$matiere->getQuantiteStock().')';
+                    }
+                }
+
+                // SI STOCK INSUFFISANT : On bloque et on affiche l'erreur dans la modale
+                if (!$peutFabriquer) {
+                    $form->addError(new FormError('Impossible de lancer la fabrication. Stock insuffisant : '.implode(' | ', $manquants)));
+
+                    return $this->render('atelier/realisation/new.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+
+                // SI TOUT EST BON : On déduit le stock
+                foreach ($pieceAProduire->getComposants() as $composant) {
+                    $matiere = $composant->getPieceEnfant();
+                    $quantiteNecessaire = $composant->getQuantite();
+
+                    $matiere->setQuantiteStock($matiere->getQuantiteStock() - $quantiteNecessaire);
+                    // L'entité matière étant déjà gérée par Doctrine, le flush() final la mettra à jour en base.
+                }
+            }
+
             $entityManager->persist($realisation);
 
             if ($realisation->getGamme()) {
@@ -94,7 +134,7 @@ class RealisationController extends AbstractController
 
             $entityManager->flush();
 
-            $this->addFlash('success', 'L\'ordre de fabrication a été lancé et ses étapes ont été générées.');
+            $this->addFlash('success', 'L\'ordre de fabrication a été lancé et les matières premières ont été déduites du stock.');
 
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_realisation_show', ['id' => $realisation->getId()])]);
