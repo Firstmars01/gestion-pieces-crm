@@ -155,6 +155,15 @@ body {
     visibility: visible;
 }
 
+/* --- Effet gris clair au survol d'une ligne entière --- */
+.table tbody tr > td {
+    transition: background-color 0.2s ease-in-out; /* Rend l'apparition du gris fluide */
+}
+
+.table tbody tr:hover > td {
+    background-color: #f1f3f5; /* Le gris clair élégant (assorti au fond de tes modales) */
+}
+
 /* ==========================================================================
    Pagination (Style Pilule)
    ========================================================================== */

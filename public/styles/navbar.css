@@ -177,20 +177,23 @@
 .submenu {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 5px 0 10px 0;
-    margin: 0;
-    background: transparent;
+    gap: 0; /* Enlève l'espacement entre les liens pour faire un bloc uni */
+    padding: 0; /* Enlève l'espace vide disgracieux en haut et en bas */
+    margin-top: 0; /* Colle parfaitement le sous-menu au bouton parent "Atelier" */
+
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .sidebar-sublink {
     display: block;
     text-align: left;
-    padding: 8px 15px 8px 32px;
+    padding: 8px 15px 8px 32px; /* La zone cliquable reste confortable */
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-size: 0.82rem;
-    border-radius: 0;
+    border-radius: 0; /* Les liens doivent être rectangulaires pour bien remplir le fond */
     transition: background 0.15s ease, color 0.15s ease;
     white-space: nowrap;
     overflow: hidden;
@@ -207,10 +210,10 @@
     font-weight: 600;
     color: #ffffff;
     border-left: 3px solid #ffffff;
-    padding-left: 29px; /* On compense les 3px de la bordure pour rester aligné avec le reste (32-3=29) */
+    padding-left: 29px;
 }
 
-/* --- Gestion du chevron (inchangée) --- */
+/* --- Gestion du chevron --- */
 .sidebar-link .bi-chevron-down {
     transition: transform 0.2s ease;
     font-size: 0.85rem;
