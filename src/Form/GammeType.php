@@ -47,6 +47,10 @@ class GammeType extends AbstractType
                             ->setParameter('gammeId', $gammeActuelle->getId());
                     }
 
+                    // 3. AJOUT DE LA RÈGLE MÉTIER : UNIQUEMENT INTERMÉDIAIRE OU LIVRABLE
+                    $qb->andWhere('p.type IN (:types_autorises)')
+                        ->setParameter('types_autorises', ['INTERMEDIAIRE', 'LIVRABLE']);
+
                     // On trie par ordre alphabétique des références pour que ce soit propre
                     $qb->orderBy('p.reference', 'ASC');
 
