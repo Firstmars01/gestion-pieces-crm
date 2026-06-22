@@ -169,7 +169,11 @@ class RealisationController extends AbstractController
             throw $this->createNotFoundException('Étape introuvable.');
         }
 
-        if (null === $pointage->getTemps() && $pointage->getOperation()) {
+        // Si le temps est actuellement null, c'est que l'étape n'a ENCORE JAMAIS été pointée.
+        $isFirstTimePointingThisStep = (null === $pointage->getTemps());
+
+        // Pré-remplissage si c'est le premier pointage de cette étape (pour l'affichage du formulaire)
+        if ($isFirstTimePointingThisStep && $pointage->getOperation()) {
             $pointage->setTemps($pointage->getTempsPrevu());
             $pointage->setPosteMachine($pointage->getOperation()->getPosteMachine());
         }
@@ -178,9 +182,37 @@ class RealisationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // 1. On applique d'abord la validation du formulaire en base de données
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le pointage a été enregistré avec succès.');
+            // 2. On vérifie si TOUTES les étapes de l'Ordre de Fabrication sont désormais remplies
+            $ofEstEntierementTermine = true;
+            foreach ($realisation->getRealisationPostes() as $rp) {
+                if (null === $rp->getTemps()) {
+                    $ofEstEntierementTermine = false;
+                    break;
+                }
+            }
+
+            // 3. SI c'était le premier pointage de cette étape ET que tout l'OF est maintenant fini
+            if ($isFirstTimePointingThisStep && $ofEstEntierementTermine) {
+                if ($realisation->getGamme() && $realisation->getGamme()->getPiece()) {
+                    $pieceFabriquee = $realisation->getGamme()->getPiece();
+
+                    // Sécurité anti-null pour le stock actuel
+                    $stockActuel = $pieceFabriquee->getQuantiteStock() ?? 0;
+                    $pieceFabriquee->setQuantiteStock($stockActuel + 1);
+
+                    // On re-flush pour envoyer la mise à jour du stock de la pièce en BDD !
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Pointage enregistré. L\'Ordre de Fabrication est TERMINÉ ! 1 unité de "'.$pieceFabriquee->getLibelle().'" a été ajoutée au stock.');
+                } else {
+                    $this->addFlash('success', 'Toutes les étapes sont terminées (Aucune pièce liée à cette gamme).');
+                }
+            } else {
+                $this->addFlash('success', 'Le pointage a été enregistré avec succès.');
+            }
 
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_realisation_show', ['id' => $realisation->getId()])]);
