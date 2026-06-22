@@ -164,6 +164,20 @@ body {
     background-color: #f1f3f5; /* Le gris clair élégant (assorti au fond de tes modales) */
 }
 
+/* Classe utilitaire pour les colonnes de tableau qui ont besoin d'une largeur minimale */
+.min-width-150 {
+    min-width: 150px;
+}
+
+/* Classe pour contrôler la hauteur des barres de progression */
+.progress-sm {
+    height: 8px;
+}
+
+.max-width-300 {
+    max-width: 300px;
+}
+
 /* ==========================================================================
    Pagination (Style Pilule)
    ========================================================================== */

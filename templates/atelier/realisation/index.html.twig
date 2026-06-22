@@ -36,10 +36,10 @@
                 <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col" style="width: 120px;">{{ knp_pagination_sortable(realisations, 'Numéro', 'r.id') }}</th>
+                        <th scope="col" >{{ knp_pagination_sortable(realisations, 'Numéro', 'r.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(realisations, 'Gamme associée', 'g.libelle') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(realisations, 'Pièce à produire', 'p.reference') }}</th>
-                        <th scope="col" style="min-width: 150px;">Avancement</th>
+                        <th scope="col" class="min-width-150">Avancement</th>
                         <th scope="col" class="text-end"></th>
                     </tr>
                     </thead>
@@ -68,7 +68,7 @@
 
                             <td>
                                 <div class="d-flex align-items-center gap-2" title="{{ done_steps }} étape(s) sur {{ total_steps }}">
-                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div class="progress flex-grow-1 progress-sm" >
                                         <div class="progress-bar {{ progress_percent == 100 ? 'bg-success' : 'bg-primary' }}"
                                              role="progressbar"
                                              style="width: {{ progress_percent }}%"

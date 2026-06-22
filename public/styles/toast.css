@@ -1,0 +1,18 @@
+/* Conteneur des notifications (Flash messages) */
+.flash-container {
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    pointer-events: none;
+    min-width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Permet aux alertes de rester cliquables (fermeture) malgré le conteneur */
+.flash-container .alert {
+    pointer-events: auto;
+}
