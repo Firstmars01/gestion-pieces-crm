@@ -19,7 +19,7 @@ class Gamme
     private ?string $libelle = null;
 
     // Relation OneToOne avec la Pièce (Gamme possède la clé étrangère piece_id)
-    #[ORM\OneToOne(inversedBy: 'gamme', targetEntity: Piece::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'gamme', targetEntity: Piece::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Piece $piece = null;
 

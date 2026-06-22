@@ -26,32 +26,35 @@ class GammeType extends AbstractType
             ])
             ->add('piece', EntityType::class, [
                 'class' => Piece::class,
-                // On filtre les pièces disponibles avec le query_builder
                 'query_builder' => function (EntityRepository $er) use ($gammeActuelle) {
                     $qb = $er->createQueryBuilder('p');
 
-                    // 1. On prépare une sous-requête qui va chercher TOUTES les pièces déjà liées à une gamme
-                    $subQuery = $er->createQueryBuilder('p2')
-                        ->select('IDENTITY(g.piece)') // On cible la clé étrangère piece_id
-                        ->from('App\Entity\Gamme', 'g')
-                        ->where('g.piece IS NOT NULL');
-
-                    // 2. Logique selon qu'on est en Création ou en Modification
-                    if (!$gammeActuelle || !$gammeActuelle->getId()) {
-                        // CRÉATION : On exclut toutes les pièces de la sous-requête
-                        $qb->where($qb->expr()->notIn('p.id', $subQuery->getDQL()));
-                    } else {
-                        // MODIFICATION : On exclut les pièces utilisées SAUF celle de la gamme actuelle
-                        $subQuery->andWhere('g.id != :gammeId');
-                        $qb->where($qb->expr()->notIn('p.id', $subQuery->getDQL()))
-                            ->setParameter('gammeId', $gammeActuelle->getId());
-                    }
-
-                    // 3. AJOUT DE LA RÈGLE MÉTIER : UNIQUEMENT INTERMÉDIAIRE OU LIVRABLE
-                    $qb->andWhere('p.type IN (:types_autorises)')
+                    // 1. Règle métier : Seulement les pièces fabricables
+                    $qb->where('p.type IN (:types_autorises)')
                         ->setParameter('types_autorises', ['INTERMEDIAIRE', 'LIVRABLE']);
 
-                    // On trie par ordre alphabétique des références pour que ce soit propre
+                    // 2. L'ARME NUCLÉAIRE : On demande une liste d'IDs pure à la BDD
+                    $em = $er->getEntityManager();
+                    $query = $em->createQuery('SELECT IDENTITY(g.piece) AS piece_id FROM App\Entity\Gamme g WHERE g.piece IS NOT NULL');
+                    $result = $query->getArrayResult();
+
+                    // On transforme le résultat en un simple tableau d'IDs (ex: [1, 4, 12])
+                    $piecesOccupees = array_map(function($row) { return $row['piece_id']; }, $result);
+
+                    // 3. Gestion de la modification : on "libère" la pièce de la gamme qu'on modifie
+                    if ($gammeActuelle && $gammeActuelle->getId() && $gammeActuelle->getPiece()) {
+                        $piecesOccupees = array_filter($piecesOccupees, function($id) use ($gammeActuelle) {
+                            return $id !== $gammeActuelle->getPiece()->getId();
+                        });
+                    }
+
+                    // 4. On applique l'exclusion stricte si des pièces sont occupées
+                    if (!empty($piecesOccupees)) {
+                        $qb->andWhere('p.id NOT IN (:occupees)')
+                            ->setParameter('occupees', array_values($piecesOccupees));
+                    }
+
+                    // On trie par ordre alphabétique
                     $qb->orderBy('p.reference', 'ASC');
 
                     return $qb;
@@ -62,7 +65,6 @@ class GammeType extends AbstractType
                 'label' => 'Pièce fabriquée',
                 'placeholder' => 'Sélectionnez une pièce...',
                 'required' => true,
-                // Maintien de Tom Select
                 'attr' => ['class' => 'select-searchable'],
             ])
             ->add('user', EntityType::class, [

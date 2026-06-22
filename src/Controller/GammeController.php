@@ -98,9 +98,22 @@ class GammeController extends AbstractController
     public function delete(Request $request, Gamme $gamme, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete_gamme_'.$gamme->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($gamme);
-            $entityManager->flush();
-            $this->addFlash('success', 'La gamme a été supprimée.');
+            try {
+                // 1. SUPPRIMER LES ÉTAPES (C'est ça qui empêchait la suppression !)
+                foreach ($gamme->getGammeOperations() as $etape) {
+                    $entityManager->remove($etape);
+                }
+
+                // 2. SUPPRIMER LA GAMME
+                // Doctrine va automatiquement libérer la pièce liée lors du flush
+                $entityManager->remove($gamme);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'La gamme a été supprimée avec succès. La pièce est de nouveau libre !');
+            } catch (\Exception $e) {
+                // Si la suppression est bloquée par un ordre de fabrication existant
+                $this->addFlash('danger', 'Impossible de supprimer cette gamme, elle est probablement liée à un historique de fabrication.');
+            }
         } else {
             $this->addFlash('danger', 'Action non autorisée (Token CSRF invalide).');
         }
