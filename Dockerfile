@@ -44,6 +44,7 @@ EXPOSE 80
 
 # On lance les migrations, on vérifie l'interrupteur pour les fixtures, on fait l'admin et on démarre.
 CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod \
+    && php bin/console doctrine:fixtures:load --no-interaction --env=prod \
     && php bin/create_admin.php \
     && chown -R www-data:www-data var \
     && apache2-foreground
