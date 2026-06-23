@@ -1,0 +1,126 @@
+{% extends './base.html.twig' %}
+
+{% block title %}Clients{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        {# En-tête avec le même alignement que les autres pages #}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Clients</h1>
+                <p class="text-muted mb-0">Gérez votre portefeuille clients et vos contacts commerciaux.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                {# Formulaire de recherche #}
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('commercial_client_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                {# Bouton d'ajout (prêt pour la modale) #}
+                <button type="button" onclick="openModalAjax('Nouveau client', '{{ path('commercial_client_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-person-plus me-1"></i>
+                    Nouveau client
+                </button>
+            </div>
+        </div>
+
+        {# Tableau des clients #}
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-sortable">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">{{ knp_pagination_sortable(clients, 'Identité / Raison Sociale', 'c.raisonSociale') }}</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initials avatar-initials-primary me-2">
+                                        {% if client.raisonSociale %}
+                                            {{ client.raisonSociale|first|upper }}
+                                        {% else %}
+                                            {{ client.nom|first|upper }}{{ client.prenom|first|upper }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="admin-user-table__identity">
+                                        {% if client.raisonSociale %}
+                                            <div class="fw-semibold">{{ client.raisonSociale }}</div>
+                                            <div class="small text-muted">{{ client.prenom }} {{ client.nom }}</div>
+                                        {% else %}
+                                            <div class="fw-semibold">{{ client.prenom }} {{ client.nom }}</div>
+                                            <div class="small text-muted">Particulier</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1 small">
+                                    {% if client.email %}
+                                        <span class="text-muted"><i class="bi bi-envelope me-1"></i> {{ client.email }}</span>
+                                    {% endif %}
+                                    {% if client.telephone %}
+                                        <span class="text-muted"><i class="bi bi-telephone me-1"></i> {{ client.telephone }}</span>
+                                    {% endif %}
+                                    {% if not client.email and not client.telephone %}
+                                        <span class="text-secondary fst-italic">Aucun contact</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                {# Boutons d'actions au survol #}
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier le client', '{{ path('commercial_client_edit', {id: client.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <form method="post" action="{{ path('commercial_client_delete', {id: client.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?');" class="mb-0">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_client_' ~ client.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                Aucun client trouvé dans la base de données.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Pagination Pilule #}
+        <div class="pagination-container pagination-pill">
+            {{ knp_pagination_render(clients) }}
+        </div>
+    </div>
+{% endblock %}
