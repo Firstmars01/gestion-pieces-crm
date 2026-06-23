@@ -34,12 +34,20 @@ class Devis
     #[ORM\OneToMany(mappedBy: 'devis', targetEntity: DevisLigne::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $devisLignes;
 
+    #[ORM\OneToMany(mappedBy: 'devis', targetEntity: Commande::class)]
+    private Collection $commandes;
+
     public function __construct()
     {
         $this->devisLignes = new ArrayCollection();
-        // Par défaut, la date du devis est la date du jour de la création
+        $this->commandes = new ArrayCollection(); // Ajoute cette ligne !
         $this->dateDevis = new \DateTime();
     }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection { return $this->commandes; }
 
     public function getId(): ?int
     {

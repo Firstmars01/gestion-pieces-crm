@@ -11,7 +11,9 @@
             </a>
         </div>
 
-        {# Carte principale (En-tête du devis) #}
+        {# ---------------------------------------------------- #}
+        {# PARTIE 1 : LE DEVIS (Les propositions)               #}
+        {# ---------------------------------------------------- #}
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
@@ -20,25 +22,21 @@
                     </h5>
                     <div class="text-muted small">
                         Devis #{{ devis.id }} • Créé le {{ devis.dateDevis|date('d/m/Y') }}
-                        {% if devis.dateLimite %} • Valide jusqu'au {{ devis.dateLimite|date('d/m/Y') }}{% endif %}
+                        {% if devis.dateLimite %} • <span class="{{ date() > devis.dateLimite ? 'text-danger fw-bold' : '' }}">Valide jusqu'au {{ devis.dateLimite|date('d/m/Y') }}</span>{% endif %}
                     </div>
                 </div>
-
                 <div class="text-md-end">
                     <div class="fs-4 fw-bold text-primary">{{ devis.getTotal()|number_format(2, ',', ' ') }} €</div>
-                    <div class="text-muted small">Montant total HT</div>
+                    <div class="text-muted small">Montant total HT proposé</div>
                 </div>
             </div>
         </div>
 
-        {# Tableau des lignes du devis #}
-        <div class="card shadow-sm border-0 overflow-hidden">
+        <div class="card shadow-sm border-0 overflow-hidden mb-5">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-list-check me-2"></i>Contenu du devis</h6>
-
-                {# Bouton pour ajouter des pièces #}
-                <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_devis_ligne_new', {id: devis.id}) }}')" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i> Ajouter une pièce
+                <h6 class="mb-0 fw-bold"><i class="bi bi-card-list me-2"></i>Contenu du Devis (Propositions)</h6>
+                <button type="button" onclick="openModalAjax('Ajouter une pièce au devis', '{{ path('commercial_devis_ligne_new', {id: devis.id}) }}')" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Pièce au devis
                 </button>
             </div>
 
@@ -46,7 +44,6 @@
                 <table class="table align-middle mb-0">
                     <thead class="table-light">
                     <tr>
-                        <th>Référence</th>
                         <th>Pièce</th>
                         <th class="text-center">Quantité</th>
                         <th class="text-end">Prix U.</th>
@@ -57,40 +54,18 @@
                     <tbody>
                     {% for ligne in devis.devisLignes %}
                         <tr>
-                            <td class="fw-semibold text-muted">{{ ligne.piece.reference }}</td>
-                            <td class="fw-medium text-dark">{{ ligne.piece.libelle }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-secondary bg-opacity-10 text-dark border px-2 py-1">{{ ligne.quantite }}</span>
-                            </td>
+                            <td class="fw-medium text-dark">{{ ligne.piece.reference }} - {{ ligne.piece.libelle }}</td>
+                            <td class="text-center"><span class="badge bg-secondary bg-opacity-10 text-dark border px-2 py-1">{{ ligne.quantite }}</span></td>
                             <td class="text-end text-muted">{{ ligne.prix|number_format(2, ',', ' ') }} €</td>
-                            <td class="text-end fw-bold text-dark">
-                                {{ (ligne.prix * ligne.quantite)|number_format(2, ',', ' ') }} €
-                            </td>
+                            <td class="text-end fw-bold text-dark">{{ (ligne.prix * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end">
-                                {# Boutons cachés gérés par la classe action-buttons #}
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
-
-                                    <button type="button"
-                                            onclick="openModalAjax('Modifier la ligne', '{{ path('commercial_devis_ligne_edit', {id: ligne.id}) }}')"
-                                            class="btn btn-sm btn-outline-primary" title="Modifier">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <form method="post" action="{{ path('commercial_devis_ligne_delete', {id: ligne.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer cette pièce du devis ?');" class="mb-0">
+                                    <button type="button" onclick="openModalAjax('Modifier la ligne', '{{ path('commercial_devis_ligne_edit', {id: ligne.id}) }}')" class="btn btn-sm btn-outline-primary" title="Modifier"><i class="bi bi-pencil-square"></i></button>
+                                    <form method="post" action="{{ path('commercial_devis_ligne_delete', {id: ligne.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" class="mb-0">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete_ligne_' ~ ligne.id) }}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer"><i class="bi bi-trash"></i></button>
                                     </form>
-
                                 </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-5">
-                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                                Aucune pièce ajoutée. Cliquez sur "Ajouter une pièce" en haut à droite.
                             </td>
                         </tr>
                     {% endfor %}
@@ -98,6 +73,60 @@
                 </table>
             </div>
         </div>
+
+        {# ---------------------------------------------------- #}
+        {# PARTIE 2 : LES COMMANDES ISSUES DU DEVIS             #}
+        {# ---------------------------------------------------- #}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-cart-check text-success me-2"></i>Commandes en cours</h5>
+
+            {% set isExpired = devis.dateLimite and date() > devis.dateLimite %}
+            <form method="post" action="{{ path('commercial_commande_new', {id: devis.id}) }}">
+                <button type="submit" class="btn btn-success" {{ isExpired ? 'disabled' : '' }}>
+                    <i class="bi bi-cart-plus me-1"></i> Créer une commande
+                </button>
+            </form>
+        </div>
+
+        {% for commande in devis.commandes %}
+            <div class="card shadow-sm border-success border-opacity-25 mb-4">
+                <div class="card-header bg-success bg-opacity-10 py-3 d-flex justify-content-between align-items-center border-bottom-0">
+                    <div>
+                        <h6 class="mb-0 fw-bold text-success">{{ commande.numero }}</h6>
+                        <small class="text-muted">Créée le {{ commande.dateCmd|date('d/m/Y') }}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-white text-dark border fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
+                        <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-success ms-2" {{ isExpired ? 'disabled' : '' }}>
+                            <i class="bi bi-plus-lg"></i> Pièce à la commande
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <tbody>
+                        {% for cLigne in commande.commandeLignes %}
+                            <tr>
+                                <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
+                                <td class="text-center">Qté: {{ cLigne.quantite }}</td>
+                                <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
+                                <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3 fst-italic">Cette commande est vide. Ajoutez-y des pièces du devis !</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-4 border rounded bg-white shadow-sm">
+                Aucune commande n'a encore été passée pour ce devis.
+            </div>
+        {% endfor %}
 
     </div>
 {% endblock %}
