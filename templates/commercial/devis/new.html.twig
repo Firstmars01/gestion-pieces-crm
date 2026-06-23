@@ -1,0 +1,12 @@
+{{ form_start(form, {'attr': {'id': 'form-devis'}}) }}
+<div class="row g-3">
+    <div class="col-12">{{ form_row(form.client) }}</div>
+    <div class="col-md-6">{{ form_row(form.user) }}</div>
+    <div class="col-md-6">{{ form_row(form.dateLimite) }}</div>
+</div>
+<hr class="my-4">
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">Créer et ajouter des pièces</button>
+</div>
+{{ form_end(form) }}

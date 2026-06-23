@@ -1,0 +1,29 @@
+{{ form_start(form, {'attr': {'id': 'form-devis-ligne'}}) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        {# Si on est en modification de ligne #}
+        {% if ligne is defined and ligne.id %}
+            <label class="form-label text-muted">Pièce sélectionnée</label>
+            <div class="form-control bg-light fw-bold text-dark border-0 shadow-sm">
+                <i class="bi bi-box-seam me-2"></i> {{ ligne.piece.reference }} - {{ ligne.piece.libelle }}
+            </div>
+            <div class="d-none">{{ form_row(form.piece) }}</div>
+        {% else %}
+            {# Si c'est une nouvelle ligne #}
+            {{ form_row(form.piece) }}
+        {% endif %}
+    </div>
+
+    <div class="col-md-6">{{ form_row(form.quantite) }}</div>
+    <div class="col-md-6">{{ form_row(form.prix) }}</div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</div>
+
+{{ form_end(form) }}

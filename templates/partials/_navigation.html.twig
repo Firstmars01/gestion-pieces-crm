@@ -82,6 +82,7 @@
             <div class="collapse {% if current_route starts with 'commercial_' %}show{% endif %} mt-1" id="commercialMenu">
                 <nav class="submenu">
                     <a href="{{ path('commercial_client_index') }}" class="sidebar-sublink {% if current_route starts with 'commercial_client_' %}active{% endif %}">Clients</a>
+                    <a href="{{ path('commercial_devis_index') }}" class="sidebar-sublink {% if current_route starts with 'commercial_devis_' %}active{% endif %}">Devis</a>
                 </nav>
             </div>
         {% endif %}

@@ -1,0 +1,91 @@
+{% extends './base.html.twig' %}
+
+{% block title %}Gestion des Devis{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        {# En-tête classique #}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Devis</h1>
+                <p class="text-muted mb-0">Éditez et suivez les devis commerciaux de l'entreprise.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('commercial_devis_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center"><i class="bi bi-x-lg"></i></a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+
+                <button type="button" onclick="openModalAjax('Nouveau devis', '{{ path('commercial_devis_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-plus-circle me-1"></i> Nouveau devis
+                </button>
+            </div>
+        </div>
+
+        {# Tableau Standardisé #}
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-sortable">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">{{ knp_pagination_sortable(devisList, '#', 'd.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(devisList, 'Client', 'c.raisonSociale') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(devisList, 'Date de création', 'd.dateDevis') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(devisList, 'Date limite', 'd.dateLimite') }}</th>
+                        <th scope="col" class="text-end">Prix</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for devis in devisList %}
+                        <tr>
+                            <td class="text-muted">{{ devis.id }}</td>
+                            <td class="fw-bold text-uppercase text-dark">
+                                {{ devis.client.raisonSociale ? devis.client.raisonSociale : devis.client.nomComplet }}
+                            </td>
+                            <td>{{ devis.dateDevis|date('d/m/Y') }}</td>
+                            <td>{{ devis.dateLimite ? devis.dateLimite|date('d/m/Y') : '-' }}</td>
+                            <td class="text-end fw-semibold">
+                                {{ devis.getTotal()|number_format(0, '', ' ') }} €
+                            </td>
+                            <td class="text-end">
+                                {# Boutons d'actions au survol (comme sur Gammes et Clients) #}
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <a href="{{ path('commercial_devis_show', {id: devis.id}) }}"
+                                       class="btn btn-sm btn-outline-info"
+                                       title="Consulter les détails">
+                                        <i class="bi bi-info-circle"></i> Consulter
+                                    </a>
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier devis', '{{ path('commercial_devis_edit', {id: devis.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Aucun devis trouvé.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Pagination #}
+        <div class="pagination-container pagination-pill mt-3">
+            {{ knp_pagination_render(devisList) }}
+        </div>
+    </div>
+{% endblock %}
