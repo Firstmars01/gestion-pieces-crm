@@ -1,0 +1,19 @@
+{{ form_start(form, {'attr': {'id': 'form-commande-edit'}}) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        <h6 class="text-muted mb-2 pb-1 border-bottom">Informations de la commande {{ commande.numero }}</h6>
+    </div>
+
+    <div class="col-md-6">{{ form_row(form.dateCmd) }}</div>
+    <div class="col-md-6">{{ form_row(form.dateFacture) }}</div>
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</div>
+
+{{ form_end(form) }}

@@ -1,43 +1,23 @@
 {{ form_start(form, {'attr': {'id': 'form-commande-ligne'}}) }}
 <div class="row g-3">
     <div class="col-12">
-        <div class="alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25 py-2 small d-flex align-items-center text-primary">
+        <div class="alert alert-info py-2 small d-flex align-items-center">
             <i class="bi bi-info-circle me-2 fs-5"></i>
-            <div>Sélectionnez une pièce. Le prix est verrouillé et la quantité est limitée au reste à commander.</div>
+            <div>
+                Conformément aux règles, la quantité et le prix seront copiés à l'identique depuis le devis.
+            </div>
         </div>
     </div>
-    <div class="col-12">{{ form_row(form.devisLigne) }}</div>
-    <div class="col-md-6">{{ form_row(form.quantite) }}</div>
+
+    <div class="col-12">
+        {{ form_row(form.devisLigne) }}
+    </div>
 </div>
+
 <hr class="my-4">
+
 <div class="d-flex justify-content-end gap-2">
     <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
-    <button type="submit" class="btn btn-primary">Valider l'ajout</button>
+    <button type="submit" class="btn btn-primary" {{ form.devisLigne.vars.disabled ? 'disabled' : '' }}>Valider l'ajout</button>
 </div>
 {{ form_end(form) }}
-
-<script>
-    setTimeout(function() {
-        const selectEl = document.querySelector('.piece-commande-select');
-        const inputQuantite = document.querySelector('.quantite-input');
-
-        function updateQty() {
-            if(!selectEl || !inputQuantite) return;
-            const selectedOption = selectEl.options[selectEl.selectedIndex];
-            if (selectedOption && selectedOption.hasAttribute('data-reste')) {
-                const max = selectedOption.getAttribute('data-reste');
-                inputQuantite.max = max; // Bloque le formulaire
-                if (parseInt(inputQuantite.value) > parseInt(max)) {
-                    inputQuantite.value = max; // Corrige si le commercial tape trop
-                }
-            }
-        }
-
-        if(selectEl) {
-            // Compatible avec Javascript standard et JQuery (Select2)
-            selectEl.addEventListener('change', updateQty);
-            if(typeof $ !== 'undefined') $(selectEl).on('change', updateQty);
-            updateQty(); // Lancement au démarrage
-        }
-    }, 200);
-</script>

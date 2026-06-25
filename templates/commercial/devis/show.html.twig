@@ -55,15 +55,19 @@
                     {% for ligne in devis.devisLignes %}
                         <tr>
                             <td class="fw-medium text-dark">{{ ligne.piece.reference }} - {{ ligne.piece.libelle }}</td>
-                            <td class="text-center"><span class="badge bg-secondary bg-opacity-10 text-dark border px-2 py-1">{{ ligne.quantite }}</span></td>
+                            <td class="text-center">{{ ligne.quantite }}</td>
                             <td class="text-end text-muted">{{ ligne.prix|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end fw-bold text-dark">{{ (ligne.prix * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
-                                    <button type="button" onclick="openModalAjax('Modifier la ligne', '{{ path('commercial_devis_ligne_edit', {id: ligne.id}) }}')" class="btn btn-sm btn-outline-primary" title="Modifier"><i class="bi bi-pencil-square"></i></button>
+                                    <button type="button" onclick="openModalAjax('Modifier la ligne', '{{ path('commercial_devis_ligne_edit', {id: ligne.id}) }}')" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
                                     <form method="post" action="{{ path('commercial_devis_ligne_delete', {id: ligne.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" class="mb-0">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete_ligne_' ~ ligne.id) }}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer"><i class="bi bi-trash"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -90,32 +94,67 @@
 
         {% for commande in devis.commandes %}
             <div class="card shadow-sm border-success border-opacity-25 mb-4">
+
+                {# EN-TÊTE DE LA COMMANDE #}
                 <div class="card-header bg-success bg-opacity-10 py-3 d-flex justify-content-between align-items-center border-bottom-0">
+
+                    {# GAUCHE : Numéro + BOUTON MODIFIER DATES + Dates #}
                     <div>
-                        <h6 class="mb-0 fw-bold text-success">{{ commande.numero }}</h6>
-                        <small class="text-muted">Créée le {{ commande.dateCmd|date('d/m/Y') }}</small>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h6 class="mb-0 fw-bold text-success">{{ commande.numero }}</h6>
+                            <button type="button" onclick="openModalAjax('Modifier la commande', '{{ path('commercial_commande_edit', {id: commande.id}) }}')" class="btn btn-sm btn-outline-success py-0 px-1" title="Modifier les dates">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            Créée le {{ commande.dateCmd|date('d/m/Y') }}
+                            {% if commande.dateFacture %}
+                                <span class="ms-2 border-start ps-2">Livraison prévue le {{ commande.dateFacture|date('d/m/Y') }}</span>
+                            {% endif %}
+                        </small>
                     </div>
-                    <div>
+
+                    {# DROITE : Total + Bouton Ajouter + Bouton Supprimer #}
+                    <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-white text-dark border fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
-                        <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-success ms-2" {{ isExpired ? 'disabled' : '' }}>
-                            <i class="bi bi-plus-lg"></i> Pièce à la commande
+
+                        <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-success" {{ isExpired ? 'disabled' : '' }}>
+                            <i class="bi bi-plus-circle me-1"></i> Pièce
                         </button>
+
+                        <form method="post" action="{{ path('commercial_commande_delete', {id: commande.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer toute cette commande ?');" class="mb-0">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_' ~ commande.id) }}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la commande">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
+                {# LIGNES DE LA COMMANDE #}
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <tbody>
                         {% for cLigne in commande.commandeLignes %}
                             <tr>
                                 <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
-                                <td class="text-center">Qté: {{ cLigne.quantite }}</td>
+                                <td class="text-center">{{ cLigne.quantite }}</td>
                                 <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
                                 <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2 action-buttons">
+                                        <form method="post" action="{{ path('commercial_commande_ligne_delete', {id: cLigne.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer cette pièce de la commande ?');" class="mb-0">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_ligne_' ~ cLigne.id) }}">
+                                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la ligne">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-3 fst-italic">Cette commande est vide. Ajoutez-y des pièces du devis !</td>
+                                <td colspan="5" class="text-center text-muted py-3 fst-italic">Cette commande est vide. Ajoutez-y des pièces du devis !</td>
                             </tr>
                         {% endfor %}
                         </tbody>

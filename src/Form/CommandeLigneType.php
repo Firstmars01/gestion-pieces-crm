@@ -6,7 +6,6 @@ use App\Entity\CommandeLigne;
 use App\Entity\DevisLigne;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,26 +15,20 @@ class CommandeLigneType extends AbstractType
     {
         $devis = $options['devis'];
 
-        // 1. Calculer les pièces qui ont encore un reste à commander
+        // On ne propose que les lignes du devis qui n'ont pas encore été commandées
         $lignesDispo = [];
-        $restes = []; // Stockage du reste par ID de DevisLigne
-
         foreach ($devis->getDevisLignes() as $dl) {
-            $dejaCommande = 0;
-            // On compte combien on en a déjà commandé dans les autres commandes de ce devis
+            $dejaCommande = false;
             foreach ($devis->getCommandes() as $cmd) {
                 foreach ($cmd->getCommandeLignes() as $cl) {
-                    if ($cl->getPiece() === $dl->getPiece()) {
-                        $dejaCommande += $cl->getQuantite();
+                    if ($cl->getPiece()->getId() === $dl->getPiece()->getId()) {
+                        $dejaCommande = true;
+                        break;
                     }
                 }
             }
-            $reste = $dl->getQuantite() - $dejaCommande;
-
-            // On ne garde que s'il en reste à commander !
-            if ($reste > 0) {
+            if (!$dejaCommande) {
                 $lignesDispo[] = $dl;
-                $restes[$dl->getId()] = $reste;
             }
         }
 
@@ -43,28 +36,14 @@ class CommandeLigneType extends AbstractType
             ->add('devisLigne', EntityType::class, [
                 'class' => DevisLigne::class,
                 'choices' => $lignesDispo,
-                'choice_label' => function(DevisLigne $dl) use ($restes) {
-                    $reste = $restes[$dl->getId()] ?? 0;
-                    return $dl->getPiece()->getReference() . ' - ' . $dl->getPiece()->getLibelle() . ' (Reste : ' . $reste . ')';
-                },
-                'choice_attr' => function(DevisLigne $dl) use ($restes) {
-                    // On place le reste en attribut pour le Javascript
-                    return ['data-reste' => $restes[$dl->getId()] ?? 0];
+                'choice_label' => function(DevisLigne $dl) {
+                    return $dl->getPiece()->getReference() . ' - ' . $dl->getPiece()->getLibelle() . ' (Qté: ' . $dl->getQuantite() . ')';
                 },
                 'mapped' => false,
-                'label' => 'Sélectionner la pièce',
-                'placeholder' => 'Sélectionnez une pièce...',
-                'attr' => [
-                    'class' => 'select-searchable piece-commande-select',
-                    'onchange' => "updateMaxQuantite(this);"
-                ]
-            ])
-            ->add('quantite', IntegerType::class, [
-                'label' => 'Quantité à commander',
-                'attr' => [
-                    'min' => 1,
-                    'class' => 'quantite-input'
-                ]
+                'label' => 'Sélectionner la ligne du devis à commander',
+                'placeholder' => empty($lignesDispo) ? 'Toutes les lignes ont déjà été commandées' : 'Sélectionnez une pièce...',
+                'attr' => ['class' => 'select-searchable piece-commande-select'],
+                'disabled' => empty($lignesDispo)
             ]);
     }
 
