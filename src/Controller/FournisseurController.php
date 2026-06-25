@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Fournisseur;
 use App\Entity\Piece;
-use App\Form\FournisseurType;
 use App\Form\FournisseurPiecePrixCatalogueType;
+use App\Form\FournisseurType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -126,9 +126,9 @@ class FournisseurController extends AbstractController
             if ($piece) {
                 $piece->setFournisseur($fournisseur);
 
-                if ($nouveauPrix !== null) {
+                if (null !== $nouveauPrix && '' !== $nouveauPrix) {
                     // On met à jour la propriété de la pièce
-                    $piece->setPrixCatalogue($nouveauPrix);
+                    $piece->setPrixCatalogue(str_replace(',', '.', trim((string) $nouveauPrix)));
                 }
 
                 $em->flush();
@@ -138,9 +138,10 @@ class FournisseurController extends AbstractController
 
             if ($request->isXmlHttpRequest()) {
                 return $this->json([
-                    'redirect' => $this->generateUrl('achats_fournisseur_show', ['id' => $fournisseur->getId()])
+                    'redirect' => $this->generateUrl('achats_fournisseur_show', ['id' => $fournisseur->getId()]),
                 ]);
             }
+
             return $this->redirectToRoute('achats_fournisseur_show', ['id' => $fournisseur->getId()]);
         }
 
