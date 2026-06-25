@@ -1,0 +1,41 @@
+{{ form_start(form, {'attr': {'id': 'form-commande-achat'}}) }}
+
+<div class="row g-3">
+    <div class="col-12">
+        {{ form_row(form.fournisseur) }}
+    </div>
+    <div class="col-md-6">
+        {{ form_row(form.dateCommande) }}
+    </div>
+    <div class="col-md-6">
+        {{ form_row(form.datePrevue) }}
+    </div>
+
+    {# --- AFFICHAGE CONDITIONNEL --- #}
+    {% if commande.id %}
+        {# Si la commande a un ID, on est en mode "Modification" : on affiche l'encart #}
+        <div class="col-12 mt-4 pt-3 border-top">
+            <div class="alert alert-light border shadow-sm">
+                <p class="mb-2 fw-bold"><i class="bi bi-truck text-success me-2"></i>Confirmation de réception</p>
+                {{ form_row(form.dateReelle) }}
+                <small class="text-muted">Ne remplissez ce champ que lorsque vous avez physiquement reçu la marchandise.</small>
+            </div>
+        </div>
+    {% else %}
+        {# En mode "Création", on masque le champ avec d-none pour éviter que la fonction form_end ne l'affiche à la fin #}
+        <div class="d-none">
+            {{ form_row(form.dateReelle) }}
+        </div>
+    {% endif %}
+</div>
+
+<hr class="my-4">
+
+<div class="d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+    <button type="submit" class="btn btn-primary">
+        {{ commande.id ? 'Mettre à jour' : 'Créer la commande' }}
+    </button>
+</div>
+
+{{ form_end(form) }}

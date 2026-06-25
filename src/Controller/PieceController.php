@@ -32,14 +32,14 @@ class PieceController extends AbstractController
             // 2. On utilise une sous-requête (EXISTS) pour chercher dans les composants
             // Cela évite le bug de "l'hydratation partielle" et garde la liste des composants intacte !
             $queryBuilder->andWhere(
-                'LOWER(p.reference) LIKE LOWER(:recherche) OR ' .
-                'LOWER(p.libelle) LIKE LOWER(:recherche) OR ' .
-                'LOWER(p.type) LIKE LOWER(:recherche) OR ' .
-                'EXISTS (' .
-                'SELECT 1 FROM App\Entity\PieceComposition sub_pc ' .
-                'JOIN sub_pc.pieceEnfant sub_pe ' .
-                'WHERE sub_pc.pieceParent = p ' .
-                'AND (LOWER(sub_pe.reference) LIKE LOWER(:recherche) OR LOWER(sub_pe.libelle) LIKE LOWER(:recherche))' .
+                'LOWER(p.reference) LIKE LOWER(:recherche) OR '.
+                'LOWER(p.libelle) LIKE LOWER(:recherche) OR '.
+                'LOWER(p.type) LIKE LOWER(:recherche) OR '.
+                'EXISTS ('.
+                'SELECT 1 FROM App\Entity\PieceComposition sub_pc '.
+                'JOIN sub_pc.pieceEnfant sub_pe '.
+                'WHERE sub_pc.pieceParent = p '.
+                'AND (LOWER(sub_pe.reference) LIKE LOWER(:recherche) OR LOWER(sub_pe.libelle) LIKE LOWER(:recherche))'.
                 ')'
             )
                 ->setParameter('recherche', '%'.$recherche.'%');

@@ -1,0 +1,19 @@
+{% extends app.request.xmlHttpRequest ? 'base_ajax.html.twig' : 'base.html.twig' %}
+
+{% block body %}
+    <div class="{{ app.request.xmlHttpRequest ? '' : 'container-fluid py-4' }}">
+        <div class="mb-3">
+            <div class="fw-bold text-dark">{{ piece.reference }} - {{ piece.libelle }}</div>
+            <div class="text-muted small">Fournisseur : {{ fournisseur.raisonSociale }}</div>
+        </div>
+
+        {{ form_start(form) }}
+        {{ form_row(form.prixCatalogue) }}
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Annuler</button>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

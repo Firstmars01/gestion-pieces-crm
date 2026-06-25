@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Achats{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        {# En-tête classique #}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Commandes d'Achat</h1>
+                <p class="text-muted mb-0">Suivez vos approvisionnements et les livraisons fournisseurs.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ app.request.query.get('q') }}">
+                        {% if app.request.query.get('q') %}
+                            <a href="{{ path('achats_commande_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center"><i class="bi bi-x-lg"></i></a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+
+                <button type="button" onclick="openModalAjax('Nouvelle commande achat', '{{ path('achats_commande_new') }}')" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-plus-circle me-1"></i> Nouveau bon de commande
+                </button>
+            </div>
+        </div>
+
+        {# Tableau Standardisé #}
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-sortable">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">{{ knp_pagination_sortable(commandesList, '#', 'c.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(commandesList, 'Fournisseur', 'f.raisonSociale') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(commandesList, 'Date de commande', 'c.dateCommande') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(commandesList, 'Statut de livraison', 'statut_tri') }}</th>
+                        <th scope="col" class="text-end">Montant</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for commande in commandesList %}
+                        <tr>
+                            <td class="text-muted">{{ commande.id }}</td>
+                            <td class="fw-bold text-uppercase text-dark">{{ commande.fournisseur.raisonSociale }}</td>
+                            <td>{{ commande.dateCommande|date('d/m/Y') }}</td>
+                            <td class="fw-semibold">
+                                {# LOGIQUE DES BADGES DE STATUT #}
+                                {% if commande.dateReelle %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check2-all"></i> Livrée le {{ commande.dateReelle|date('d/m/Y') }}</span>
+                                {% else %}
+                                    {% if date() > commande.datePrevue %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-exclamation-triangle"></i> Retard (Prévue le {{ commande.datePrevue|date('d/m/Y') }})</span>
+                                    {% else %}
+                                        <span class="badge bg-orange-rouge-light text-orange-rouge border border-orange-rouge"><i class="bi bi-clock"></i> En attente (Prévue le {{ commande.datePrevue|date('d/m/Y') }})</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-semibold">
+                                {{ commande.getTotal()|number_format(2, ',', ' ') }} €
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    <a href="{{ path('achats_commande_show', {id: commande.id}) }}"
+                                       class="btn btn-sm btn-outline-info"
+                                       title="Consulter les détails">
+                                        <i class="bi bi-info-circle"></i> Consulter
+                                    </a>
+                                    <button type="button"
+                                            onclick="openModalAjax('Modifier commande', '{{ path('achats_commande_edit', {id: commande.id}) }}')"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Modifier les dates">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Aucune commande d'achat trouvée.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Pagination #}
+        <div class="pagination-container pagination-pill mt-3">
+            {{ knp_pagination_render(commandesList) }}
+        </div>
+    </div>
+{% endblock %}

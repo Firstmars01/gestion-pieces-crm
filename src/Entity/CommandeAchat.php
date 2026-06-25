@@ -38,6 +38,20 @@ class CommandeAchat
         $this->dateCommande = new \DateTime();
     }
 
+    /**
+     * Calcule le montant total de la commande d'achat
+     */
+    public function getTotal(): float
+    {
+        $total = 0;
+        foreach ($this->getLignes() as $ligne) {
+            // On multiplie le prix d'achat par la quantité pour chaque ligne
+            $total += ((float) $ligne->getPrixAchat() * $ligne->getQuantite());
+        }
+
+        return $total;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

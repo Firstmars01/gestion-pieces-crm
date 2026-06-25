@@ -87,6 +87,21 @@
             </div>
         {% endif %}
 
+        {% if is_granted('ROLE_ACHATS') or is_granted('ROLE_ADMIN') %}
+            <a href="#achatsMenu" class="sidebar-link {% if current_route starts with 'achats_' %}active{% endif %}"
+               data-bs-toggle="collapse" role="button" aria-expanded="{{ (current_route starts with 'achats_') ? 'true' : 'false' }}" aria-controls="achatsMenu">
+                Achats
+                <i class="bi bi-chevron-down"></i>
+            </a>
+
+            <div class="collapse {% if current_route starts with 'achats_' %}show{% endif %} mt-1" id="achatsMenu">
+                <nav class="submenu">
+                    <a href="{{ path('achats_fournisseur_index') }}" class="sidebar-sublink {% if current_route starts with 'achats_fournisseur_' %}active{% endif %}">Fournisseurs</a>
+                    <a href="{{ path('achats_commande_index') }}" class="sidebar-sublink {% if current_route starts with 'achats_commande_' %}active{% endif %}">Commandes</a>
+                </nav>
+            </div>
+        {% endif %}
+
     </nav>
 </aside>
 
