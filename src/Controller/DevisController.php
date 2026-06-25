@@ -25,7 +25,8 @@ class DevisController extends AbstractController
             ->orderBy('d.id', 'DESC');
 
         if ($recherche = $request->query->get('q')) {
-            $queryBuilder->andWhere('LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.nom) LIKE LOWER(:recherche)')
+            // CORRECTION : On utilise les vraies colonnes de la BDD (raisonSociale, nom, prenom, et d.nom)
+            $queryBuilder->andWhere('LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.nom) LIKE LOWER(:recherche) OR LOWER(c.prenom) LIKE LOWER(:recherche) OR LOWER(d.nom) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }
 
@@ -74,6 +75,16 @@ class DevisController extends AbstractController
     #[Route('/{id}/ajouter-piece', name: 'commercial_devis_ligne_new', methods: ['GET', 'POST'])]
     public function addLigne(Request $request, Devis $devis, EntityManagerInterface $entityManager): Response
     {
+        // SÉCURITÉ : Le devis est-il expiré ?
+        if ($devis->getDateLimite() && new \DateTime() > $devis->getDateLimite()) {
+            $this->addFlash('danger', 'Action impossible : Ce devis est expiré et définitivement verrouillé.');
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $devis->getId()])]);
+            }
+
+            return $this->redirectToRoute('commercial_devis_show', ['id' => $devis->getId()]);
+        }
+
         $ligne = new DevisLigne();
         $ligne->setDevis($devis);
 
@@ -125,6 +136,16 @@ class DevisController extends AbstractController
     #[Route('/ligne/{id}/supprimer', name: 'commercial_devis_ligne_delete', methods: ['POST'])]
     public function deleteLigne(Request $request, DevisLigne $ligne, EntityManagerInterface $entityManager): Response
     {
+        $devis = $ligne->getDevis();
+        $devisId = $devis->getId();
+
+        // SÉCURITÉ : Le devis est-il expiré ?
+        if ($devis->getDateLimite() && new \DateTime() > $devis->getDateLimite()) {
+            $this->addFlash('danger', 'Action impossible : Ce devis est expiré et définitivement verrouillé.');
+
+            return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
+        }
+
         $devisId = $ligne->getDevis()->getId();
 
         // 1. Combien de fois cette paire a été commandée ?
@@ -132,7 +153,7 @@ class DevisController extends AbstractController
         foreach ($ligne->getDevis()->getCommandes() as $cmd) {
             foreach ($cmd->getCommandeLignes() as $cl) {
                 if ($cl->getPiece()->getId() === $ligne->getPiece()->getId() && $cl->getQuantite() === $ligne->getQuantite()) {
-                    $countCommandees++;
+                    ++$countCommandees;
                 }
             }
         }
@@ -141,7 +162,7 @@ class DevisController extends AbstractController
         $occurrenceIndex = 0;
         foreach ($ligne->getDevis()->getDevisLignes() as $dl) {
             if ($dl->getPiece()->getId() === $ligne->getPiece()->getId() && $dl->getQuantite() === $ligne->getQuantite()) {
-                $occurrenceIndex++;
+                ++$occurrenceIndex;
                 if ($dl->getId() === $ligne->getId()) {
                     break;
                 }
@@ -150,10 +171,11 @@ class DevisController extends AbstractController
 
         if ($occurrenceIndex <= $countCommandees) {
             $this->addFlash('danger', 'Suppression impossible : cette ligne a déjà été transformée en commande.');
+
             return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
         }
 
-        if ($this->isCsrfTokenValid('delete_ligne_' . $ligne->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_ligne_'.$ligne->getId(), $request->request->get('_token'))) {
             $entityManager->remove($ligne);
             $entityManager->flush();
             $this->addFlash('success', 'La ligne a été retirée du devis.');

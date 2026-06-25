@@ -52,7 +52,9 @@
                                 {{ devis.client.raisonSociale ? devis.client.raisonSociale : devis.client.nomComplet }}
                             </td>
                             <td>{{ devis.dateDevis|date('d/m/Y') }}</td>
-                            <td>{{ devis.dateLimite ? devis.dateLimite|date('d/m/Y') : '-' }}</td>
+                            <td class="fw-semibold {% if devis.dateLimite %}{{ devis.dateLimite < date() ? 'text-danger' : 'text-success' }}{% endif %}">
+                                {{ devis.dateLimite ? devis.dateLimite|date('d/m/Y') : '-' }}
+                            </td>
                             <td class="text-end fw-semibold">
                                 {{ devis.getTotal()|number_format(0, '', ' ') }} €
                             </td>

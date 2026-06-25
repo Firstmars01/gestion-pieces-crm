@@ -3,6 +3,7 @@
 {% block title %}Détail Devis #{{ devis.id }}{% endblock %}
 
 {% block body %}
+    {% set isExpired = devis.dateLimite and date() > devis.dateLimite %}
     <div class="container-fluid py-4 max-w-1000px">
 
         <div class="mb-4">
@@ -38,7 +39,7 @@
         <div class="card shadow-sm border-0 overflow-hidden mb-5">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
                 <h6 class="mb-0 fw-bold"><i class="bi bi-card-list me-2"></i>Contenu du Devis (Propositions)</h6>
-                <button type="button" onclick="openModalAjax('Ajouter une pièce au devis', '{{ path('commercial_devis_ligne_new', {id: devis.id}) }}')" class="btn btn-sm btn-outline-primary">
+                <button type="button" onclick="openModalAjax('Ajouter une pièce au devis', '{{ path('commercial_devis_ligne_new', {id: devis.id}) }}')" class="btn btn-sm btn-outline-primary" {{ isExpired ? 'disabled' : '' }}>
                     <i class="bi bi-plus-circle me-1"></i> Pièce au devis
                 </button>
             </div>
@@ -78,7 +79,7 @@
                             {% endif %}
                         {% endfor %}
 
-                        {# 3. Si l'occurrence est <= au nombre de commandes, c'est VERROUILLÉ ! #}
+                        {# 3. Si l'occurrence est <= au nombre de commandes OU expiré, c'est VERROUILLÉ ! #}
                         {% set isCommandee = occurrenceIndex <= countCommandees %}
 
                         <tr>
@@ -88,8 +89,8 @@
                             <td class="text-end fw-bold text-dark">{{ (ligne.prix * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end">
 
-                                {% if isCommandee %}
-                                    <span class="badge bg-light text-muted border" title="Ligne verrouillée : copiée dans une commande.">
+                                {% if isCommandee or isExpired %}
+                                    <span class="badge bg-light text-muted border" title="{{ isExpired ? 'Devis expiré' : 'Ligne verrouillée : copiée dans une commande.' }}">
                                         <i class="bi bi-lock-fill me-1"></i> Verrouillé
                                     </span>
                                 {% else %}
@@ -166,7 +167,7 @@
                             <span class="badge bg-white text-dark border border-orange-rouge fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
 
                             <div class="d-flex align-items-center gap-2 action-hover">
-                                <button type="button" onclick="openModalAjax('Lier un autre devis', '{{ path('commercial_commande_lier_devis', {id: commande.id}) }}')" class="btn btn-sm btn-outline-secondary" title="Lier un autre devis à cette commande">
+                                <button type="button" onclick="openModalAjax('Lier un autre devis', '{{ path('commercial_commande_lier_devis', {id: commande.id}) }}')" class="btn btn-sm btn-outline-secondary" title="Lier un autre devis à cette commande" {{ isExpired ? 'disabled' : '' }}>
                                     <i class="bi bi-link-45deg"></i> Lier devis
                                 </button>
                                 <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-outline-orange-rouge" {{ isExpired ? 'disabled' : '' }}>
