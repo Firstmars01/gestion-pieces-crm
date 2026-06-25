@@ -29,10 +29,8 @@ class Commande
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
-    // Lien vers le devis d'origine
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Devis $devis = null;
+    #[ORM\ManyToMany(targetEntity: Devis::class, inversedBy: 'commandes')]
+    private Collection $devisList;
 
     #[ORM\OneToMany(mappedBy: 'commande', targetEntity: CommandeLigne::class, cascade: ['persist', 'remove'])]
     private Collection $commandeLignes;
@@ -40,6 +38,7 @@ class Commande
     public function __construct()
     {
         $this->commandeLignes = new ArrayCollection();
+        $this->devisList = new ArrayCollection(); // Ajoute cette ligne !
         $this->dateCmd = new \DateTime();
     }
 
@@ -107,14 +106,26 @@ class Commande
         return $this;
     }
 
-    public function getDevis(): ?Devis
+    /**
+     * @return Collection<int, Devis>
+     */
+    public function getDevisList(): Collection
     {
-        return $this->devis;
+        return $this->devisList;
     }
 
-    public function setDevis(?Devis $devis): static
+    public function addDevisList(Devis $devis): static
     {
-        $this->devis = $devis;
+        if (!$this->devisList->contains($devis)) {
+            $this->devisList->add($devis);
+        }
+
+        return $this;
+    }
+
+    public function removeDevisList(Devis $devis): static
+    {
+        $this->devisList->removeElement($devis);
 
         return $this;
     }

@@ -75,7 +75,7 @@ class DevisController extends AbstractController
     public function addLigne(Request $request, Devis $devis, EntityManagerInterface $entityManager): Response
     {
         $ligne = new DevisLigne();
-        $ligne->setDevis($devis); // On relie la ligne au devis actuel
+        $ligne->setDevis($devis);
 
         $form = $this->createForm(DevisLigneType::class, $ligne);
         $form->handleRequest($request);
@@ -95,27 +95,6 @@ class DevisController extends AbstractController
         return $this->render('commercial/devis/form_ligne.html.twig', ['form' => $form->createView()]);
     }
 
-    // --- 5. MODIFIER UNE PIÈCE (LIGNE) ---
-    #[Route('/ligne/{id}/modifier', name: 'commercial_devis_ligne_edit', methods: ['GET', 'POST'])]
-    public function editLigne(Request $request, DevisLigne $ligne, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(DevisLigneType::class, $ligne);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            $this->addFlash('success', 'La pièce a été modifiée.');
-
-            if ($request->isXmlHttpRequest()) {
-                return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $ligne->getDevis()->getId()])]);
-            }
-
-            return $this->redirectToRoute('commercial_devis_show', ['id' => $ligne->getDevis()->getId()]);
-        }
-
-        return $this->render('commercial/devis/form_ligne.html.twig', ['form' => $form->createView(), 'ligne' => $ligne]);
-    }
-
     // --- MODIFIER LE DEVIS (En-tête : Client, Date, Commercial) ---
     #[Route('/{id}/modifier', name: 'commercial_devis_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Devis $devis, EntityManagerInterface $entityManager): Response
@@ -131,13 +110,14 @@ class DevisController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('commercial_devis_index')]);
             }
+
             return $this->redirectToRoute('commercial_devis_index');
         }
 
         // On réutilise la vue 'new.html.twig' car elle contient exactement les bons champs
         return $this->render('commercial/devis/new.html.twig', [
             'form' => $form->createView(),
-            'devis' => $devis
+            'devis' => $devis,
         ]);
     }
 
@@ -145,13 +125,38 @@ class DevisController extends AbstractController
     #[Route('/ligne/{id}/supprimer', name: 'commercial_devis_ligne_delete', methods: ['POST'])]
     public function deleteLigne(Request $request, DevisLigne $ligne, EntityManagerInterface $entityManager): Response
     {
-        // On sauvegarde l'ID du devis avant de supprimer la ligne pour pouvoir rediriger au bon endroit
         $devisId = $ligne->getDevis()->getId();
+
+        // 1. Combien de fois cette paire a été commandée ?
+        $countCommandees = 0;
+        foreach ($ligne->getDevis()->getCommandes() as $cmd) {
+            foreach ($cmd->getCommandeLignes() as $cl) {
+                if ($cl->getPiece()->getId() === $ligne->getPiece()->getId() && $cl->getQuantite() === $ligne->getQuantite()) {
+                    $countCommandees++;
+                }
+            }
+        }
+
+        // 2. Quelle est l'occurrence de la ligne qu'on essaie de supprimer ?
+        $occurrenceIndex = 0;
+        foreach ($ligne->getDevis()->getDevisLignes() as $dl) {
+            if ($dl->getPiece()->getId() === $ligne->getPiece()->getId() && $dl->getQuantite() === $ligne->getQuantite()) {
+                $occurrenceIndex++;
+                if ($dl->getId() === $ligne->getId()) {
+                    break;
+                }
+            }
+        }
+
+        if ($occurrenceIndex <= $countCommandees) {
+            $this->addFlash('danger', 'Suppression impossible : cette ligne a déjà été transformée en commande.');
+            return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
+        }
 
         if ($this->isCsrfTokenValid('delete_ligne_' . $ligne->getId(), $request->request->get('_token'))) {
             $entityManager->remove($ligne);
             $entityManager->flush();
-            $this->addFlash('success', 'La pièce a été retirée du devis.');
+            $this->addFlash('success', 'La ligne a été retirée du devis.');
         } else {
             $this->addFlash('danger', 'Action non autorisée.');
         }

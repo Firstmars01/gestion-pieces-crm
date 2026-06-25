@@ -27,10 +27,10 @@ class DevisLigneType extends AbstractType
                         ->orderBy('p.reference', 'ASC');
                 },
                 'choice_label' => function (Piece $piece) {
-                    return $piece->getReference() . ' - ' . $piece->getLibelle();
+                    return $piece->getReference().' - '.$piece->getLibelle();
                 },
                 // On cache le prix dans les options du select
-                'choice_attr' => function(?Piece $piece) {
+                'choice_attr' => function (?Piece $piece) {
                     return $piece ? ['data-prix' => $piece->getPrixVente() ?? ''] : [];
                 },
                 'placeholder' => 'Sélectionnez une pièce...',
@@ -38,8 +38,9 @@ class DevisLigneType extends AbstractType
                 // 2. LE SCRIPT ANTI-AJAX : On met le script directement dans l'événement "onchange" du HTML
                 'attr' => [
                     'class' => 'select-searchable', // Ajout de la classe de recherche
-                    'onchange' => "document.querySelector('.prix-input-auto').value = this.options[this.selectedIndex].getAttribute('data-prix') || '';"
-                ]
+                    'onchange' => "document.querySelector('.prix-input-auto').value = this.options[this.selectedIndex].getAttribute('data-prix') || '';",
+                ],
+                'required' => true,
             ])
             ->add('quantite', IntegerType::class, [
                 'label' => 'Quantité demandée',
@@ -49,7 +50,8 @@ class DevisLigneType extends AbstractType
             ->add('prix', MoneyType::class, [
                 'label' => 'Prix Unitaire (HT)',
                 'currency' => 'EUR',
-                'attr' => ['class' => 'prix-input-auto']
+                'attr' => ['class' => 'prix-input-auto'],
+                'required' => true,
             ]);
     }
 

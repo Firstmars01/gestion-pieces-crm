@@ -15,67 +15,55 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/commercial/commandes')]
 class CommandeController extends AbstractController
 {
-    // --- 1. CRÉER UNE NOUVELLE COMMANDE VIDE ---
     #[Route('/devis/{id}/nouvelle', name: 'commercial_commande_new', methods: ['POST'])]
     public function newFromDevis(Request $request, Devis $devis, EntityManagerInterface $em): Response
     {
-        // VÉRIFICATION MÉTIER : Date du devis
         if ($devis->getDateLimite() && new \DateTime() > $devis->getDateLimite()) {
-            $this->addFlash('danger', 'Le délai de ce devis est dépassé, vous ne pouvez plus créer de commandes.');
+            $this->addFlash('danger', 'Le délai est dépassé.');
             return $this->redirectToRoute('commercial_devis_show', ['id' => $devis->getId()]);
         }
 
         $commande = new Commande();
         $commande->setClient($devis->getClient());
-        $commande->setDevis($devis);
-        $commande->setNumero('CMD-' . date('YmdHis')); // Numéro temporaire
+
+        // C'EST ICI QUE ÇA CHANGE : On ajoute le devis à la LISTE de la commande
+        $commande->addDevisList($devis);
+        $commande->setNumero('CMD-' . date('YmdHis'));
 
         $em->persist($commande);
         $em->flush();
-        $this->addFlash('success', 'Nouvelle commande créée. Vous pouvez y ajouter des pièces.');
+        $this->addFlash('success', 'Nouvelle commande créée.');
 
         return $this->redirectToRoute('commercial_devis_show', ['id' => $devis->getId()]);
     }
 
-// --- 2. AJOUTER UNE LIGNE COMPLÈTE DU DEVIS DANS LA COMMANDE ---
     #[Route('/{id}/ajouter-piece', name: 'commercial_commande_add_ligne', methods: ['GET', 'POST'])]
     public function addLigne(Request $request, Commande $commande, EntityManagerInterface $em): Response
     {
-        $devis = $commande->getDevis();
-
-        // Règle : "On ne peut donc passer commande que si la date n'est pas postérieure au délai fixé"
-        if ($devis->getDateLimite() && new \DateTime() > $devis->getDateLimite()) {
-            $this->addFlash('danger', 'Le délai du devis est dépassé. Ajout impossible.');
-            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $devis->getId()])]);
-        }
-
         $commandeLigne = new CommandeLigne();
         $commandeLigne->setCommande($commande);
 
-        $form = $this->createForm(CommandeLigneType::class, $commandeLigne, ['devis' => $devis]);
+        $form = $this->createForm(CommandeLigneType::class, $commandeLigne, ['commande' => $commande]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $devisLigne = $form->get('devisLigne')->getData();
 
-            // Règle : "Chaque ligne d'une commande doit correspondre à une ligne complète du devis (même pièce, même quantité)."
+            // COPIE STRICTE DES DONNÉES DU DEVIS !
             $commandeLigne->setPiece($devisLigne->getPiece());
-            $commandeLigne->setQuantite($devisLigne->getQuantite());
-
-            // Règle : "Les montants doivent rester fixes"
+            $commandeLigne->setQuantite($devisLigne->getQuantite()); // Aucune saisie possible
             $commandeLigne->setPrixUnitaire($devisLigne->getPrix());
 
             $em->persist($commandeLigne);
             $em->flush();
 
             $this->addFlash('success', 'La ligne complète a été ajoutée à la commande.');
-            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $devis->getId()])]);
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
         }
 
         return $this->render('commercial/commande/form_ligne.html.twig', ['form' => $form->createView()]);
     }
 
-    // --- 3. MODIFIER LES DATES D'UNE COMMANDE ---
     #[Route('/{id}/modifier', name: 'commercial_commande_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Commande $commande, EntityManagerInterface $em): Response
     {
@@ -84,25 +72,17 @@ class CommandeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'Les dates de la commande ont été mises à jour.');
-
-            if ($request->isXmlHttpRequest()) {
-                return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevis()->getId()])]);
-            }
-            return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevis()->getId()]);
+            $this->addFlash('success', 'Les dates ont été mises à jour.');
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
         }
 
-        return $this->render('commercial/commande/edit.html.twig', [
-            'form' => $form->createView(),
-            'commande' => $commande
-        ]);
+        return $this->render('commercial/commande/edit.html.twig', ['form' => $form->createView(), 'commande' => $commande]);
     }
 
-    // --- 4. SUPPRIMER UNE COMMANDE ---
     #[Route('/{id}/supprimer', name: 'commercial_commande_delete', methods: ['POST'])]
     public function delete(Request $request, Commande $commande, EntityManagerInterface $em): Response
     {
-        $devisId = $commande->getDevis()->getId();
+        $devisId = $commande->getDevisList()->first()->getId();
 
         if ($this->isCsrfTokenValid('delete_commande_' . $commande->getId(), $request->request->get('_token'))) {
             $em->remove($commande);
@@ -113,12 +93,10 @@ class CommandeController extends AbstractController
         return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
     }
 
-
-    // --- 6. SUPPRIMER UNE LIGNE DE COMMANDE ---
     #[Route('/ligne/{id}/supprimer', name: 'commercial_commande_ligne_delete', methods: ['POST'])]
     public function deleteLigne(Request $request, CommandeLigne $ligne, EntityManagerInterface $em): Response
     {
-        $devisId = $ligne->getCommande()->getDevis()->getId();
+        $devisId = $ligne->getCommande()->getDevisList()->first()->getId();
 
         if ($this->isCsrfTokenValid('delete_commande_ligne_' . $ligne->getId(), $request->request->get('_token'))) {
             $em->remove($ligne);
@@ -127,5 +105,30 @@ class CommandeController extends AbstractController
         }
 
         return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
+    }
+
+    #[Route('/{id}/lier-devis', name: 'commercial_commande_lier_devis', methods: ['GET', 'POST'])]
+    public function lierDevis(Request $request, Commande $commande, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(\App\Form\CommandeAddDevisType::class, null, ['commande' => $commande]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $nouveauDevis = $form->get('devis')->getData();
+
+            // On lie le devis à la commande !
+            $commande->addDevisList($nouveauDevis);
+            $em->flush();
+
+            $this->addFlash('success', 'Le devis a été lié. Vous pouvez maintenant ajouter ses pièces à la commande.');
+
+            // On redirige vers la page où on était (le 1er devis de la liste par défaut)
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
+        }
+
+        return $this->render('commercial/commande/form_lier_devis.html.twig', [
+            'form' => $form->createView(),
+            'commande' => $commande
+        ]);
     }
 }

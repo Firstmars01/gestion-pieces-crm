@@ -34,8 +34,11 @@ class Devis
     #[ORM\OneToMany(mappedBy: 'devis', targetEntity: DevisLigne::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $devisLignes;
 
-    #[ORM\OneToMany(mappedBy: 'devis', targetEntity: Commande::class)]
+    #[ORM\ManyToMany(targetEntity: Commande::class, mappedBy: 'devisList')]
     private Collection $commandes;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
 
     public function __construct()
     {
@@ -139,5 +142,16 @@ class Devis
             $total += ($ligne->getPrix() * $ligne->getQuantite());
         }
         return (float) $total;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+        return $this;
     }
 }

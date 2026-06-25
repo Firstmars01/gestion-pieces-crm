@@ -8,6 +8,7 @@ use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // <- Ajoute ceci
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,25 +17,32 @@ class DevisType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('nom', TextType::class, [
+                'label' => 'Nom du devis (ex: Chantier Dupont)',
+                'attr' => ['placeholder' => 'Saisissez un nom pour ce devis...'],
+                'required' => true,
+            ])
             ->add('client', EntityType::class, [
                 'class' => Client::class,
                 'choice_label' => 'nomComplet',
                 'placeholder' => 'Sélectionnez un client...',
-                'attr' => ['class' => 'select-searchable'] // Ajout de la classe de recherche
+                'attr' => ['class' => 'select-searchable'], // Ajout de la classe de recherche
+                'required' => true,
             ])
             ->add('user', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => function (User $user) {
-                    return $user->getNom() . ' ' . $user->getPrenom();
+                    return $user->getNom().' '.$user->getPrenom();
                 },
                 'label' => 'Commercial en charge',
                 'placeholder' => 'Sélectionnez un commercial...',
-                'attr' => ['class' => 'select-searchable'] // Ajout de la classe de recherche
+                'attr' => ['class' => 'select-searchable'], // Ajout de la classe de recherche
+                'required' => true,
             ])
             ->add('dateLimite', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de limite de validité',
-                'required' => false,
+                'required' => true,
             ]);
     }
 

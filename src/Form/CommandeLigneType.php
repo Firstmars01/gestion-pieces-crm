@@ -13,45 +13,54 @@ class CommandeLigneType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $devis = $options['devis'];
+        $commande = $options['commande'];
 
-        // On ne propose que les lignes du devis qui n'ont pas encore été commandées
-        $lignesDispo = [];
-        foreach ($devis->getDevisLignes() as $dl) {
-            $dejaCommande = false;
+        // 1. Compter combien de fois chaque paire [Pièce + Quantité] a DÉJÀ été commandée
+        $commandeesCount = [];
+        foreach ($commande->getDevisList() as $devis) {
             foreach ($devis->getCommandes() as $cmd) {
                 foreach ($cmd->getCommandeLignes() as $cl) {
-                    if ($cl->getPiece()->getId() === $dl->getPiece()->getId()) {
-                        $dejaCommande = true;
-                        break;
-                    }
+                    $key = $cl->getPiece()->getId() . '_' . $cl->getQuantite();
+                    if (!isset($commandeesCount[$key])) $commandeesCount[$key] = 0;
+                    $commandeesCount[$key]++;
                 }
-            }
-            if (!$dejaCommande) {
-                $lignesDispo[] = $dl;
             }
         }
 
-        $builder
-            ->add('devisLigne', EntityType::class, [
-                'class' => DevisLigne::class,
-                'choices' => $lignesDispo,
-                'choice_label' => function(DevisLigne $dl) {
-                    return $dl->getPiece()->getReference() . ' - ' . $dl->getPiece()->getLibelle() . ' (Qté: ' . $dl->getQuantite() . ')';
-                },
-                'mapped' => false,
-                'label' => 'Sélectionner la ligne du devis à commander',
-                'placeholder' => empty($lignesDispo) ? 'Toutes les lignes ont déjà été commandées' : 'Sélectionnez une pièce...',
-                'attr' => ['class' => 'select-searchable piece-commande-select'],
-                'disabled' => empty($lignesDispo)
-            ]);
+        // 2. Parcourir les lignes de devis pour voir lesquelles sont encore disponibles
+        $lignesDispo = [];
+        foreach ($commande->getDevisList() as $devis) {
+            foreach ($devis->getDevisLignes() as $dl) {
+                $key = $dl->getPiece()->getId() . '_' . $dl->getQuantite();
+
+                // Si cette paire a déjà été commandée, on "consomme" une commande et on ignore la ligne
+                if (isset($commandeesCount[$key]) && $commandeesCount[$key] > 0) {
+                    $commandeesCount[$key]--;
+                } else {
+                    // Sinon, la ligne est libre pour être ajoutée !
+                    $lignesDispo[] = $dl;
+                }
+            }
+        }
+
+        $builder->add('devisLigne', EntityType::class, [
+            'class' => DevisLigne::class,
+            'choices' => $lignesDispo,
+            'choice_label' => function(DevisLigne $dl) {
+                $nomDevis = $dl->getDevis()->getNom() ? $dl->getDevis()->getNom() : 'Devis #' . $dl->getDevis()->getId();
+                return '[' . $nomDevis . '] ' . $dl->getPiece()->getReference() . ' - ' . $dl->getPiece()->getLibelle() . ' (Quantité figée : ' . $dl->getQuantite() . ')';
+            },
+            'mapped' => false,
+            'label' => 'Sélectionner la ligne complète à commander',
+            'placeholder' => empty($lignesDispo) ? 'Toutes les lignes ont déjà été commandées' : 'Sélectionnez une pièce...',
+            'attr' => ['class' => 'select-searchable piece-commande-select'],
+            'disabled' => empty($lignesDispo)
+        ]);
+        // REMARQUE : On a totalement supprimé le champ "quantite" ici !
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => CommandeLigne::class,
-            'devis' => null,
-        ]);
+        $resolver->setDefaults(['data_class' => CommandeLigne::class, 'commande' => null]);
     }
 }
