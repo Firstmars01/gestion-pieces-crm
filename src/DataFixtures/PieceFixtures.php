@@ -5,12 +5,27 @@ namespace App\DataFixtures;
 use App\Entity\Piece;
 use App\Entity\PieceComposition;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use App\Entity\Fournisseur;
 
-class PieceFixtures extends Fixture
+class PieceFixtures extends Fixture implements DependentFixtureInterface
 {
+    public function getDependencies(): array
+    {
+        // On dit à Symfony : "Crée les fournisseurs d'abord !"
+        return [
+            FournisseurFixtures::class,
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
+        $fournBois = $this->getReference('fournisseur_0', Fournisseur::class);
+        $fournMetal = $this->getReference('fournisseur_1', Fournisseur::class);
+        $fournAccess = $this->getReference('fournisseur_2', Fournisseur::class);
+        $fournChimie = $this->getReference('fournisseur_3', Fournisseur::class);
+
         // ====================================================================
         // 1. MATIÈRES PREMIÈRES (Bois, Acier, Peinture...)
         // ====================================================================
@@ -21,6 +36,7 @@ class PieceFixtures extends Fixture
         $boisMdf->setType('MATIERE_PREMIERE');
         $boisMdf->setQuantiteStock(150);
         $boisMdf->setPrixCatalogue(45.00);
+        $boisMdf->setFournisseur($fournBois);
         $manager->persist($boisMdf);
 
         $resineMelamine = new Piece();
@@ -29,6 +45,7 @@ class PieceFixtures extends Fixture
         $resineMelamine->setType('MATIERE_PREMIERE');
         $resineMelamine->setQuantiteStock(100);
         $resineMelamine->setPrixCatalogue(85.00);
+        $resineMelamine->setFournisseur($fournChimie);
         $manager->persist($resineMelamine);
 
         $tubeAcier30 = new Piece();
@@ -37,6 +54,7 @@ class PieceFixtures extends Fixture
         $tubeAcier30->setType('MATIERE_PREMIERE');
         $tubeAcier30->setQuantiteStock(300);
         $tubeAcier30->setPrixCatalogue(12.50);
+        $tubeAcier30->setFournisseur($fournMetal);
         $manager->persist($tubeAcier30);
 
         $tubeAcier40 = new Piece();
@@ -45,6 +63,7 @@ class PieceFixtures extends Fixture
         $tubeAcier40->setType('MATIERE_PREMIERE');
         $tubeAcier40->setQuantiteStock(200);
         $tubeAcier40->setPrixCatalogue(18.00);
+        $tubeAcier40->setFournisseur($fournMetal);
         $manager->persist($tubeAcier40);
 
         $peintureBleue = new Piece();
@@ -61,6 +80,8 @@ class PieceFixtures extends Fixture
         $peintureBlanche->setType('MATIERE_PREMIERE');
         $peintureBlanche->setQuantiteStock(30);
         $peintureBlanche->setPrixCatalogue(35.00);
+        $peintureBlanche->setFournisseur($fournAccess);
+
         $manager->persist($peintureBlanche);
 
         $profilAlu = new Piece();
@@ -70,7 +91,6 @@ class PieceFixtures extends Fixture
         $profilAlu->setQuantiteStock(400);
         $profilAlu->setPrixCatalogue(9.50);
         $manager->persist($profilAlu);
-
 
         // ====================================================================
         // 2. PIÈCES ACHETÉES (Visserie, Roulettes, Accessoires bruts...)
@@ -157,7 +177,6 @@ class PieceFixtures extends Fixture
         $housseBrute->setPrixCatalogue(12.00);
         $manager->persist($housseBrute);
 
-
         // ====================================================================
         // 3. PIÈCES INTERMÉDIAIRES (Sous-ensembles fabriqués en usine)
         // ====================================================================
@@ -189,7 +208,6 @@ class PieceFixtures extends Fixture
         $chariotCentral->setType('INTERMEDIAIRE');
         $chariotCentral->setQuantiteStock(50);
         $manager->persist($chariotCentral);
-
 
         // ====================================================================
         // 4. PRODUITS LIVRABLES (Ce qui est vendu au client final)
@@ -236,7 +254,6 @@ class PieceFixtures extends Fixture
         $manager->persist($housseLivrable);
 
         $manager->flush(); // Sauvegarde pour générer les IDs avant les compositions
-
 
         // ====================================================================
         // 5. COMPOSITIONS (Nomenclatures de fabrication)
@@ -314,7 +331,6 @@ class PieceFixtures extends Fixture
         $comp11->setQuantite(16); // 4 vis par roulette
         $manager->persist($comp11);
 
-
         // --- ASSEMBLAGE FINAL : Table Indoor ---
         // 2 demi-plateaux + 4 pieds fixes + 1 kit filet
         $comp12 = new PieceComposition();
@@ -341,7 +357,6 @@ class PieceFixtures extends Fixture
         $comp15->setQuantite(2);
         $manager->persist($comp15);
 
-
         // --- ASSEMBLAGE FINAL : Table Outdoor Pliable ---
         // 2 demi-plateaux outdoor + 1 chariot central + filet pro
         $comp16 = new PieceComposition();
@@ -367,7 +382,6 @@ class PieceFixtures extends Fixture
         $comp19->setPieceEnfant($poteauFilet);
         $comp19->setQuantite(2);
         $manager->persist($comp19);
-
 
         // --- PACKAGING ACCESSOIRES (Pour la vente) ---
 
