@@ -154,4 +154,23 @@ class Devis
         $this->nom = $nom;
         return $this;
     }
+
+    public function addCommande(Commande $commande): static
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes->add($commande);
+            $commande->addDevisList($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): static
+    {
+        if ($this->commandes->removeElement($commande)) {
+            $commande->removeDevisList($this);
+        }
+
+        return $this;
+    }
 }

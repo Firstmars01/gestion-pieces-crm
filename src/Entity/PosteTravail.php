@@ -84,4 +84,26 @@ class PosteTravail
 
         return $this;
     }
+
+    public function addQualification(Qualification $qualification): static
+    {
+        if (!$this->qualifications->contains($qualification)) {
+            $this->qualifications->add($qualification);
+            $qualification->setPoste($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQualification(Qualification $qualification): static
+    {
+        if ($this->qualifications->removeElement($qualification)) {
+            // set the owning side to null (unless already changed)
+            if ($qualification->getPoste() === $this) {
+                $qualification->setPoste(null);
+            }
+        }
+
+        return $this;
+    }
 }

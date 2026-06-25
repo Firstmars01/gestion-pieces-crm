@@ -56,6 +56,11 @@ class Piece
     #[ORM\OneToOne(targetEntity: Gamme::class, mappedBy: 'piece', cascade: ['persist', 'remove'])]
     private ?Gamme $gamme = null;
 
+    #[ORM\ManyToOne(targetEntity: Fournisseur::class, inversedBy: 'pieces')]
+    // Nullable car une pièce fabriquée (LIVRABLE, INTERMEDIAIRE) n'a pas de fournisseur
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Fournisseur $fournisseur = null;
+
     public function __construct()
     {
         $this->composants = new ArrayCollection();
@@ -80,6 +85,17 @@ class Piece
                 ->atPath('prixVente')
                 ->addViolation();
         }
+    }
+
+    public function getFournisseur(): ?Fournisseur
+    {
+        return $this->fournisseur;
+    }
+
+    public function setFournisseur(?Fournisseur $fournisseur): static
+    {
+        $this->fournisseur = $fournisseur;
+        return $this;
     }
 
     public function getGamme(): ?Gamme
@@ -208,5 +224,27 @@ class Piece
     public function getUtilisations(): Collection
     {
         return $this->utilisations;
+    }
+
+    public function addUtilisation(PieceComposition $utilisation): static
+    {
+        if (!$this->utilisations->contains($utilisation)) {
+            $this->utilisations->add($utilisation);
+            $utilisation->setPieceEnfant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUtilisation(PieceComposition $utilisation): static
+    {
+        if ($this->utilisations->removeElement($utilisation)) {
+            // set the owning side to null (unless already changed)
+            if ($utilisation->getPieceEnfant() === $this) {
+                $utilisation->setPieceEnfant(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -50,4 +50,26 @@ class Machine
 
         return $this;
     }
+
+    public function addPosteMachine(PosteMachine $posteMachine): static
+    {
+        if (!$this->posteMachines->contains($posteMachine)) {
+            $this->posteMachines->add($posteMachine);
+            $posteMachine->setMachine($this);
+        }
+
+        return $this;
+    }
+
+    public function removePosteMachine(PosteMachine $posteMachine): static
+    {
+        if ($this->posteMachines->removeElement($posteMachine)) {
+            // set the owning side to null (unless already changed)
+            if ($posteMachine->getMachine() === $this) {
+                $posteMachine->setMachine(null);
+            }
+        }
+
+        return $this;
+    }
 }

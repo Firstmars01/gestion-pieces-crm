@@ -19,13 +19,29 @@ class PieceController extends AbstractController
     #[Route('/stock', name: 'atelier_stock')]
     public function index(PieceRepository $pieceRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        // 1. On récupère les pièces et on joint les composants UNIQUEMENT pour l'affichage (sans les filtrer)
         $queryBuilder = $pieceRepository->createQueryBuilder('p')
-            ->orderBy('p.id', 'ASC'); // Tri par défaut pour éviter le bug des doublons de pagination
+            ->leftJoin('p.composants', 'pc')
+            ->leftJoin('pc.pieceEnfant', 'pe')
+            ->addSelect('pc', 'pe')
+            ->orderBy('p.id', 'ASC');
 
         $recherche = $request->query->get('q');
 
         if ($recherche) {
-            $queryBuilder->andWhere('LOWER(p.reference) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(p.type) LIKE LOWER(:recherche)')
+            // 2. On utilise une sous-requête (EXISTS) pour chercher dans les composants
+            // Cela évite le bug de "l'hydratation partielle" et garde la liste des composants intacte !
+            $queryBuilder->andWhere(
+                'LOWER(p.reference) LIKE LOWER(:recherche) OR ' .
+                'LOWER(p.libelle) LIKE LOWER(:recherche) OR ' .
+                'LOWER(p.type) LIKE LOWER(:recherche) OR ' .
+                'EXISTS (' .
+                'SELECT 1 FROM App\Entity\PieceComposition sub_pc ' .
+                'JOIN sub_pc.pieceEnfant sub_pe ' .
+                'WHERE sub_pc.pieceParent = p ' .
+                'AND (LOWER(sub_pe.reference) LIKE LOWER(:recherche) OR LOWER(sub_pe.libelle) LIKE LOWER(:recherche))' .
+                ')'
+            )
                 ->setParameter('recherche', '%'.$recherche.'%');
         }
 
