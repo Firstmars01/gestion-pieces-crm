@@ -362,9 +362,6 @@ body {
     }
 }
 
-
-/* public/css/app.css */
-
 /* Ne s'applique que sur les écrans avec une souris (ordinateur) */
 @media (hover: hover) {
     /* Boutons de l'en-tête de la commande */
@@ -385,3 +382,17 @@ body {
         opacity: 1;
     }
 }
+
+
+/* Thème personnalisé : Orange-Rouge (doux pour les yeux) */
+.text-orange-rouge { color: #d35400 !important; }
+.bg-orange-rouge-light { background-color: rgba(211, 84, 0, 0.08) !important; }
+.border-orange-rouge { border-color: rgba(211, 84, 0, 0.4) !important; }
+
+/* Bouton plein */
+.btn-orange-rouge { background-color: #d35400; color: white; border-color: #d35400; }
+.btn-orange-rouge:hover { background-color: #b84700; color: white; border-color: #b84700; }
+
+/* Bouton avec contour (outline) */
+.btn-outline-orange-rouge { color: #d35400; border-color: #d35400; background-color: transparent; }
+.btn-outline-orange-rouge:hover { background-color: #d35400; color: white; border-color: #d35400; }
