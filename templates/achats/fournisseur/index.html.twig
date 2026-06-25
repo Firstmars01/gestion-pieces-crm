@@ -82,13 +82,6 @@
                                             title="Modifier">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-
-                                    <form method="post" action="{{ path('achats_fournisseur_delete', {id: fournisseur.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ? Ses pièces se retrouveront sans fournisseur.');" class="mb-0">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_fournisseur_' ~ fournisseur.id) }}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>

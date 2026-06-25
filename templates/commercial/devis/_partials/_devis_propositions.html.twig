@@ -1,9 +1,18 @@
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <h5 class="mb-1 fw-bold text-dark text-uppercase">
-                {{ devis.nom is empty ? 'Devis #' ~ devis.id : devis.nom }}
-            </h5>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <h5 class="mb-1 fw-bold text-dark text-uppercase">
+                    {{ devis.nom is empty ? 'Devis #' ~ devis.id : devis.nom }}
+                </h5>
+                <button type="button"
+                        onclick="openModalAjax('Modifier devis', '{{ path('commercial_devis_edit', {id: devis.id}) }}')"
+                        class="btn btn-sm btn-outline-primary"
+                        title="Modifier">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+            </div>
+
             <div class="text-muted small">
                 {{ devis.client.raisonSociale ? devis.client.raisonSociale : devis.client.nomComplet }}
             </div>
