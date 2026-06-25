@@ -361,3 +361,27 @@ body {
         visibility: visible;
     }
 }
+
+
+/* public/css/app.css */
+
+/* Ne s'applique que sur les écrans avec une souris (ordinateur) */
+@media (hover: hover) {
+    /* Boutons de l'en-tête de la commande */
+    .commande-card .action-hover {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+    .commande-card:hover .action-hover {
+        opacity: 1;
+    }
+
+    /* Bouton de suppression d'une ligne (n'apparaît qu'au survol de la ligne) */
+    .commande-card .action-buttons {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+    .commande-card tr:hover .action-buttons {
+        opacity: 1;
+    }
+}

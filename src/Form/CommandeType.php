@@ -16,11 +16,12 @@ class CommandeType extends AbstractType
             ->add('dateCmd', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de création de la commande',
+                'required' => true,
             ])
             ->add('dateFacture', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de facturation / livraison',
-                'required' => false,
+                'required' => true,
             ]);
     }
 
