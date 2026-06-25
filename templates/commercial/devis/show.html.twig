@@ -15,115 +15,16 @@
         {# ---------------------------------------------------- #}
         {# PARTIE 1 : LE DEVIS (Les propositions)               #}
         {# ---------------------------------------------------- #}
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                <div>
-                    <h5 class="mb-1 fw-bold text-dark text-uppercase">
-                        {{ devis.nom is empty ? 'Devis #' ~ devis.id : devis.nom }}
-                    </h5>
-                    <div class="text-muted small">
-                        {{ devis.client.raisonSociale ? devis.client.raisonSociale : devis.client.nomComplet }}
-                    </div>
-                    <div class="text-muted small">
-                        Devis #{{ devis.id }} • Créé le {{ devis.dateDevis|date('d/m/Y') }}
-                        {% if devis.dateLimite %} • <span class="{{ date() > devis.dateLimite ? 'text-danger fw-bold' : '' }}">Valide jusqu'au {{ devis.dateLimite|date('d/m/Y') }}</span>{% endif %}
-                    </div>
-                </div>
-                <div class="text-md-end">
-                    <div class="fs-4 fw-bold text-primary">{{ devis.getTotal()|number_format(2, ',', ' ') }} €</div>
-                    <div class="text-muted small">Montant total HT proposé</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm border-0 overflow-hidden mb-5">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-card-list me-2"></i>Contenu du Devis (Propositions)</h6>
-                <button type="button" onclick="openModalAjax('Ajouter une pièce au devis', '{{ path('commercial_devis_ligne_new', {id: devis.id}) }}')" class="btn btn-sm btn-outline-primary" {{ isExpired ? 'disabled' : '' }}>
-                    <i class="bi bi-plus-circle me-1"></i> Pièce au devis
-                </button>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Pièce</th>
-                        <th class="text-center">Quantité</th>
-                        <th class="text-end">Prix U.</th>
-                        <th class="text-end">Total Ligne</th>
-                        <th class="text-end"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ligne in devis.devisLignes %}
-
-                        {# 1. Combien de fois cette ligne (même pièce, même qté) a été commandée ? #}
-                        {% set countCommandees = 0 %}
-                        {% for cmd in devis.commandes %}
-                            {% for cl in cmd.commandeLignes %}
-                                {% if cl.piece.id == ligne.piece.id and cl.quantite == ligne.quantite %}
-                                    {% set countCommandees = countCommandees + 1 %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-
-                        {# 2. Quelle est la position (occurrence) de cette ligne parmi ses "jumelles" ? #}
-                        {% set occurrenceIndex = 0 %}
-                        {% for dl in devis.devisLignes %}
-                            {% if dl.piece.id == ligne.piece.id and dl.quantite == ligne.quantite %}
-                                {# On compte uniquement les lignes apparues avant ou pendant cette boucle #}
-                                {% if loop.index0 <= loop.parent.loop.index0 %}
-                                    {% set occurrenceIndex = occurrenceIndex + 1 %}
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-
-                        {# 3. Si l'occurrence est <= au nombre de commandes OU expiré, c'est VERROUILLÉ ! #}
-                        {% set isCommandee = occurrenceIndex <= countCommandees %}
-
-                        <tr>
-                            <td class="fw-medium text-dark">{{ ligne.piece.reference }} - {{ ligne.piece.libelle }}</td>
-                            <td class="text-center">{{ ligne.quantite }}</td>
-                            <td class="text-end text-muted">{{ ligne.prix|number_format(2, ',', ' ') }} €</td>
-                            <td class="text-end fw-bold text-dark">{{ (ligne.prix * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
-                            <td class="text-end">
-
-                                {% if isCommandee or isExpired %}
-                                    <span class="badge bg-light text-muted border" title="{{ isExpired ? 'Devis expiré' : 'Ligne verrouillée : copiée dans une commande.' }}">
-                                        <i class="bi bi-lock-fill me-1"></i> Verrouillé
-                                    </span>
-                                {% else %}
-                                    <div class="d-flex justify-content-end gap-2 action-buttons">
-                                        <form method="post" action="{{ path('commercial_devis_ligne_delete', {id: ligne.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" class="mb-0">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_ligne_' ~ ligne.id) }}">
-                                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la ligne">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                {% endif %}
-
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {{ include('commercial/devis/_partials/_devis_propositions.html.twig') }}
 
         {# ---------------------------------------------------- #}
-        {# PARTIE 2 : LES COMMANDES ISSUES DU DEVIS             #}
+        {# PARTIE 2 : TRI DES COMMANDES                         #}
         {# ---------------------------------------------------- #}
-
-        {# 1. ON TRIE LES COMMANDES EN DEUX CATÉGORIES #}
         {% set commandesEnCours = [] %}
         {% set commandesPassees = [] %}
 
         {% for commande in devis.commandes %}
-            {# On ne gère la commande que sur la page de son devis "propriétaire" #}
             {% if commande.devisList|length > 0 and commande.devisList.first.id == devis.id %}
-                {# Est-elle livrée (dateFacture renseignée ET dans le passé) ? #}
                 {% if commande.dateFacture and date('now') > commande.dateFacture %}
                     {% set commandesPassees = commandesPassees|merge([commande]) %}
                 {% else %}
@@ -132,156 +33,11 @@
             {% endif %}
         {% endfor %}
 
-        {# ==================================================== #}
-        {# SECTION : COMMANDES EN COURS (ORANGE ROUGE DOUX)     #}
-        {# ==================================================== #}
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-orange-rouge me-2"></i>Commandes en cours</h5>
+        {# SECTION : COMMANDES EN COURS #}
+        {{ include('commercial/devis/_partials/_commandes_en_cours.html.twig') }}
 
-            {% set isExpired = devis.dateLimite and date() > devis.dateLimite %}
-            <button type="button" onclick="openModalAjax('Créer une commande', '{{ path('commercial_commande_new', {id: devis.id}) }}')" class="btn btn-orange-rouge" {{ isExpired ? 'disabled' : '' }}>
-                <i class="bi bi-cart-plus me-1"></i> Créer une commande
-            </button>
-        </div>
-
-        {% if commandesEnCours|length > 0 %}
-            {% for commande in commandesEnCours %}
-                <div class="card shadow-sm border-orange-rouge mb-4 commande-card">
-                    <div class="card-header bg-orange-rouge-light py-3 d-flex justify-content-between align-items-center border-bottom-0">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="mb-0 fw-bold text-dark">{{ commande.numero }}</h6>
-                                <button type="button" onclick="openModalAjax('Modifier la commande', '{{ path('commercial_commande_edit', {id: commande.id}) }}')" class="btn btn-sm btn-outline-orange-rouge py-0 px-1 action-hover" title="Modifier les dates">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                            </div>
-                            <small class="text-muted">
-                                Créée le {{ commande.dateCmd|date('d/m/Y') }}
-                                {% if commande.dateFacture %}
-                                    <span class="ms-2 border-start border-orange-rouge ps-2 text-dark fw-medium">Livraison prévue le {{ commande.dateFacture|date('d/m/Y') }}</span>
-                                {% endif %}
-                            </small>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-white text-dark border border-orange-rouge fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
-
-                            <div class="d-flex align-items-center gap-2 action-hover">
-                                <button type="button" onclick="openModalAjax('Lier un autre devis', '{{ path('commercial_commande_lier_devis', {id: commande.id}) }}')" class="btn btn-sm btn-outline-secondary" title="Lier un autre devis à cette commande" {{ isExpired ? 'disabled' : '' }}>
-                                    <i class="bi bi-link-45deg"></i> Lier devis
-                                </button>
-                                <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-outline-orange-rouge" {{ isExpired ? 'disabled' : '' }}>
-                                    <i class="bi bi-plus-circle me-1"></i> Pièce
-                                </button>
-                                <form method="post" action="{{ path('commercial_commande_delete', {id: commande.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer toute cette commande ?');" class="mb-0">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_' ~ commande.id) }}">
-                                    <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la commande">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-light border-bottom px-3 py-2 small text-muted">
-                        <i class="bi bi-tags me-1"></i> Devis sources :
-                        {% for d in commande.devisList %}
-                            <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
-                        {% endfor %}
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <tbody>
-                            {% for cLigne in commande.commandeLignes %}
-                                <tr>
-                                    <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
-                                    <td class="text-center">{{ cLigne.quantite }}</td>
-                                    <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
-                                    <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-2 action-buttons">
-                                            <form method="post" action="{{ path('commercial_commande_ligne_delete', {id: cLigne.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer cette pièce de la commande ?');" class="mb-0">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_ligne_' ~ cLigne.id) }}">
-                                                <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la ligne">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted py-3 fst-italic">Cette commande est vide. Ajoutez-y des pièces du devis !</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="text-center text-muted py-4 border rounded bg-white shadow-sm mb-4">
-                Aucune commande en cours pour le moment.
-            </div>
-        {% endif %}
-
-        {# ==================================================== #}
-        {# SECTION : COMMANDES PASSÉES (VERT & VERROUILLÉ)      #}
-        {# ==================================================== #}
-        {% if commandesPassees|length > 0 %}
-            <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
-                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-check-circle-fill text-success me-2"></i>Commandes passées (Livrées)</h5>
-            </div>
-
-            {% for commande in commandesPassees %}
-                <div class="card shadow-sm border-success border-opacity-25 mb-4">
-                    <div class="card-header bg-success bg-opacity-10 py-3 d-flex justify-content-between align-items-center border-bottom-0">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="mb-0 fw-bold text-success">{{ commande.numero }}</h6>
-                                <span class="badge bg-success"><i class="bi bi-check2-all"></i> Livrée</span>
-                            </div>
-                            <small class="text-muted">
-                                Créée le {{ commande.dateCmd|date('d/m/Y') }}
-                                <span class="ms-2 border-start border-success ps-2 text-success fw-medium">Livrée le {{ commande.dateFacture|date('d/m/Y') }}</span>
-                            </small>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-white text-dark border border-success fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
-                            {# AUCUN BOUTON D'ACTION CAR LA COMMANDE EST PASSÉE #}
-                        </div>
-                    </div>
-
-                    <div class="bg-light border-bottom px-3 py-2 small text-muted">
-                        <i class="bi bi-tags me-1"></i> Devis sources :
-                        {% for d in commande.devisList %}
-                            <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
-                        {% endfor %}
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <tbody>
-                            {% for cLigne in commande.commandeLignes %}
-                                <tr>
-                                    <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
-                                    <td class="text-center">{{ cLigne.quantite }}</td>
-                                    <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
-                                    <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
-                                    <td class="text-end pe-4">
-                                        {# CADENAS À LA PLACE DE LA CORBEILLE #}
-                                        <i class="bi bi-lock-fill text-muted" title="Verrouillé (Commande livrée)"></i>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
+        {# SECTION : COMMANDES PASSÉES #}
+        {{ include('commercial/devis/_partials/_commandes_passees.html.twig') }}
 
     </div>
 {% endblock %}

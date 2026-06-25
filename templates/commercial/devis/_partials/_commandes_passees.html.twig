@@ -1,0 +1,53 @@
+{% if commandesPassees|length > 0 %}
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-check-circle-fill text-success me-2"></i>Commandes passées (Livrées)</h5>
+    </div>
+
+    {% for commande in commandesPassees %}
+        <div class="card shadow-sm border-success border-opacity-25 mb-4">
+            <div class="card-header bg-success bg-opacity-10 py-3 d-flex justify-content-between align-items-center border-bottom-0">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h6 class="mb-0 fw-bold text-success">{{ commande.numero }}</h6>
+                        <span class="badge bg-success"><i class="bi bi-check2-all"></i> Livrée</span>
+                    </div>
+                    <small class="text-muted">
+                        Créée le {{ commande.dateCmd|date('d/m/Y') }}
+                        <span class="ms-2 border-start border-success ps-2 text-success fw-medium">Livrée le {{ commande.dateFacture|date('d/m/Y') }}</span>
+                    </small>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-white text-dark border border-success fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
+                    {# AUCUN BOUTON D'ACTION CAR LA COMMANDE EST PASSÉE #}
+                </div>
+            </div>
+
+            <div class="bg-light border-bottom px-3 py-2 small text-muted">
+                <i class="bi bi-tags me-1"></i> Devis sources :
+                {% for d in commande.devisList %}
+                    <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <tbody>
+                    {% for cLigne in commande.commandeLignes %}
+                        <tr>
+                            <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
+                            <td class="text-center">{{ cLigne.quantite }}</td>
+                            <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
+                            <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
+                            <td class="text-end pe-4">
+                                {# CADENAS À LA PLACE DE LA CORBEILLE #}
+                                <i class="bi bi-lock-fill text-muted" title="Verrouillé (Commande livrée)"></i>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
