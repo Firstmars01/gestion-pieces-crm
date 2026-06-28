@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -21,16 +21,18 @@ class CmdAchatLigneType extends AbstractType
         $builder
             ->add('piece', EntityType::class, [
                 'class' => Piece::class,
-                // On filtre pour n'avoir que les pièces de CE fournisseur
                 'query_builder' => function (EntityRepository $er) use ($fournisseur) {
                     return $er->createQueryBuilder('p')
                         ->where('p.fournisseur = :fournisseur')
                         ->setParameter('fournisseur', $fournisseur)
                         ->orderBy('p.reference', 'ASC');
                 },
-                // On affiche le prix catalogue dans la liste pour aider l'acheteur
                 'choice_label' => function (Piece $piece) {
                     return sprintf('%s - %s (Cat: %s €)', $piece->getReference(), $piece->getLibelle(), $piece->getPrixCatalogue());
+                },
+                // --- ON REMET LE PRIX EN ATTRIBUT DE L'OPTION ---
+                'choice_attr' => function (Piece $piece) {
+                    return ['data-prix' => str_replace(',', '.', (string) $piece->getPrixCatalogue())];
                 },
                 'label' => 'Sélectionnez la pièce',
                 'placeholder' => 'Choisir une pièce...',
@@ -40,11 +42,16 @@ class CmdAchatLigneType extends AbstractType
                 'label' => 'Quantité commandée',
                 'attr' => ['min' => 1]
             ])
-            ->add('prixAchat', NumberType::class, [
+            // --- ON UTILISE TextType COMME DANS LE FORMULAIRE FOURNISSEUR ---
+            ->add('prixAchat', TextType::class, [
                 'label' => 'Prix d\'achat unitaire négocié (€)',
-                'scale' => 2,
-                'html5' => true,
-                'attr' => ['step' => '0.01', 'min' => '0']
+                'required' => false,
+                'attr' => [
+                    'class' => 'prix-input-auto', // Classe utilisée pour le ciblage JS
+                    'inputmode' => 'decimal',
+                    'pattern' => '^\d+([.]\d{1,2})?$',
+                    'placeholder' => 'Ex: 10.99',
+                ],
             ])
         ;
     }

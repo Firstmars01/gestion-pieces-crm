@@ -35,14 +35,14 @@ class CommandeAchatController extends AbstractController
         // Gestion de la barre de recherche
         if ($recherche = $request->query->get('q')) {
             $queryBuilder->andWhere('LOWER(f.raisonSociale) LIKE LOWER(:recherche) OR c.id = :idRecherche')
-                ->setParameter('recherche', '%' . $recherche . '%')
+                ->setParameter('recherche', '%'.$recherche.'%')
                 ->setParameter('idRecherche', is_numeric($recherche) ? $recherche : 0);
         }
 
         $commandesList = $paginator->paginate($queryBuilder, $request->query->getInt('page', 1), 15);
 
         return $this->render('achats/commande/index.html.twig', [
-            'commandesList' => $commandesList
+            'commandesList' => $commandesList,
         ]);
     }
 
@@ -87,14 +87,38 @@ class CommandeAchatController extends AbstractController
     #[Route('/{id}/edit', name: 'achats_commande_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, CommandeAchat $commande, EntityManagerInterface $em): Response
     {
+        // 1. On mémorise si la commande était DÉJÀ livrée avant la modification
+        $etaitDejaLivree = null !== $commande->getDateReelle();
+
         $form = $this->createForm(CommandeAchatType::class, $commande);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'Les dates de la commande ont été mises à jour.');
+            // 2. On vérifie l'état après soumission du formulaire
+            $estMaintenantLivree = null !== $commande->getDateReelle();
 
-            // Si la requête vient de la modale AJAX, on renvoie vers l'index en JSON
+            // 3. LA MAGIE : Si elle n'était pas livrée, et qu'elle l'est maintenant !
+            if (!$etaitDejaLivree && $estMaintenantLivree) {
+                // On boucle sur toutes les lignes de la commande
+                foreach ($commande->getLignes() as $ligne) {
+                    $piece = $ligne->getPiece();
+                    $quantiteCommandee = $ligne->getQuantite();
+
+                    // On additionne la quantité reçue au stock actuel de la pièce
+                    $nouveauStock = $piece->getQuantiteStock() + $quantiteCommandee;
+                    $piece->setQuantiteStock($nouveauStock);
+                }
+
+                $this->addFlash('success', 'Commande marquée comme livrée ! Le stock des pièces a été mis à jour automatiquement.');
+            } else {
+                // Si on a juste modifié autre chose (ex: la date prévue)
+                $this->addFlash('success', 'Les dates de la commande ont été mises à jour.');
+            }
+
+            // On sauvegarde tout en base de données (Commande + Lignes + Pièces mises à jour)
+            $em->flush();
+
+            // Redirection AJAX vers l'index
             if ($request->isXmlHttpRequest()) {
                 return $this->json([
                     'redirect' => $this->generateUrl('achats_commande_index'),
@@ -136,10 +160,14 @@ class CommandeAchatController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // ON A SUPPRIMÉ LA MISE À JOUR DE LA PIÈCE ICI.
+            // Le prix saisi dans le formulaire est automatiquement sauvegardé
+
+
             $em->persist($ligne);
             $em->flush();
 
-            $this->addFlash('success', 'La pièce a été ajoutée à la commande.');
+            $this->addFlash('success', 'La pièce a été ajoutée à la commande au prix négocié.');
 
             // Redirection AJAX vers la page show
             if ($request->isXmlHttpRequest()) {
@@ -157,8 +185,9 @@ class CommandeAchatController extends AbstractController
         ]);
     }
 
+
     #[Route('/ligne/{id}/delete', name: 'achats_commande_ligne_delete', methods: ['POST'])]
-    public function deleteLigne(Request $request, \App\Entity\CmdAchatLigne $ligne, EntityManagerInterface $em): Response
+    public function deleteLigne(Request $request, CmdAchatLigne $ligne, EntityManagerInterface $em): Response
     {
         $commandeId = $ligne->getCommandeAchat()->getId();
 

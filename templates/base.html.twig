@@ -78,5 +78,58 @@
 
 {% endblock %}
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Fonction pour mettre à jour le prix
+        function updatePrixInput(selectElement) {
+            // Cherche un champ prix à proximité (dans le même formulaire) qui a la classe 'prix-input-auto'
+            const form = selectElement.closest('form');
+            if (!form) return;
+
+            const prixInput = form.querySelector('.prix-input-auto');
+            if (!prixInput) return;
+
+            // Récupère la valeur sélectionnée
+            const selectedValue = selectElement.value;
+            if (!selectedValue) {
+                prixInput.value = '';
+                return;
+            }
+
+            // Récupère l'option correspondante
+            const option = selectElement.querySelector('option[value="' + selectedValue + '"]');
+            if (option) {
+                const prix = option.getAttribute('data-prix');
+                if (prix !== null && prix !== undefined) {
+                    prixInput.value = prix;
+                }
+            }
+        }
+
+        // --- Cas 1: Si TomSelect est utilisé ---
+        // TomSelect crée ses propres événements. On s'assure de l'écouter.
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.classList && e.target.classList.contains('select-searchable')) {
+                updatePrixInput(e.target);
+            }
+        });
+
+        // --- Cas 2: Initialisation à l'ouverture de la modale ---
+        // Si ton modal_global.js déclenche 'modal:loaded', on vérifie l'état initial
+        document.addEventListener('modal:loaded', function(e) {
+            const selects = e.detail.modalBody.querySelectorAll('select.select-searchable');
+            selects.forEach(function(select) {
+                // Écouteur natif au cas où
+                select.addEventListener('change', function() {
+                    updatePrixInput(this);
+                });
+                // Met à jour au chargement si une valeur est déjà sélectionnée
+                updatePrixInput(select);
+            });
+        });
+    });
+</script>
+
 </body>
 </html>
