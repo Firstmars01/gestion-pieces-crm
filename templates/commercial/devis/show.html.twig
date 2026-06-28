@@ -25,7 +25,7 @@
 
         {% for commande in devis.commandes %}
             {% if commande.devisList|length > 0 and commande.devisList.first.id == devis.id %}
-                {% if commande.dateFacture and date('now') > commande.dateFacture %}
+                {% if commande.isLivree %}
                     {% set commandesPassees = commandesPassees|merge([commande]) %}
                 {% else %}
                     {% set commandesEnCours = commandesEnCours|merge([commande]) %}

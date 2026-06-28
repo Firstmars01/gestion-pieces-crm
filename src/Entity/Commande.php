@@ -35,6 +35,21 @@ class Commande
     #[ORM\OneToMany(mappedBy: 'commande', targetEntity: CommandeLigne::class, cascade: ['persist', 'remove'])]
     private Collection $commandeLignes;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $isLivree = false;
+
+    public function isLivree(): bool
+    {
+        return $this->isLivree;
+    }
+
+    public function setIsLivree(bool $isLivree): static
+    {
+        $this->isLivree = $isLivree;
+
+        return $this;
+    }
+
     public function __construct()
     {
         $this->commandeLignes = new ArrayCollection();

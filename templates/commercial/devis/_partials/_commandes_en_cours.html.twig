@@ -8,42 +8,82 @@
 
 {% if commandesEnCours|length > 0 %}
     {% for commande in commandesEnCours %}
-        <div class="card shadow-sm border-orange-rouge mb-4 commande-card">
-            <div class="card-header bg-orange-rouge-light py-3 d-flex justify-content-between align-items-center border-bottom-0">
+
+        {# On recalcule le manque de stock pour déclencher le design rouge #}
+        {% set stockManquant = false %}
+        {% set piecesManquantes = [] %}
+        {% for ligne in commande.commandeLignes %}
+            {% if ligne.quantite > ligne.piece.quantiteStock %}
+                {% set stockManquant = true %}
+                {% set piecesManquantes = piecesManquantes|merge([ligne.piece.reference]) %}
+            {% endif %}
+        {% endfor %}
+
+        {# La commande devient rouge SI le jour J est atteint ET qu'il manque du stock #}
+        {% set isJourJ = commande.dateFacture and date('now')|date('Y-m-d') >= commande.dateFacture|date('Y-m-d') %}
+        {% set isAlerteRouge = isJourJ and stockManquant %}
+
+        {# Couleurs dynamiques #}
+        {% set cardColor = isAlerteRouge ? 'danger' : 'orange-rouge' %}
+        {% set textClass = isAlerteRouge ? 'text-white' : 'text-dark' %}
+        {% set mutedClass = isAlerteRouge ? 'text-white-50' : 'text-muted' %}
+
+        <div class="card shadow-sm border-{{ cardColor }} mb-4 commande-card">
+
+            <div class="card-header bg-{{ isAlerteRouge ? 'danger' : 'orange-rouge-light' }} py-3 d-flex justify-content-between align-items-center border-bottom-0">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <h6 class="mb-0 fw-bold text-dark">{{ commande.numero }}</h6>
-                        <button type="button" onclick="openModalAjax('Modifier la commande', '{{ path('commercial_commande_edit', {id: commande.id}) }}')" class="btn btn-sm btn-outline-orange-rouge py-0 px-1 action-hover" title="Modifier les dates">
+                        <h6 class="mb-0 fw-bold {{ textClass }}">{{ commande.numero }}</h6>
+                        <button type="button" onclick="openModalAjax('Modifier la commande', '{{ path('commercial_commande_edit', {id: commande.id}) }}')" class="btn btn-sm {{ isAlerteRouge ? 'btn-light' : 'btn-outline-orange-rouge' }} py-0 px-1 action-hover" title="Modifier les dates">
                             <i class="bi bi-pencil-square"></i>
                         </button>
+                        {% if isAlerteRouge %}
+                            <span class="badge bg-white text-danger ms-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> Retard Logistique</span>
+                        {% endif %}
                     </div>
-                    <small class="text-muted">
+                    <small class="{{ mutedClass }}">
                         Créée le {{ commande.dateCmd|date('d/m/Y') }}
                         {% if commande.dateFacture %}
-                            <span class="ms-2 border-start border-orange-rouge ps-2 text-dark fw-medium">Livraison prévue le {{ commande.dateFacture|date('d/m/Y') }}</span>
+                            <span class="ms-2 border-start {{ isAlerteRouge ? 'border-white-50' : 'border-orange-rouge' }} ps-2 fw-medium">
+                                Livraison prévue le {{ commande.dateFacture|date('d/m/Y') }}
+                            </span>
                         {% endif %}
                     </small>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-white text-dark border border-orange-rouge fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
+                    <span class="badge bg-white text-dark border border-{{ cardColor }} fs-6">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</span>
 
                     <div class="d-flex align-items-center gap-2 action-hover">
-                        <button type="button" onclick="openModalAjax('Lier un autre devis', '{{ path('commercial_commande_lier_devis', {id: commande.id}) }}')" class="btn btn-sm btn-outline-secondary" title="Lier un autre devis à cette commande" {{ isExpired ? 'disabled' : '' }}>
+                        {% if not stockManquant and commande.commandeLignes|length > 0 %}
+                            <form method="post" action="{{ path('commercial_commande_livrer', {id: commande.id}) }}" onsubmit="return confirm('Confirmer l\'expédition de cette commande ? Les pièces seront retirées du stock.');" class="mb-0">
+                                <input type="hidden" name="_token" value="{{ csrf_token('livrer_commande_' ~ commande.id) }}">
+                                <button class="btn btn-sm btn-success" type="submit" title="Expédier et déduire le stock">
+                                    <i class="bi bi-box-seam"></i> Expédier
+                                </button>
+                            </form>
+                        {% endif %}
+                        <button type="button" onclick="openModalAjax('Lier un autre devis', '{{ path('commercial_commande_lier_devis', {id: commande.id}) }}')" class="btn btn-sm {{ isAlerteRouge ? 'btn-outline-light' : 'btn-outline-secondary' }}" title="Lier devis" {{ isExpired ? 'disabled' : '' }}>
                             <i class="bi bi-link-45deg"></i> Lier devis
                         </button>
-                        <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm btn-outline-orange-rouge" {{ isExpired ? 'disabled' : '' }}>
+                        <button type="button" onclick="openModalAjax('Ajouter une pièce', '{{ path('commercial_commande_add_ligne', {id: commande.id}) }}')" class="btn btn-sm {{ isAlerteRouge ? 'btn-light text-danger' : 'btn-outline-orange-rouge' }}" {{ isExpired ? 'disabled' : '' }}>
                             <i class="bi bi-plus-circle me-1"></i> Pièce
                         </button>
-                        <form method="post" action="{{ path('commercial_commande_delete', {id: commande.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer toute cette commande ?');" class="mb-0">
+                        <form method="post" action="{{ path('commercial_commande_delete', {id: commande.id}) }}" onsubmit="return confirm('Êtes-vous sûr de supprimer cette commande ?');" class="mb-0">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_' ~ commande.id) }}">
-                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la commande">
+                            <button class="btn btn-sm {{ isAlerteRouge ? 'btn-outline-light' : 'btn-outline-danger' }}" type="submit" title="Supprimer la commande">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
+
+            {% if isAlerteRouge %}
+                <div class="bg-danger bg-opacity-10 border-bottom px-3 py-2 small text-danger fw-bold">
+                    <i class="bi bi-shield-exclamation me-1"></i> Action requise : La commande ne peut pas être expédiée aujourd'hui. Pièces manquantes : {{ piecesManquantes|join(', ') }}.
+                </div>
+            {% endif %}
 
             <div class="bg-light border-bottom px-3 py-2 small text-muted">
                 <i class="bi bi-tags me-1"></i> Devis sources :
@@ -56,14 +96,21 @@
                 <table class="table align-middle mb-0">
                     <tbody>
                     {% for cLigne in commande.commandeLignes %}
-                        <tr>
-                            <td class="ps-4"><i class="bi bi-arrow-return-right text-muted me-2"></i> <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span></td>
+                        {% set isLigneManquante = cLigne.quantite > cLigne.piece.quantiteStock %}
+                        <tr class="{{ isAlerteRouge and isLigneManquante ? 'bg-danger bg-opacity-10' : '' }}">
+                            <td class="ps-4">
+                                <i class="bi bi-arrow-return-right {{ isAlerteRouge and isLigneManquante ? 'text-danger' : 'text-muted' }} me-2"></i>
+                                <span class="fw-medium">{{ cLigne.piece.reference }} - {{ cLigne.piece.libelle }}</span>
+                                {% if isAlerteRouge and isLigneManquante %}
+                                    <span class="badge bg-danger ms-2">En stock : {{ cLigne.piece.quantiteStock }} (Demandé : {{ cLigne.quantite }})</span>
+                                {% endif %}
+                            </td>
                             <td class="text-center">{{ cLigne.quantite }}</td>
                             <td class="text-end text-muted">{{ cLigne.prixUnitaire|number_format(2, ',', ' ') }} € / u</td>
                             <td class="text-end fw-bold pe-4">{{ (cLigne.prixUnitaire * cLigne.quantite)|number_format(2, ',', ' ') }} €</td>
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-2 action-buttons">
-                                    <form method="post" action="{{ path('commercial_commande_ligne_delete', {id: cLigne.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer cette pièce de la commande ?');" class="mb-0">
+                                    <form method="post" action="{{ path('commercial_commande_ligne_delete', {id: cLigne.id}) }}" onsubmit="return confirm('Êtes-vous sûr de retirer cette pièce ?');" class="mb-0">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_ligne_' ~ cLigne.id) }}">
                                         <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer la ligne">
                                             <i class="bi bi-trash"></i>
@@ -71,10 +118,6 @@
                                     </form>
                                 </div>
                             </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3 fst-italic">Cette commande est vide. Ajoutez-y des pièces du devis !</td>
                         </tr>
                     {% endfor %}
                     </tbody>
