@@ -54,7 +54,7 @@ class PieceType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Ex: 10',
                     'min' => 1,
-                    'max' => 999999,
+                    'max' => 999999999,
                 ],
             ])
             ->add('composants', CollectionType::class, [
@@ -71,9 +71,6 @@ class PieceType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Piece::class,
-            'attr' => [
-                'novalidate' => 'novalidate',
-            ],
         ]);
     }
 }
