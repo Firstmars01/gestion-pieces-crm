@@ -138,13 +138,22 @@ class CommandeAchatController extends AbstractController
     #[Route('/{id}', name: 'achats_commande_delete', methods: ['POST'])]
     public function delete(Request $request, CommandeAchat $commande, EntityManagerInterface $em): Response
     {
+        // SECURITY CHECK: Ensure the order is not delivered and has no lines.
+        if ($commande->getDateReelle() !== null || $commande->getLignes()->count() > 0) {
+            $this->addFlash('danger', 'Action impossible : Cette commande contient des pièces ou a déjà été livrée.');
+            return $this->redirectToRoute('achats_commande_show', ['id' => $commande->getId()]);
+        }
+
         if ($this->isCsrfTokenValid('delete_commande_'.$commande->getId(), $request->request->get('_token'))) {
             $em->remove($commande);
             $em->flush();
             $this->addFlash('success', 'La commande a été supprimée.');
+            // Redirect to index after successful deletion of the entire order
+            return $this->redirectToRoute('achats_commande_index');
         }
 
-        return $this->redirectToRoute('achats_commande_index');
+        $this->addFlash('danger', 'Action non autorisée (Token invalide).');
+        return $this->redirectToRoute('achats_commande_show', ['id' => $commande->getId()]);
     }
 
     #[Route('/{id}/add-ligne', name: 'achats_commande_add_ligne', methods: ['GET', 'POST'])]
@@ -199,4 +208,6 @@ class CommandeAchatController extends AbstractController
 
         return $this->redirectToRoute('achats_commande_show', ['id' => $commandeId]);
     }
+
+
 }
