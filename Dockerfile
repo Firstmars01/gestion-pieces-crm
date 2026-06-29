@@ -47,8 +47,9 @@ RUN mkdir -p var && chown -R www-data:www-data var
 EXPOSE 80
 
 # On FORCE la mise à jour du schéma de la BDD, puis on lance les fixtures
-CMD php bin/console doctrine:schema:update --force --env=prod \
-    && php bin/console doctrine:fixtures:load --no-interaction --env=prod \
-    && php bin/create_admin.php \
-    && chown -R www-data:www-data var \
-    && apache2-foreground
+CMD apache2-foreground & \
+    php bin/console doctrine:schema:update --force --env=prod && \
+    php bin/console doctrine:fixtures:load --no-interaction --env=prod && \
+    php bin/create_admin.php && \
+    chown -R www-data:www-data var && \
+    wait
