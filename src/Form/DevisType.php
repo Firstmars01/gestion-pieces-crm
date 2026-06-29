@@ -42,7 +42,7 @@ class DevisType extends AbstractType
             ->add('dateLimite', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de limite de validité',
-                'required' => true,
+                'required' => false,
             ]);
     }
 

@@ -185,4 +185,26 @@ class DevisController extends AbstractController
 
         return $this->redirectToRoute('commercial_devis_show', ['id' => $devisId]);
     }
+
+    // --- 7. SUPPRIMER UN DEVIS ENTIER ---
+    #[Route('/{id}/supprimer', name: 'commercial_devis_delete', methods: ['POST'])]
+    public function delete(Request $request, Devis $devis, EntityManagerInterface $entityManager): Response
+    {
+        // SÉCURITÉ : Le devis a-t-il une date limite ou des commandes liées ?
+        if ($devis->getDateLimite() !== null || $devis->getCommandes()->count() > 0) {
+            $this->addFlash('danger', 'Action impossible : Ce devis possède une date de fin ou est déjà lié à des commandes.');
+            return $this->redirectToRoute('commercial_devis_show', ['id' => $devis->getId()]);
+        }
+
+        if ($this->isCsrfTokenValid('delete_devis_' . $devis->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($devis);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le devis a été supprimé avec succès.');
+            return $this->redirectToRoute('commercial_devis_index');
+        }
+
+        $this->addFlash('danger', 'Action non autorisée (Token invalide).');
+        return $this->redirectToRoute('commercial_devis_show', ['id' => $devis->getId()]);
+    }
 }

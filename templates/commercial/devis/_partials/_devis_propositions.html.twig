@@ -5,12 +5,23 @@
                 <h5 class="mb-1 fw-bold text-dark text-uppercase">
                     {{ devis.nom is empty ? 'Devis #' ~ devis.id : devis.nom }}
                 </h5>
+                {# BOUTON MODIFIER #}
                 <button type="button"
                         onclick="openModalAjax('Modifier devis', '{{ path('commercial_devis_edit', {id: devis.id}) }}')"
                         class="btn btn-sm btn-outline-primary"
                         title="Modifier">
                     <i class="bi bi-pencil-square"></i>
                 </button>
+
+                {# BOUTON SUPPRIMER (Sous conditions) #}
+                {% if not devis.dateLimite or devis.commandes|length == 0 %}
+                    <form method="post" action="{{ path('commercial_devis_delete', {id: devis.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement ce devis ? Toute la liste des pièces sera perdue.');" class="mb-0">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_devis_' ~ devis.id) }}">
+                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Supprimer le devis">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                {% endif %}
             </div>
 
             <div class="text-muted small">
