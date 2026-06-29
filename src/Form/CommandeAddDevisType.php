@@ -40,14 +40,15 @@ class CommandeAddDevisType extends AbstractType
 
                 return $qb;
             },
-            'choice_label' => function(Devis $devis) {
-                $nom = $devis->getNom() ? $devis->getNom() : 'Devis #' . $devis->getId();
-                return $nom . ' (Créé le ' . $devis->getDateDevis()->format('d/m/Y') . ')';
+            'choice_label' => function (Devis $devis) {
+                $nom = $devis->getNom() ? $devis->getNom() : 'Devis #'.$devis->getId();
+
+                return $nom.' (Créé le '.$devis->getDateDevis()->format('d/m/Y').')';
             },
             'mapped' => false,
             'label' => 'Sélectionner un devis supplémentaire',
             'placeholder' => 'Choisissez un devis de ce client...',
-            'attr' => ['class' => 'select-searchable']
+            'attr' => ['class' => 'select-searchable'],
         ]);
     }
 

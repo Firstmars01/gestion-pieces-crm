@@ -17,17 +17,17 @@ class GammeOperationType extends AbstractType
         $builder
             ->add('operation', EntityType::class, [
                 'class' => Operation::class,
-                'choice_label' => function(Operation $op) {
-                    return $op->getLibelle() . ' (' . $op->getTempsPrevu() . ' min)';
+                'choice_label' => function (Operation $op) {
+                    return $op->getLibelle().' ('.$op->getTempsPrevu().' min)';
                 },
                 'label' => 'Opération à ajouter',
                 'placeholder' => 'Sélectionnez une opération...',
                 'required' => true,
-                'attr' => ['class' => 'select-searchable']
+                'attr' => ['class' => 'select-searchable'],
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre (N° de l\'étape)',
-                'attr' => ['min' => 1]
+                'attr' => ['min' => 1],
             ])
         ;
     }

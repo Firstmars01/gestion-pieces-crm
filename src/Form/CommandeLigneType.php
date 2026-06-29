@@ -20,9 +20,11 @@ class CommandeLigneType extends AbstractType
         foreach ($commande->getDevisList() as $devis) {
             foreach ($devis->getCommandes() as $cmd) {
                 foreach ($cmd->getCommandeLignes() as $cl) {
-                    $key = $cl->getPiece()->getId() . '_' . $cl->getQuantite();
-                    if (!isset($commandeesCount[$key])) $commandeesCount[$key] = 0;
-                    $commandeesCount[$key]++;
+                    $key = $cl->getPiece()->getId().'_'.$cl->getQuantite();
+                    if (!isset($commandeesCount[$key])) {
+                        $commandeesCount[$key] = 0;
+                    }
+                    ++$commandeesCount[$key];
                 }
             }
         }
@@ -31,11 +33,11 @@ class CommandeLigneType extends AbstractType
         $lignesDispo = [];
         foreach ($commande->getDevisList() as $devis) {
             foreach ($devis->getDevisLignes() as $dl) {
-                $key = $dl->getPiece()->getId() . '_' . $dl->getQuantite();
+                $key = $dl->getPiece()->getId().'_'.$dl->getQuantite();
 
                 // Si cette paire a déjà été commandée, on "consomme" une commande et on ignore la ligne
                 if (isset($commandeesCount[$key]) && $commandeesCount[$key] > 0) {
-                    $commandeesCount[$key]--;
+                    --$commandeesCount[$key];
                 } else {
                     // Sinon, la ligne est libre pour être ajoutée !
                     $lignesDispo[] = $dl;
@@ -46,15 +48,16 @@ class CommandeLigneType extends AbstractType
         $builder->add('devisLigne', EntityType::class, [
             'class' => DevisLigne::class,
             'choices' => $lignesDispo,
-            'choice_label' => function(DevisLigne $dl) {
-                $nomDevis = $dl->getDevis()->getNom() ? $dl->getDevis()->getNom() : 'Devis #' . $dl->getDevis()->getId();
-                return '[' . $nomDevis . '] ' . $dl->getPiece()->getReference() . ' - ' . $dl->getPiece()->getLibelle() . ' (Quantité figée : ' . $dl->getQuantite() . ')';
+            'choice_label' => function (DevisLigne $dl) {
+                $nomDevis = $dl->getDevis()->getNom() ? $dl->getDevis()->getNom() : 'Devis #'.$dl->getDevis()->getId();
+
+                return '['.$nomDevis.'] '.$dl->getPiece()->getReference().' - '.$dl->getPiece()->getLibelle().' (Quantité figée : '.$dl->getQuantite().')';
             },
             'mapped' => false,
             'label' => 'Sélectionner la ligne complète à commander',
             'placeholder' => empty($lignesDispo) ? 'Toutes les lignes ont déjà été commandées' : 'Sélectionnez une pièce...',
             'attr' => ['class' => 'select-searchable piece-commande-select'],
-            'disabled' => empty($lignesDispo)
+            'disabled' => empty($lignesDispo),
         ]);
         // REMARQUE : On a totalement supprimé le champ "quantite" ici !
     }

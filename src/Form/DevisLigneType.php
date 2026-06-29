@@ -44,7 +44,10 @@ class DevisLigneType extends AbstractType
             ])
             ->add('quantite', IntegerType::class, [
                 'label' => 'Quantité demandée',
-                'attr' => ['min' => 1],
+                'attr' => [
+                    'min' => 1,
+                    'max' => 999999,
+                ],
                 'required' => true,
             ])
             ->add('prix', MoneyType::class, [

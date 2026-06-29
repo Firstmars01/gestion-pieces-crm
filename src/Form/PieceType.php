@@ -51,7 +51,11 @@ class PieceType extends AbstractType
             ])
             ->add('quantiteStock', IntegerType::class, [
                 'label' => 'Quantité en stock',
-                'attr' => ['placeholder' => 'Ex: 10'],
+                'attr' => [
+                    'placeholder' => 'Ex: 10',
+                    'min' => 1,
+                    'max' => 999999,
+                ],
             ])
             ->add('composants', CollectionType::class, [
                 'entry_type' => PieceCompositionType::class,

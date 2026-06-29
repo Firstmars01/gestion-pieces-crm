@@ -37,6 +37,7 @@ class PieceCompositionType extends AbstractType
                 'label' => false,
                 'attr' => [
                     'min' => 1,
+                    'max' => 999999,
                     'placeholder' => 'Quantité',
                     'class' => 'form-control form-control-sm',
                 ],

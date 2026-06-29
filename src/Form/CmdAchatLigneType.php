@@ -36,11 +36,14 @@ class CmdAchatLigneType extends AbstractType
                 },
                 'label' => 'Sélectionnez la pièce',
                 'placeholder' => 'Choisir une pièce...',
-                'attr' => ['class' => 'select-searchable']
+                'attr' => ['class' => 'select-searchable'],
             ])
             ->add('quantite', IntegerType::class, [
                 'label' => 'Quantité commandée',
-                'attr' => ['min' => 1]
+                'attr' => [
+                    'min' => 1,
+                    'max' => 999999,
+                ],
             ])
             // --- ON UTILISE TextType COMME DANS LE FORMULAIRE FOURNISSEUR ---
             ->add('prixAchat', TextType::class, [
