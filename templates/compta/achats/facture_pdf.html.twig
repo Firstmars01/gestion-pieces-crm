@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture Achat #{{ commande.id }}</title>
+
+    <link rel="stylesheet" href="{{ public_dir }}/styles/pdf.css">
+</head>
+<body>
+
+<div class="header">
+    <div class="company-info">
+        <div class="company-name">SYNERGY CRM</div>
+        <p class="company-details">
+            123 Boulevard de l'Industrie<br>
+            75000 Paris, France<br>
+            Tél : 01 23 45 67 89<br>
+            Email : compta@synergy.fr
+        </p>
+    </div>
+    <div class="client-info">
+        <h3 class="client-title">Fournisseur :</h3>
+        <p>
+            <strong>{{ commande.fournisseur.raisonSociale }}</strong><br>
+            {{ commande.fournisseur.email|default('Email non renseigné') }}<br>
+            {{ commande.fournisseur.telephone|default('Tél non renseigné') }}
+        </p>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<h1 class="invoice-title">Facture Achat #{{ commande.id }}</h1>
+<div class="invoice-meta">
+    Date de réception : {{ commande.dateReelle ? commande.dateReelle|date('d/m/Y') : 'Non renseignée' }}
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Référence</th>
+        <th>Désignation</th>
+        <th class="text-center">Qté</th>
+        <th class="text-right">Prix Unitaire</th>
+        <th class="text-right">Total Ligne</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ligne in commande.lignes %}
+        <tr>
+            <td>{{ ligne.piece.reference|default('-') }}</td>
+            <td>{{ ligne.piece.libelle|default('-') }}</td>
+            <td class="text-center">{{ ligne.quantite }}</td>
+            <td class="text-right">{{ ligne.prixAchat|number_format(2, ',', ' ') }} €</td>
+            <td class="text-right">{{ (ligne.prixAchat * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr class="total-row">
+        <td colspan="4" class="total-label">TOTAL HT :</td>
+        <td class="text-right">{{ commande.getTotal()|number_format(2, ',', ' ') }} €</td>
+    </tr>
+    </tfoot>
+</table>
+
+<div class="footer-notes">
+    <p>Document d'archivage interne des achats.</p>
+</div>
+
+</body>
+</html>

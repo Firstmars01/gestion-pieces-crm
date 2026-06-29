@@ -102,6 +102,21 @@
             </div>
         {% endif %}
 
+        {% if is_granted('ROLE_COMPTA') or is_granted('ROLE_ADMIN') %}
+            <a href="#comptaMenu" class="sidebar-link {% if current_route starts with 'compta_' %}active{% endif %}"
+               data-bs-toggle="collapse" role="button" aria-expanded="{{ (current_route starts with 'compta_') ? 'true' : 'false' }}" aria-controls="comptaMenu">
+                Comptabilité
+                <i class="bi bi-chevron-down"></i>
+            </a>
+
+            <div class="collapse {% if current_route starts with 'compta_' %}show{% endif %} mt-1" id="comptaMenu">
+                <nav class="submenu">
+                    <a href="{{ path('compta_ventes_index') }}" class="sidebar-sublink {% if current_route starts with 'compta_ventes_' %}active{% endif %}">Factures de vente</a>
+                    <a href="{{ path('compta_achats_index') }}" class="sidebar-sublink {% if current_route starts with 'compta_achats_' %}active{% endif %}">Factures d'achat</a>
+                </nav>
+            </div>
+        {% endif %}
+
     </nav>
 </aside>
 

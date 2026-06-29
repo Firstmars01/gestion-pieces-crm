@@ -1,0 +1,87 @@
+{% extends './base.html.twig' %}
+
+{% block title %}Comptabilité - Factures Clients{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Ventes clients</h1>
+                <p class="text-muted mb-0">Retrouvez ici toutes les commandes livrées prêtes pour l'archivage comptable.</p>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <form method="get" class="mb-0">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="N° de facture ou Client..." value="{{ app.request.query.get('q') }}">
+                        {% if app.request.query.get('q') %}
+                            {# MISE À JOUR DE LA ROUTE ICI #}
+                            <a href="{{ path('compta_ventes_index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Effacer la recherche">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        {% endif %}
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-header bg-white py-3 border-bottom-0">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Registre des Factures de Vente</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover table-sortable">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">{{ knp_pagination_sortable(ventes, 'N° Facture (Cmd)', 'c.numero') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(ventes, 'Date Facturation', 'c.dateFacture') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(ventes, 'Client', 'client.raisonSociale') }}</th>
+                        <th scope="col" class="text-center">Nb. Lignes</th>
+                        <th scope="col" class="text-end">Montant HT</th>
+                        <th scope="col" class="text-end"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for facture in ventes %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ facture.numero }}</td>
+                            <td>{{ facture.dateFacture ? facture.dateFacture|date('d/m/Y') : '-' }}</td>
+                            <td>
+                                {{ facture.client.raisonSociale ?: facture.client.nomComplet }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border">{{ facture.commandeLignes|length }}</span>
+                            </td>
+                            <td class="text-end fw-bold text-primary">
+                                {{ facture.getTotal()|number_format(2, ',', ' ') }} €
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 action-buttons">
+                                    {# MISE À JOUR DE LA ROUTE DU PDF ICI #}
+                                    <a href="{{ path('compta_vente_pdf', {id: facture.id}) }}" class="btn btn-sm btn-outline-danger" title="Télécharger le PDF">
+                                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
+                                Aucune facture disponible pour le moment.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-container pagination-pill mt-3">
+            {{ knp_pagination_render(ventes) }}
+        </div>
+    </div>
+{% endblock %}

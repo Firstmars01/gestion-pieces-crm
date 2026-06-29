@@ -1,0 +1,124 @@
+/* ==========================================================================
+   STYLE DU PDF - SYNERGY CRM
+   Basé sur les variables de la charte graphique
+   ========================================================================== */
+
+:root {
+    /* Couleurs principales basées sur app.css */
+    --primary: #243c84;
+    --sidebar: #464ba4;
+    --background: #cccccc;
+    --navbar-bg: #ffffff;
+
+    /* Couleurs additionnelles pour le PDF */
+    --orange-rouge: #d35400;
+    --gris-clair: #f1f3f5;
+    --texte-sombre: #333333;
+    --texte-muted: #888888;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: var(--texte-sombre);
+}
+
+.header {
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.company-info {
+    float: left;
+    width: 50%;
+}
+
+.company-name {
+    color: var(--primary);
+    margin-bottom: 5px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.company-details {
+    margin-top: 0;
+    line-height: 1.4;
+}
+
+.client-info {
+    float: right;
+    width: 45%;
+    text-align: left;
+    background-color: var(--gris-clair);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.client-title {
+    margin-top: 0;
+    border-bottom: 2px solid var(--background);
+    padding-bottom: 8px;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.clear {
+    clear: both;
+}
+
+.invoice-title {
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.invoice-meta {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--orange-rouge);
+    font-weight: bold;
+}
+
+/* --- TABLEAU DES PIÈCES --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+th, td {
+    border: 1px solid var(--background);
+    padding: 12px 10px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary);
+    color: var(--navbar-bg);
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+.total-row {
+    font-weight: bold;
+    font-size: 16px;
+    background-color: var(--gris-clair);
+    color: var(--primary);
+}
+
+.total-label {
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.footer-notes {
+    margin-top: 50px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--texte-muted);
+    line-height: 1.5;
+}
