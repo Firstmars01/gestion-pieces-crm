@@ -24,6 +24,30 @@
                         </button>
                     </div>
                 </form>
+
+                    <form method="get" action="{{ path('compta_achats_csv') }}" class="d-flex align-items-center gap-2 mb-0 ms-2 border-start ps-2">
+
+                        {% set moisNoms = {'01':'Janvier', '02':'Février', '03':'Mars', '04':'Avril', '05':'Mai', '06':'Juin', '07':'Juillet', '08':'Août', '09':'Septembre', '10':'Octobre', '11':'Novembre', '12':'Décembre'} %}
+                        {% set lastMonth = "now"|date_modify("-1 month")|date("m") %}
+                        {% set lastYear = "now"|date_modify("-1 month")|date("Y") %}
+
+                        {# NOUVEAU : On affiche toujours les 12 mois #}
+                        <select name="mois" class="form-select form-select-sm w-auto" style="min-width: 120px;" required>
+                            {% for code, nom in moisNoms %}
+                                <option value="{{ code }}" {% if code == lastMonth %}selected{% endif %}>{{ nom }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="annee" class="form-select form-select-sm w-auto" style="min-width: 90px;" required>
+                            {% for a in anneesDispo %}
+                                <option value="{{ a }}" {% if a == lastYear %}selected{% endif %}>{{ a }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-success d-flex align-items-center">
+                            <i class="bi bi-filetype-csv me-1"></i> CSV
+                        </button>
+                    </form>
             </div>
         </div>
 
