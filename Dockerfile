@@ -1,12 +1,16 @@
 FROM php:8.3-apache
 
-# 1. Installation des dépendances et de l'extension zip (cruciale pour Composer)
+# 1. Installation des dépendances (ajout de libpng/libjpeg pour l'extension GD nécessaire à Dompdf)
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libpq-dev \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql zip gd
 
 # 2. Activation du module de réécriture Apache (indispensable pour Symfony)
 RUN a2enmod rewrite
@@ -34,8 +38,8 @@ COPY . .
 # 6. Variables d'environnement pour le build de Symfony (évite d'avoir besoin de la bdd au build)
 ENV APP_ENV=prod
 
-# 7. Installation des dépendances sans les scripts (on lancera le cache-clear après)
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# 7. Installation des dépendances SANS LIMITE DE MÉMOIRE (Évite le crash sur Render)
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-scripts
 
 # 8. Gestion des permissions pour Symfony (le cache et les logs)
 RUN mkdir -p var && chown -R www-data:www-data var
