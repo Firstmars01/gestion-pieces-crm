@@ -38,8 +38,8 @@ COPY . .
 # 6. Variables d'environnement pour le build de Symfony (évite d'avoir besoin de la bdd au build)
 ENV APP_ENV=prod
 
-# 7. Installation des dépendances SANS LIMITE DE MÉMOIRE (Évite le crash sur Render)
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-scripts
+# 7. Installation des dépendances SANS LIMITE DE MÉMOIRE et via GIT
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-scripts --prefer-source
 
 # 8. Gestion des permissions pour Symfony (le cache et les logs)
 RUN mkdir -p var && chown -R www-data:www-data var
