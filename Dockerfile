@@ -46,8 +46,8 @@ RUN mkdir -p var && chown -R www-data:www-data var
 
 EXPOSE 80
 
-# On lance les migrations, on vérifie l'interrupteur pour les fixtures, on fait l'admin et on démarre.
-CMD php bin/console doctrine:migrations:migrate --no-interaction --env=prod \
+# On FORCE la mise à jour du schéma de la BDD, puis on lance les fixtures
+CMD php bin/console doctrine:schema:update --force --env=prod \
     && php bin/console doctrine:fixtures:load --no-interaction --env=prod \
     && php bin/create_admin.php \
     && chown -R www-data:www-data var \
