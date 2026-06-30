@@ -38,6 +38,21 @@ class Commande
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $isLivree = false;
 
+    #[ORM\ManyToOne(targetEntity: Devis::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Devis $devisParent = null;
+
+    public function getDevisParent(): ?Devis
+    {
+        return $this->devisParent;
+    }
+
+    public function setDevisParent(?Devis $devisParent): static
+    {
+        $this->devisParent = $devisParent;
+        return $this;
+    }
+
     public function isLivree(): bool
     {
         return $this->isLivree;

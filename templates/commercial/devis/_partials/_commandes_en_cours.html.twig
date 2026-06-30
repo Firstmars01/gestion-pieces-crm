@@ -9,6 +9,19 @@
 {% if commandesEnCours|length > 0 %}
     {% for commande in commandesEnCours %}
 
+        {# 1. ON VERROUILLE LE VRAI PARENT (Celui d'origine, qui ne changera jamais) #}
+        {% set vraiParentId = 0 %}
+        {% if commande.devisParent %}
+            {% set vraiParentId = commande.devisParent.id %}
+        {% elseif '-P' in commande.numero %}
+            {% set vraiParentId = (commande.numero|split('-P')|last|trim) + 0 %}
+        {% elseif commande.devisList|length > 0 %}
+            {% set vraiParentId = commande.devisList|first.id %}
+        {% endif %}
+
+        {# On nettoie le numéro pour l'affichage propre (sans le -P) #}
+        {% set numeroAffichage = commande.numero|split('-P')[0] %}
+
         {# On recalcule le manque de stock pour déclencher le design rouge #}
         {% set stockManquant = false %}
         {% set piecesManquantes = [] %}
@@ -33,7 +46,7 @@
             <div class="card-header bg-{{ isAlerteRouge ? 'danger' : 'orange-rouge-light' }} py-3 d-flex justify-content-between align-items-center border-bottom-0">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <h6 class="mb-0 fw-bold {{ textClass }}">{{ commande.numero }}</h6>
+                        <h6 class="mb-0 fw-bold {{ textClass }}">{{ numeroAffichage }}</h6>
                         <button type="button" onclick="openModalAjax('Modifier la commande', '{{ path('commercial_commande_edit', {id: commande.id}) }}')" class="btn btn-sm {{ isAlerteRouge ? 'btn-light' : 'btn-outline-orange-rouge' }} py-0 px-1 action-hover" title="Modifier les dates">
                             <i class="bi bi-pencil-square"></i>
                         </button>
@@ -88,7 +101,12 @@
             <div class="bg-light border-bottom px-3 py-2 small text-muted">
                 <i class="bi bi-tags me-1"></i> Devis sources :
                 {% for d in commande.devisList %}
-                    <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
+                    {# 2. LE BADGE EST FIXÉ AU VRAI PARENT (Il ne bougera plus jamais selon la page) #}
+                    {% if d.id == vraiParentId %}
+                        <span class="badge bg-secondary text-white border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }} (Parent)</span>
+                    {% else %}
+                        <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
+                    {% endif %}
                 {% endfor %}
             </div>
 
@@ -124,6 +142,7 @@
                 </table>
             </div>
         </div>
+
     {% endfor %}
 {% else %}
     <div class="text-center text-muted py-4 border rounded bg-white shadow-sm mb-4">

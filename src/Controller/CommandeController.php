@@ -34,8 +34,9 @@ class CommandeController extends AbstractController
 
         $commande = new Commande();
         $commande->setClient($devis->getClient());
+        $commande->setDevisParent($devis);
         $commande->addDevisList($devis);
-        $commande->setNumero('CMD-'.date('YmdHis'));
+        $commande->setNumero('CMD-'.date('YmdHis').'-P'.$devis->getId());
 
         $form = $this->createForm(\App\Form\CommandeType::class, $commande);
         $form->handleRequest($request);
@@ -59,16 +60,18 @@ class CommandeController extends AbstractController
     {
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Commande déjà expédiée.');
+
             return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
         }
 
         // --- NOUVELLE SÉCURITÉ : La commande est-elle vide ? ---
         if ($commande->getCommandeLignes()->isEmpty()) {
             $this->addFlash('danger', 'Impossible d\'expédier : la commande est vide. Veuillez d\'abord y ajouter des pièces.');
+
             return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
         }
 
-        if ($this->isCsrfTokenValid('livrer_commande_' . $commande->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('livrer_commande_'.$commande->getId(), $request->request->get('_token'))) {
             $erreursStock = [];
 
             // 1. On vérifie le stock une dernière fois
@@ -76,12 +79,12 @@ class CommandeController extends AbstractController
                 $piece = $ligne->getPiece();
                 if ($piece->getQuantiteStock() < $ligne->getQuantite()) {
                     $manque = $ligne->getQuantite() - $piece->getQuantiteStock();
-                    $erreursStock[] = $piece->getReference() . ' (Manque : ' . $manque . ')';
+                    $erreursStock[] = $piece->getReference().' (Manque : '.$manque.')';
                 }
             }
 
             if (count($erreursStock) > 0) {
-                $this->addFlash('danger', 'Impossible d\'expédier. Stock insuffisant pour : ' . implode(', ', $erreursStock));
+                $this->addFlash('danger', 'Impossible d\'expédier. Stock insuffisant pour : '.implode(', ', $erreursStock));
             } else {
                 // 2. On DÉDUIT les stocks !
                 foreach ($commande->getCommandeLignes() as $ligne) {
@@ -142,6 +145,7 @@ class CommandeController extends AbstractController
     {
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée.');
+
             return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
         }
 
@@ -158,12 +162,13 @@ class CommandeController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $redirectUrl]);
             }
+
             return $this->redirect($redirectUrl);
         }
 
         return $this->render('commercial/commande/edit.html.twig', [
             'form' => $form->createView(),
-            'commande' => $commande
+            'commande' => $commande,
         ]);
     }
 
@@ -222,12 +227,13 @@ class CommandeController extends AbstractController
     #[Route('/{id}/lier-devis', name: 'commercial_commande_lier_devis', methods: ['GET', 'POST'])]
     public function lierDevis(Request $request, Commande $commande, EntityManagerInterface $em): Response
     {
-        // SÉCURITÉ : La commande est-elle passée ?
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée.');
-
             return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
         }
+
+        // 1. LE SECRET EST ICI : On mémorise tous les devis liés AVANT que le formulaire ne vienne tout casser
+        $anciensDevis = $commande->getDevisList()->toArray();
 
         $form = $this->createForm(\App\Form\CommandeAddDevisType::class, null, ['commande' => $commande]);
         $form->handleRequest($request);
@@ -235,13 +241,19 @@ class CommandeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $nouveauDevis = $form->get('devis')->getData();
 
+            // 2. On FORCE la restauration de l'ancien parent (Pedro) pour ne pas le perdre
+            foreach ($anciensDevis as $ancien) {
+                $commande->addDevisList($ancien);
+            }
+
+            // 3. On ajoute enfin le nouveau (Pedra)
             $commande->addDevisList($nouveauDevis);
             $em->flush();
 
-            $this->addFlash('success', 'Le devis a été lié. Vous pouvez maintenant ajouter ses pièces à la commande.');
+            $this->addFlash('success', 'Le devis a été lié avec succès.');
 
             $referer = $request->headers->get('referer');
-            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => $anciensDevis[0]->getId()]);
 
             return $this->json(['redirect' => $redirectUrl]);
         }

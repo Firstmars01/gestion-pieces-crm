@@ -50,7 +50,10 @@ class Devis
     /**
      * @return Collection<int, Commande>
      */
-    public function getCommandes(): Collection { return $this->commandes; }
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
 
     public function getId(): ?int
     {
