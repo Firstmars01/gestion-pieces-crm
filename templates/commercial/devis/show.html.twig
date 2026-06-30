@@ -24,7 +24,8 @@
         {% set commandesPassees = [] %}
 
         {% for commande in devis.commandes %}
-            {% if commande.devisList|length > 0 and commande.devisList.first.id == devis.id %}
+            {# On vérifie strictement que le devis affiché est le vrai parent #}
+            {% if commande.devisParent and commande.devisParent.id == devis.id %}
                 {% if commande.isLivree %}
                     {% set commandesPassees = commandesPassees|merge([commande]) %}
                 {% else %}

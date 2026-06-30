@@ -35,7 +35,10 @@ class CommandeController extends AbstractController
         $commande = new Commande();
         $commande->setClient($devis->getClient());
         $commande->setDevisParent($devis);
-        $commande->addDevisList($devis);
+
+        // CORRECTION : On utilise la méthode inverse pour lier les deux côtés
+        $devis->addCommande($commande);
+
         $commande->setNumero('CMD-'.date('YmdHis').'-P'.$devis->getId());
 
         $form = $this->createForm(\App\Form\CommandeType::class, $commande);
@@ -61,14 +64,14 @@ class CommandeController extends AbstractController
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Commande déjà expédiée.');
 
-            return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            return $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
         }
 
         // --- NOUVELLE SÉCURITÉ : La commande est-elle vide ? ---
         if ($commande->getCommandeLignes()->isEmpty()) {
             $this->addFlash('danger', 'Impossible d\'expédier : la commande est vide. Veuillez d\'abord y ajouter des pièces.');
 
-            return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            return $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
         }
 
         if ($this->isCsrfTokenValid('livrer_commande_'.$commande->getId(), $request->request->get('_token'))) {
@@ -100,7 +103,7 @@ class CommandeController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+        return $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
     }
 
     #[Route('/{id}/ajouter-piece', name: 'commercial_commande_add_ligne', methods: ['GET', 'POST'])]
@@ -110,7 +113,7 @@ class CommandeController extends AbstractController
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée et est archivée.');
 
-            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())])]);
         }
 
         $commandeLigne = new CommandeLigne();
@@ -132,7 +135,7 @@ class CommandeController extends AbstractController
             $this->addFlash('success', 'La ligne complète a été ajoutée à la commande.');
 
             $referer = $request->headers->get('referer');
-            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
 
             return $this->json(['redirect' => $redirectUrl]);
         }
@@ -146,7 +149,7 @@ class CommandeController extends AbstractController
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée.');
 
-            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())])]);
         }
 
         $form = $this->createForm(\App\Form\CommandeType::class, $commande);
@@ -157,7 +160,7 @@ class CommandeController extends AbstractController
             $this->addFlash('success', 'Les dates ont été mises à jour.');
 
             $referer = $request->headers->get('referer');
-            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
 
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $redirectUrl]);
@@ -180,7 +183,7 @@ class CommandeController extends AbstractController
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée et archivée.');
             $referer = $request->headers->get('referer');
 
-            return $referer ? $this->redirect($referer) : $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            return $referer ? $this->redirect($referer) : $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
         }
 
         if ($this->isCsrfTokenValid('delete_commande_'.$commande->getId(), $request->request->get('_token'))) {
@@ -194,7 +197,7 @@ class CommandeController extends AbstractController
             return $this->redirect($referer);
         }
 
-        return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+        return $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
     }
 
     #[Route('/ligne/{id}/supprimer', name: 'commercial_commande_ligne_delete', methods: ['POST'])]
@@ -207,7 +210,7 @@ class CommandeController extends AbstractController
             $this->addFlash('danger', 'Action impossible : Impossible de retirer une pièce d\'une commande déjà livrée.');
             $referer = $request->headers->get('referer');
 
-            return $referer ? $this->redirect($referer) : $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+            return $referer ? $this->redirect($referer) : $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
         }
 
         if ($this->isCsrfTokenValid('delete_commande_ligne_'.$ligne->getId(), $request->request->get('_token'))) {
@@ -221,7 +224,7 @@ class CommandeController extends AbstractController
             return $this->redirect($referer);
         }
 
-        return $this->redirectToRoute('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()]);
+        return $this->redirectToRoute('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())]);
     }
 
     #[Route('/{id}/lier-devis', name: 'commercial_commande_lier_devis', methods: ['GET', 'POST'])]
@@ -229,10 +232,10 @@ class CommandeController extends AbstractController
     {
         if ($this->isCommandeVerrouillee($commande)) {
             $this->addFlash('danger', 'Action impossible : Cette commande a déjà été livrée.');
-            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => $commande->getDevisList()->first()->getId()])]);
+            return $this->json(['redirect' => $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $commande->getDevisList()->first()->getId())])]);
         }
 
-        // 1. LE SECRET EST ICI : On mémorise tous les devis liés AVANT que le formulaire ne vienne tout casser
+        // 1. On mémorise tous les devis liés AVANT que le formulaire ne vienne tout casser
         $anciensDevis = $commande->getDevisList()->toArray();
 
         $form = $this->createForm(\App\Form\CommandeAddDevisType::class, null, ['commande' => $commande]);
@@ -241,19 +244,21 @@ class CommandeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $nouveauDevis = $form->get('devis')->getData();
 
-            // 2. On FORCE la restauration de l'ancien parent (Pedro) pour ne pas le perdre
+            // 2. CORRECTION : On force la synchronisation bilatérale en mémoire pour Doctrine
             foreach ($anciensDevis as $ancien) {
-                $commande->addDevisList($ancien);
+                // Met à jour la collection du Devis ET de la Commande simultanément
+                $ancien->addCommande($commande);
             }
 
-            // 3. On ajoute enfin le nouveau (Pedra)
-            $commande->addDevisList($nouveauDevis);
+            // 3. On ajoute enfin le nouveau
+            $nouveauDevis->addCommande($commande);
+
             $em->flush();
 
             $this->addFlash('success', 'Le devis a été lié avec succès.');
 
             $referer = $request->headers->get('referer');
-            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => $anciensDevis[0]->getId()]);
+            $redirectUrl = $referer ?: $this->generateUrl('commercial_devis_show', ['id' => ($commande->getDevisParent()?->getId() ?? $anciensDevis[0]->getId())]);
 
             return $this->json(['redirect' => $redirectUrl]);
         }
