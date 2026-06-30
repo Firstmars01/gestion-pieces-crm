@@ -12,11 +12,10 @@ use Faker\Factory;
 
 class CommandeFixtures extends Fixture implements DependentFixtureInterface
 {
-    // On dit à Symfony : "Exécute DevisFixtures AVANT ce fichier !"
     public function getDependencies(): array
     {
         return [
-            DevisFixtures::class,
+            DevisFixtures::class, // On s'assure que les devis et pièces existent déjà
         ];
     }
 
@@ -24,78 +23,110 @@ class CommandeFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create('fr_FR');
 
-        // On récupère TOUS les devis de la BDD (valides ET expirés)
-        $tousLesDevis = $manager->getRepository(Devis::class)->findAll();
+        // 1. Récupération des devis existants
+        $devisList = $manager->getRepository(Devis::class)->findAll();
 
-        foreach ($tousLesDevis as $devisPrincipal) {
+        if (empty($devisList)) {
+            throw new \LogicException('Aucun devis trouvé. Exécutez DevisFixtures en premier.');
+        }
 
-            // Chaque devis aura obligatoirement entre 1 et 2 commandes
-            $nbCommandes = $faker->numberBetween(1, 2);
-
-            for ($i = 0; $i < $nbCommandes; $i++) {
-                $commande = new Commande();
-                $commande->setClient($devisPrincipal->getClient());
-
-                // Numéro unique et date de création (quelques jours après le devis)
-                $dateBase = clone $devisPrincipal->getDateDevis();
-                $dateBase->modify('+' . $faker->numberBetween(0, 5) . ' days');
-
-                $commande->setNumero('CMD-' . $dateBase->format('YmdHis') . $faker->randomNumber(3, true));
-                $commande->setDateCmd($dateBase);
-
-                // On lie le devis principal
-                $commande->addDevisList($devisPrincipal);
-
-                // TEST MULTI-DEVIS : 30% de chance de lier un DEUXIÈME devis du même client
-                if ($faker->boolean(30)) {
-                    foreach ($tousLesDevis as $autreDevis) {
-                        if ($autreDevis->getId() !== $devisPrincipal->getId() && $autreDevis->getClient()->getId() === $devisPrincipal->getClient()->getId()) {
-                            $commande->addDevisList($autreDevis);
-                            break; // On a trouvé un autre devis, on arrête de chercher
-                        }
-                    }
-                }
-
-                // TEST STATUT : 40% de commandes Livrées (Vert) / 60% En cours (Orange/Bleu)
-                $estLivree = $faker->boolean(40);
-
-                if ($estLivree) {
-                    // Date de livraison dans le passé
-                    $dateFacture = clone $commande->getDateCmd();
-                    $dateFacture->modify('+' . $faker->numberBetween(2, 10) . ' days');
-                    if ($dateFacture > new \DateTime()) {
-                        $dateFacture = new \DateTime('-1 day');
-                    }
-                    $commande->setDateFacture($dateFacture);
-                } else {
-                    // Date de livraison dans le futur (ou null)
-                    if ($faker->boolean(70)) {
-                        $dateFacture = new \DateTime();
-                        $dateFacture->modify('+' . $faker->numberBetween(5, 30) . ' days');
-                        $commande->setDateFacture($dateFacture);
-                    }
-                }
-
-                // AJOUT DES LIGNES (On pioche dans TOUS les devis liés à cette commande)
-                $lignesAjoutees = 0;
-                foreach ($commande->getDevisList() as $d) {
-                    foreach ($d->getDevisLignes() as $dLigne) {
-                        // 80% de chance de commander cette pièce, ou 100% si aucune ligne n'a encore été ajoutée (évite les commandes vides)
-                        if ($faker->boolean(80) || $lignesAjoutees === 0) {
-                            $cLigne = new CommandeLigne();
-                            $cLigne->setPiece($dLigne->getPiece());
-                            $cLigne->setQuantite($dLigne->getQuantite()); // Copie exacte de la quantité
-                            $cLigne->setPrixUnitaire($dLigne->getPrix());
-
-                            $commande->addCommandeLigne($cLigne);
-                            $manager->persist($cLigne);
-                            $lignesAjoutees++;
-                        }
-                    }
-                }
-
-                $manager->persist($commande);
+        // 2. Création des commandes
+        foreach ($devisList as $devis) {
+            // On ne transforme en commande que ~60% des devis
+            if ($faker->boolean(40)) {
+                continue;
             }
+
+            $commande = new Commande();
+            $commande->setClient($devis->getClient());
+
+            // On définit le VRAI parent
+            $commande->setDevisParent($devis);
+
+            // On utilise la méthode corrigée pour lier les deux côtés de la relation ManyToMany
+            $devis->addCommande($commande);
+
+            // Génération des dates
+            $dateCmd = clone $devis->getDateDevis();
+            $dateCmd->modify('+' . $faker->numberBetween(1, 10) . ' days');
+            $commande->setDateCmd($dateCmd);
+
+            // Numérotation basée sur ta logique du contrôleur
+            $numero = 'CMD-' . $dateCmd->format('YmdHis') . '-P' . $devis->getId();
+            $commande->setNumero($numero);
+
+            // Statut de la commande
+            $isLivree = $faker->boolean(40);
+            $commande->setIsLivree($isLivree);
+
+            if ($isLivree) {
+                // Si livrée, la dateFacture correspond à la date de livraison effective
+                $dateFacture = clone $dateCmd;
+                $dateFacture->modify('+' . $faker->numberBetween(2, 15) . ' days');
+                if ($dateFacture > new \DateTime()) {
+                    $dateFacture = new \DateTime(); // Pas de livraison dans le futur
+                }
+                $commande->setDateFacture($dateFacture);
+            } else {
+                // Si en cours, dateFacture sert de "Date de livraison prévue"
+                if ($faker->boolean(70)) {
+                    $dateLivraisonPrevue = clone $dateCmd;
+                    $dateLivraisonPrevue->modify('+' . $faker->numberBetween(5, 30) . ' days');
+                    $commande->setDateFacture($dateLivraisonPrevue);
+                }
+            }
+
+            // 3. Clonage des lignes du Devis vers la Commande
+            foreach ($devis->getDevisLignes() as $devisLigne) {
+                // Le client commande 80% des lignes proposées sur le devis
+                if ($faker->boolean(80)) {
+                    $commandeLigne = new CommandeLigne();
+                    $commandeLigne->setPiece($devisLigne->getPiece());
+
+                    // Parfois le client commande une quantité inférieure à ce qui était prévu
+                    if ($faker->boolean(20)) {
+                        $commandeLigne->setQuantite($faker->numberBetween(1, $devisLigne->getQuantite()));
+                    } else {
+                        $commandeLigne->setQuantite($devisLigne->getQuantite());
+                    }
+
+                    $commandeLigne->setPrixUnitaire($devisLigne->getPrix());
+                    $commande->addCommandeLigne($commandeLigne);
+
+                    $manager->persist($commandeLigne);
+                }
+            }
+
+            // 4. TEST DE ROBUSTESSE : Lier un deuxième devis (pour tester notre fameux correctif !)
+            if ($faker->boolean(25)) {
+                // On cherche un autre devis appartenant au MÊME client
+                $autresDevis = array_filter($devisList, function($d) use ($devis) {
+                    return $d->getId() !== $devis->getId() && $d->getClient() === $devis->getClient();
+                });
+
+                if (!empty($autresDevis)) {
+                    $devisLie = $faker->randomElement($autresDevis);
+
+                    // On lie l'autre devis à la commande
+                    $devisLie->addCommande($commande);
+
+                    // On pique une pièce de cet autre devis pour l'ajouter à la commande
+                    if ($devisLie->getDevisLignes()->count() > 0) {
+                        $ligneLiee = $devisLie->getDevisLignes()->first();
+
+                        $commandeLigneLiee = new CommandeLigne();
+                        $commandeLigneLiee->setPiece($ligneLiee->getPiece());
+                        $commandeLigneLiee->setQuantite($ligneLiee->getQuantite());
+                        $commandeLigneLiee->setPrixUnitaire($ligneLiee->getPrix());
+
+                        $commande->addCommandeLigne($commandeLigneLiee);
+                        $manager->persist($commandeLigneLiee);
+                    }
+                }
+            }
+
+            // On sauvegarde la commande dans tous les cas
+            $manager->persist($commande);
         }
 
         $manager->flush();
