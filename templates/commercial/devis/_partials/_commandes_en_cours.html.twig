@@ -9,16 +9,6 @@
 {% if commandesEnCours|length > 0 %}
     {% for commande in commandesEnCours %}
 
-        {# 1. ON VERROUILLE LE VRAI PARENT (Celui d'origine, qui ne changera jamais) #}
-        {% set vraiParentId = 0 %}
-        {% if commande.devisParent %}
-            {% set vraiParentId = commande.devisParent.id %}
-        {% elseif '-P' in commande.numero %}
-            {% set vraiParentId = (commande.numero|split('-P')|last|trim) + 0 %}
-        {% elseif commande.devisList|length > 0 %}
-            {% set vraiParentId = commande.devisList|first.id %}
-        {% endif %}
-
         {# On nettoie le numéro pour l'affichage propre (sans le -P) #}
         {% set numeroAffichage = commande.numero|split('-P')[0] %}
 
@@ -101,9 +91,9 @@
             <div class="bg-light border-bottom px-3 py-2 small text-muted">
                 <i class="bi bi-tags me-1"></i> Devis sources :
                 {% for d in commande.devisList %}
-                    {# 2. LE BADGE EST FIXÉ AU VRAI PARENT (Il ne bougera plus jamais selon la page) #}
-                    {% if d.id == vraiParentId %}
-                        <span class="badge bg-secondary text-white border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }} (Parent)</span>
+                    {# Utilisation directe de devisParent pour le badge #}
+                    {% if commande.devisParent and d.id == commande.devisParent.id %}
+                        <span class="badge bg-secondary text-white border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
                     {% else %}
                         <span class="badge bg-secondary bg-opacity-10 text-dark border ms-1">{{ d.nom ?: 'Devis #' ~ d.id }}</span>
                     {% endif %}
