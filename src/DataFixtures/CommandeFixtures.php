@@ -48,11 +48,11 @@ class CommandeFixtures extends Fixture implements DependentFixtureInterface
 
             // Génération des dates
             $dateCmd = clone $devis->getDateDevis();
-            $dateCmd->modify('+' . $faker->numberBetween(1, 10) . ' days');
+            $dateCmd->modify('+'.$faker->numberBetween(1, 10).' days');
             $commande->setDateCmd($dateCmd);
 
             // Numérotation basée sur ta logique du contrôleur
-            $numero = 'CMD-' . $dateCmd->format('YmdHis') . '-P' . $devis->getId();
+            $numero = 'CMD-'.$dateCmd->format('YmdHis').'-P'.$devis->getId();
             $commande->setNumero($numero);
 
             // Statut de la commande
@@ -62,7 +62,7 @@ class CommandeFixtures extends Fixture implements DependentFixtureInterface
             if ($isLivree) {
                 // Si livrée, la dateFacture correspond à la date de livraison effective
                 $dateFacture = clone $dateCmd;
-                $dateFacture->modify('+' . $faker->numberBetween(2, 15) . ' days');
+                $dateFacture->modify('+'.$faker->numberBetween(2, 15).' days');
                 if ($dateFacture > new \DateTime()) {
                     $dateFacture = new \DateTime(); // Pas de livraison dans le futur
                 }
@@ -71,12 +71,14 @@ class CommandeFixtures extends Fixture implements DependentFixtureInterface
                 // Si en cours, dateFacture sert de "Date de livraison prévue"
                 if ($faker->boolean(70)) {
                     $dateLivraisonPrevue = clone $dateCmd;
-                    $dateLivraisonPrevue->modify('+' . $faker->numberBetween(5, 30) . ' days');
+                    $dateLivraisonPrevue->modify('+'.$faker->numberBetween(5, 30).' days');
                     $commande->setDateFacture($dateLivraisonPrevue);
                 }
             }
 
             // 3. Clonage des lignes du Devis vers la Commande
+            $lignesAjoutees = 0; // On initialise un compteur
+
             foreach ($devis->getDevisLignes() as $devisLigne) {
                 // Le client commande 80% des lignes proposées sur le devis
                 if ($faker->boolean(80)) {
@@ -94,13 +96,27 @@ class CommandeFixtures extends Fixture implements DependentFixtureInterface
                     $commande->addCommandeLigne($commandeLigne);
 
                     $manager->persist($commandeLigne);
+                    ++$lignesAjoutees; // On incrémente le compteur
                 }
+            }
+
+            // SÉCURITÉ : Si le hasard a fait qu'aucune pièce n'a été sélectionnée, on force l'ajout de la première !
+            if (0 === $lignesAjoutees && $devis->getDevisLignes()->count() > 0) {
+                $devisLigne = $devis->getDevisLignes()->first();
+
+                $commandeLigne = new CommandeLigne();
+                $commandeLigne->setPiece($devisLigne->getPiece());
+                $commandeLigne->setQuantite($devisLigne->getQuantite());
+                $commandeLigne->setPrixUnitaire($devisLigne->getPrix());
+
+                $commande->addCommandeLigne($commandeLigne);
+                $manager->persist($commandeLigne);
             }
 
             // 4. TEST DE ROBUSTESSE : Lier un deuxième devis (pour tester notre fameux correctif !)
             if ($faker->boolean(25)) {
                 // On cherche un autre devis appartenant au MÊME client
-                $autresDevis = array_filter($devisList, function($d) use ($devis) {
+                $autresDevis = array_filter($devisList, function ($d) use ($devis) {
                     return $d->getId() !== $devis->getId() && $d->getClient() === $devis->getClient();
                 });
 
