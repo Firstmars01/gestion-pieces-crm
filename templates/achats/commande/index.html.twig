@@ -34,7 +34,7 @@
                 <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">{{ knp_pagination_sortable(commandesList, '#', 'c.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(commandesList, 'N° Commande', 'c.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(commandesList, 'Fournisseur', 'f.raisonSociale') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(commandesList, 'Date de commande', 'c.dateCommande') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(commandesList, 'Statut de livraison', 'statut_tri') }}</th>
@@ -45,7 +45,7 @@
                     <tbody>
                     {% for commande in commandesList %}
                         <tr>
-                            <td class="text-muted">{{ commande.id }}</td>
+                            <td class="fw-bold text-uppercase text-dark">{{ commande.id }}</td>
                             <td class="fw-bold text-uppercase text-dark">{{ commande.fournisseur.raisonSociale }}</td>
                             <td>{{ commande.dateCommande|date('d/m/Y') }}</td>
                             <td class="fw-semibold">

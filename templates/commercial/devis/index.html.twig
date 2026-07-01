@@ -33,7 +33,7 @@
                 <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">{{ knp_pagination_sortable(devisList, '#', 'd.id') }}</th>
+                        <th scope="col">{{ knp_pagination_sortable(devisList, 'N° devis', 'd.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(devisList, 'Nom', 'd.nom') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(devisList, 'Client', 'c.raisonSociale') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(devisList, 'Date de création', 'd.dateDevis') }}</th>
@@ -45,7 +45,7 @@
                     <tbody>
                     {% for devis in devisList %}
                         <tr>
-                            <td class="text-muted">{{ devis.id }}</td>
+                            <td class="fw-bold text-uppercase text-dark">{{ devis.id }}</td>
                             <td class="fw-bold text-uppercase text-dark" {{ devis.nom is empty ? 'class="fst-italic}} text-muted"' : '' }}>{{ devis.nom is empty ? '—' : devis.nom }}</td>
                             <td class="fw-bold text-uppercase text-dark">
                                 {{ devis.client.raisonSociale ? devis.client.raisonSociale : devis.client.nomComplet }}

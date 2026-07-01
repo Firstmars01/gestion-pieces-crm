@@ -70,7 +70,7 @@
                     <tbody>
                     {% for achat in achats %}
                         <tr>
-                            <td class="fw-bold text-dark">#{{ achat.id }}</td>
+                            <td class="fw-bold text-dark">{{ achat.id }}</td>
                             <td>{{ achat.dateReelle ? achat.dateReelle|date('d/m/Y') : '-' }}</td>
                             <td>
                                 {{ achat.fournisseur.raisonSociale }}
