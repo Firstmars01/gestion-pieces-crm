@@ -26,9 +26,7 @@ class PieceController extends AbstractController
             ->addSelect('pc', 'pe')
             ->orderBy('p.id', 'ASC');
 
-        $recherche = $request->query->get('q');
-
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             // 2. On utilise une sous-requête (EXISTS) pour chercher dans les composants
             // Cela évite le bug de "l'hydratation partielle" et garde la liste des composants intacte !
             $queryBuilder->andWhere(

@@ -30,9 +30,7 @@ class PosteTravailController extends AbstractController
 
             ->orderBy('p.id', 'ASC');
 
-        $recherche = $request->query->get('q');
-
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             // La recherche marchera parfaitement maintenant avec le bon alias 'p'
             $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');

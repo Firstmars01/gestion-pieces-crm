@@ -25,9 +25,7 @@ class MachineController extends AbstractController
             ->addSelect('p')
             ->orderBy('m.id', 'ASC');
 
-        $recherche = $request->query->get('q');
-
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('LOWER(m.libelle) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }

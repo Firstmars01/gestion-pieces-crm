@@ -25,9 +25,8 @@ class OperationController extends AbstractController
             ->leftJoin('pm.machine', 'm')->addSelect('m')
             ->orderBy('o.id', 'ASC');
 
-        $recherche = $request->query->get('q');
 
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             // On peut chercher par nom d'opération, nom de machine ou nom de poste !
             $queryBuilder->andWhere('LOWER(o.libelle) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(m.libelle) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%' . $recherche . '%');

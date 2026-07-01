@@ -29,7 +29,7 @@ class ComptaController extends AbstractController
             ->setParameter('livree', true)
             ->orderBy('c.dateFacture', 'DESC');
 
-        if ($recherche = $request->query->get('q')) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('
                 LOWER(client.raisonSociale) LIKE LOWER(:recherche)
                 OR LOWER(client.nom) LIKE LOWER(:recherche)

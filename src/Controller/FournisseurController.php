@@ -23,7 +23,7 @@ class FournisseurController extends AbstractController
             ->orderBy('f.id', 'ASC');
 
         // Gestion de la barre de recherche
-        if ($recherche = $request->query->get('q')) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere(
                 'LOWER(f.raisonSociale) LIKE LOWER(:recherche) OR '.
                 'LOWER(f.email) LIKE LOWER(:recherche) OR '.

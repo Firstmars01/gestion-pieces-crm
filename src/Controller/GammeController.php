@@ -26,9 +26,8 @@ class GammeController extends AbstractController
             ->addSelect('u')
             ->orderBy('g.id', 'ASC'); // Tri stable par défaut pour la pagination
 
-        $recherche = $request->query->get('q');
 
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('LOWER(g.libelle) LIKE LOWER(:recherche) OR LOWER(p.reference) LIKE LOWER(:recherche) OR LOWER(u.nom) LIKE LOWER(:recherche) OR LOWER(u.prenom) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }

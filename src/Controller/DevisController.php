@@ -24,12 +24,18 @@ class DevisController extends AbstractController
             ->leftJoin('d.client', 'c')->addSelect('c')
             ->orderBy('d.id', 'DESC');
 
-        if ($recherche = $request->query->get('q')) {
-            // CORRECTION : On utilise les vraies colonnes de la BDD (raisonSociale, nom, prenom, et d.nom)
-            $queryBuilder->andWhere('LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.nom) LIKE LOWER(:recherche) OR LOWER(c.prenom) LIKE LOWER(:recherche) OR LOWER(d.nom) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%'.$recherche.'%');
+        if ($recherche = trim((string) $request->query->get('q'))) {
+            if (is_numeric($recherche)) {
+                // Si la recherche est un nombre, on inclut la colonne d.id
+                $queryBuilder->andWhere('LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.nom) LIKE LOWER(:recherche) OR LOWER(c.prenom) LIKE LOWER(:recherche) OR LOWER(d.nom) LIKE LOWER(:recherche) OR d.id = :recherche_id')
+                    ->setParameter('recherche', '%'.$recherche.'%')
+                    ->setParameter('recherche_id', $recherche);
+            } else {
+                // Sinon, recherche classique sur le texte
+                $queryBuilder->andWhere('LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.nom) LIKE LOWER(:recherche) OR LOWER(c.prenom) LIKE LOWER(:recherche) OR LOWER(d.nom) LIKE LOWER(:recherche)')
+                    ->setParameter('recherche', '%'.$recherche.'%');
+            }
         }
-
         $devisList = $paginator->paginate($queryBuilder, $request->query->getInt('page', 1), 15);
 
         return $this->render('commercial/devis/index.html.twig', ['devisList' => $devisList]);

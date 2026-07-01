@@ -33,7 +33,7 @@ class CommandeAchatController extends AbstractController
             ->orderBy('c.dateCommande', 'DESC');
 
         // Gestion de la barre de recherche
-        if ($recherche = $request->query->get('q')) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('LOWER(f.raisonSociale) LIKE LOWER(:recherche) OR c.id = :idRecherche')
                 ->setParameter('recherche', '%'.$recherche.'%')
                 ->setParameter('idRecherche', is_numeric($recherche) ? $recherche : 0);

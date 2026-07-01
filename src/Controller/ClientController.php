@@ -20,9 +20,7 @@ class ClientController extends AbstractController
         $queryBuilder = $em->getRepository(Client::class)->createQueryBuilder('c')
             ->orderBy('c.id', 'DESC');
 
-        $recherche = $request->query->get('q');
-
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('LOWER(c.nom) LIKE LOWER(:recherche) OR LOWER(c.prenom) LIKE LOWER(:recherche) OR LOWER(c.raisonSociale) LIKE LOWER(:recherche) OR LOWER(c.email) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }

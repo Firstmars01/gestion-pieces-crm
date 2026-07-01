@@ -32,11 +32,8 @@ final class UserAdministrationController extends AbstractController
             ->leftJoin('u.userRoles', 'r')
             ->addSelect('r');
 
-        // Récupération du terme de recherche
-        $recherche = $request->query->get('q');
-
         // Si une recherche est faite, on filtre la requête (insensible à la casse)
-        if ($recherche) {
+        if ($recherche = trim((string) $request->query->get('q'))) {
             $queryBuilder->andWhere('LOWER(u.nom) LIKE LOWER(:recherche) OR LOWER(u.prenom) LIKE LOWER(:recherche) OR LOWER(u.email) LIKE LOWER(:recherche)')
                 ->setParameter('recherche', '%'.$recherche.'%');
         }
