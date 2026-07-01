@@ -396,3 +396,12 @@ body {
 /* Bouton avec contour (outline) */
 .btn-outline-orange-rouge { color: #d35400; border-color: #d35400; background-color: transparent; }
 .btn-outline-orange-rouge:hover { background-color: #d35400; color: white; border-color: #d35400; }
+
+
+.select-mois {
+    min-width: 120px;
+}
+
+.select-annee {
+    min-width: 90px;
+}

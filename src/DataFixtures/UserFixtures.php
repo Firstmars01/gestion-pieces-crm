@@ -34,6 +34,11 @@ class UserFixtures extends Fixture
         $roleComptable->setCode('ROLE_COMPTABLE');
         $manager->persist($roleComptable);
 
+        // --- NOUVEAU RÔLE : ACHATS ---
+        $roleAchats = new Role();
+        $roleAchats->setCode('ROLE_ACHATS');
+        $manager->persist($roleAchats);
+
         // Mot de passe par défaut pour tous les utilisateurs de test
         $defaultPassword = 'password123';
 
@@ -77,7 +82,17 @@ class UserFixtures extends Fixture
         $comptable->setPassword($this->passwordHasher->hashPassword($comptable, $defaultPassword));
         $manager->persist($comptable);
 
-        // 6. Création de 10 utilisateurs sans rôle spécial
+        // --- 6. NOUVEL UTILISATEUR : ACHATS ---
+        $achats = new User();
+        $achats->setEmail('achats@crm.com');
+        $achats->setNom('Lemoine');
+        $achats->setPrenom('Claire');
+        $achats->setActif(true);
+        $achats->addUserRole($roleAchats);
+        $achats->setPassword($this->passwordHasher->hashPassword($achats, $defaultPassword));
+        $manager->persist($achats);
+
+        // 7. Création de 10 utilisateurs sans rôle spécial
         $nomsCommuns = ['Lefebvre', 'Moreau', 'Simon', 'Laurent', 'Petit', 'Durand', 'Lecomte', 'Fournier', 'Renault', 'Germain'];
         $prenomsCommuns = ['Marie', 'Pierre', 'Luc', 'Anne', 'Thomas', 'Isabelle', 'Marc', 'Catherine', 'Laurent', 'Viviane'];
 
@@ -92,7 +107,7 @@ class UserFixtures extends Fixture
             $manager->persist($user);
         }
 
-        // 7. On envoie le tout en base de données
+        // 8. On envoie le tout en base de données
         $manager->flush();
     }
 }
