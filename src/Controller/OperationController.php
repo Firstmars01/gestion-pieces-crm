@@ -25,11 +25,15 @@ class OperationController extends AbstractController
             ->leftJoin('pm.machine', 'm')->addSelect('m')
             ->orderBy('o.id', 'ASC');
 
-
         if ($recherche = trim((string) $request->query->get('q'))) {
-            // On peut chercher par nom d'opération, nom de machine ou nom de poste !
-            $queryBuilder->andWhere('LOWER(o.libelle) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(m.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%' . $recherche . '%');
+            if (is_numeric($recherche)) {
+                $queryBuilder->andWhere('LOWER(o.libelle) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(m.libelle) LIKE LOWER(:recherche) OR o.id = :recherche_id')
+                    ->setParameter('recherche', '%'.$recherche.'%')
+                    ->setParameter('recherche_id', $recherche);
+            } else {
+                $queryBuilder->andWhere('LOWER(o.libelle) LIKE LOWER(:recherche) OR LOWER(p.libelle) LIKE LOWER(:recherche) OR LOWER(m.libelle) LIKE LOWER(:recherche)')
+                    ->setParameter('recherche', '%'.$recherche.'%');
+            }
         }
 
         $operations = $paginator->paginate(
@@ -59,6 +63,7 @@ class OperationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_operation_index')]);
             }
+
             return $this->redirectToRoute('atelier_operation_index');
         }
 
@@ -82,6 +87,7 @@ class OperationController extends AbstractController
             if ($request->isXmlHttpRequest()) {
                 return $this->json(['redirect' => $this->generateUrl('atelier_operation_index')]);
             }
+
             return $this->redirectToRoute('atelier_operation_index');
         }
 
@@ -94,7 +100,7 @@ class OperationController extends AbstractController
     #[Route('/{id}', name: 'atelier_operation_delete', methods: ['POST'])]
     public function delete(Request $request, Operation $operation, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete_operation_' . $operation->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_operation_'.$operation->getId(), $request->request->get('_token'))) {
             $entityManager->remove($operation);
             $entityManager->flush();
             $this->addFlash('success', 'L\'opération a été supprimée.');

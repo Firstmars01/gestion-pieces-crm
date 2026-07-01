@@ -45,7 +45,7 @@
                     <tbody>
                     {% for machine in machines %}
                         <tr>
-                            <td class="text-muted">#{{ machine.id }}</td>
+                            <td class="fw-semibold">{{ machine.id }}</td>
                             <td class="fw-semibold">{{ machine.libelle }}</td>
                             <td>
                                 {% for pm in machine.posteMachines %}

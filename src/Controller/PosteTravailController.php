@@ -31,9 +31,14 @@ class PosteTravailController extends AbstractController
             ->orderBy('p.id', 'ASC');
 
         if ($recherche = trim((string) $request->query->get('q'))) {
-            // La recherche marchera parfaitement maintenant avec le bon alias 'p'
-            $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%'.$recherche.'%');
+            if (is_numeric($recherche)) {
+                $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche) OR p.id = :recherche_id')
+                    ->setParameter('recherche', '%'.$recherche.'%')
+                    ->setParameter('recherche_id', $recherche);
+            } else {
+                $queryBuilder->andWhere('LOWER(p.libelle) LIKE LOWER(:recherche)')
+                    ->setParameter('recherche', '%'.$recherche.'%');
+            }
         }
 
         $postes = $paginator->paginate(

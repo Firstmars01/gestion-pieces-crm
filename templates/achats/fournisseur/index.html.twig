@@ -36,7 +36,6 @@
                 <table class="table align-middle mb-0 table-sortable">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">{{ knp_pagination_sortable(fournisseurs, 'ID', 'f.id') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(fournisseurs, 'Raison Sociale', 'f.raisonSociale') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(fournisseurs, 'Email', 'f.email') }}</th>
                         <th scope="col">{{ knp_pagination_sortable(fournisseurs, 'Téléphone', 'f.telephone') }}</th>
@@ -47,7 +46,6 @@
                     <tbody>
                     {% for fournisseur in fournisseurs %}
                         <tr>
-                            <td class="text-muted">#{{ fournisseur.id }}</td>
                             <td class="fw-bold text-dark">{{ fournisseur.raisonSociale }}</td>
                             <td>
                                 {% if fournisseur.email %}

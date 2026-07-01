@@ -26,8 +26,14 @@ class MachineController extends AbstractController
             ->orderBy('m.id', 'ASC');
 
         if ($recherche = trim((string) $request->query->get('q'))) {
-            $queryBuilder->andWhere('LOWER(m.libelle) LIKE LOWER(:recherche)')
-                ->setParameter('recherche', '%'.$recherche.'%');
+            if (is_numeric($recherche)) {
+                $queryBuilder->andWhere('LOWER(m.libelle) LIKE LOWER(:recherche) OR m.id = :recherche_id')
+                    ->setParameter('recherche', '%'.$recherche.'%')
+                    ->setParameter('recherche_id', $recherche);
+            } else {
+                $queryBuilder->andWhere('LOWER(m.libelle) LIKE LOWER(:recherche)')
+                    ->setParameter('recherche', '%'.$recherche.'%');
+            }
         }
 
         $machines = $paginator->paginate(
